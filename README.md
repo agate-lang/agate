@@ -1,10 +1,10 @@
-# Agate, a simple and embeddable programming language
-
 ![Agate](agate.png)
 
-Agate is a simple object-oriented language with a familiar syntax. It is largely inspired by [Wren](https://wren.io/) with some different choices.
+## Agate, a simple and embeddable programming language
 
-It can be embedded in any application (e.g. games). Only three files are necessary: `agate.h`, `agate.c`, `core.inc`, and that's all. You can copy them in your source tree, and add `agate.c` in your compilation list.
+Agate is a scripting language with a simple yet powerful object-oriented syntax written in C99. It can easily be embedded in any application (e.g. games) with only three files to copy in your source tree. It has decent performance thanks to a bytecode virtual machine and a single pass compiler.
+
+### Hello World!
 
 ```
 IO.println("Hello World!") #> Hello World!
@@ -37,3 +37,7 @@ def a = vec(1, 2)
 def b = vec(3, 4)
 IO.println("%(a + b)") #> (4,6)
 ```
+
+### Acknowledgements
+
+Agate is largely inspired by the great work of [Bob Nystrom](http://journal.stuffwithstuff.com/), especially his awesome book [Crafting Interpreters](http://craftinginterpreters.com/) and his classy little scripting language [Wren](https://wren.io/).
