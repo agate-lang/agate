@@ -1,0 +1,2 @@
+IO.println(5.0 * 3.0) # expect: 15
+IO.println(12.34 * 0.3) # expect: 3.702

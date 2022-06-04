@@ -1,0 +1,24 @@
+# Handle empty list.
+IO.println([].join(",") == "") # expect: true
+
+# Handle a simple list with an empty delimeter.
+IO.println([1, 2, 3].join("")) # expect: 123
+
+# Handle a simple list with no separator.
+IO.println([1, 2, 3].join()) # expect: 123
+
+# Does not quote strings.
+IO.println([1, "2", true].join(",")) # expect: 1,2,true
+
+# Nested lists.
+IO.println([1, [2, [3], 4], 5].join(",")) # expect: 1,[2, [3], 4],5
+
+# Calls to_s on elements.
+class Foo {
+  construct new() {}
+  to_s { "Foo.to_s" }
+}
+
+IO.println([1, Foo.new(), 2].join(", ")) # expect: 1, Foo.to_s, 2
+
+# TODO: Handle lists that contain themselves.

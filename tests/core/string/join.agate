@@ -1,0 +1,10 @@
+def str = "string"
+
+IO.println(str.join("") == str) # expect: true
+
+IO.println(str.join(", ")) # expect: s, t, r, i, n, g
+
+# 8-bit clean.
+def ing = "a\0b\0c"
+IO.println(ing.join("") == ing) # expect: true
+IO.println(ing.join(", ") == "a, \0, b, \0, c") # expect: true

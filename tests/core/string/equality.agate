@@ -1,0 +1,28 @@
+IO.println("" == "")          # expect: true
+IO.println("abcd" == "abcd")  # expect: true
+IO.println("abcd" == "d")     # expect: false
+IO.println("e" == "abcd")     # expect: false
+IO.println("" == "abcd")      # expect: false
+
+# Not equal to other types.
+IO.println("1" == 1)        # expect: false
+IO.println("true" == true)  # expect: false
+
+IO.println("" != "")          # expect: false
+IO.println("abcd" != "abcd")  # expect: false
+IO.println("abcd" != "d")     # expect: true
+IO.println("e" != "abcd")     # expect: true
+IO.println("" != "abcd")      # expect: true
+
+# Not equal to other types.
+IO.println("1" != 1)        # expect: true
+IO.println("true" != true)  # expect: true
+
+# Non-ASCII.
+IO.println("vålue" == "value") # expect: false
+IO.println("vålue" == "vålue") # expect: true
+
+# 8-bit clean.
+IO.println("a\0b\0c" == "a") # expect: false
+IO.println("a\0b\0c" == "abc") # expect: false
+IO.println("a\0b\0c" == "a\0b\0c") # expect: true

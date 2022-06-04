@@ -1,0 +1,41 @@
+# Add to empty list.
+def a = []
+a.insert(0, 1)
+IO.println(a) # expect: [1]
+
+# Normal indices.
+def b = [1, 2, 3]
+b.insert(0, 4)
+IO.println(b) # expect: [4, 1, 2, 3]
+
+def c = [1, 2, 3]
+c.insert(1, 4)
+IO.println(c) # expect: [1, 4, 2, 3]
+
+def d = [1, 2, 3]
+d.insert(2, 4)
+IO.println(d) # expect: [1, 2, 4, 3]
+
+def e = [1, 2, 3]
+e.insert(3, 4)
+IO.println(e) # expect: [1, 2, 3, 4]
+
+# Negative indices.
+def f = [1, 2, 3]
+f.insert(-4, 4)
+IO.println(f) # expect: [4, 1, 2, 3]
+
+def g = [1, 2, 3]
+g.insert(-3, 4)
+IO.println(g) # expect: [1, 4, 2, 3]
+
+def h = [1, 2, 3]
+h.insert(-2, 4)
+IO.println(h) # expect: [1, 2, 4, 3]
+
+def i = [1, 2, 3]
+i.insert(-1, 4)
+IO.println(i) # expect: [1, 2, 3, 4]
+
+# Returns.inserted value.
+IO.println([1, 2].insert(0, 3)) # expect: 3

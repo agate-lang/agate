@@ -1,0 +1,5 @@
+def a = ["one", "two", "three", "four"]
+IO.println(a.iterator_value(0)) # expect: one
+IO.println(a.iterator_value(1)) # expect: two
+IO.println(a.iterator_value(2)) # expect: three
+IO.println(a.iterator_value(3)) # expect: four

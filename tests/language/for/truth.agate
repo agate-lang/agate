@@ -1,0 +1,32 @@
+class Iter {
+  construct new(value) { @value = value }
+  iterate(iterator) { @value }
+  iterator_value(iterator) { "value" }
+}
+
+# False and nil are false.
+for (n in Iter.new(false)) {
+  IO.println("bad")
+  break
+}
+
+for (n in Iter.new(nil)) {
+  IO.println("bad")
+  break
+}
+
+# Everything else is true.
+for (n in Iter.new(true)) {
+  IO.println("true") # expect: true
+  break
+}
+
+for (n in Iter.new(0)) {
+  IO.println(0) # expect: 0
+  break
+}
+
+for (n in Iter.new("")) {
+  IO.println("string") # expect: string
+  break
+}

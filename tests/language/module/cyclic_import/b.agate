@@ -1,0 +1,9 @@
+# nontest
+IO.println("start b")
+
+def B = "b value"
+IO.println("b defined %(B)")
+import "a" for A
+IO.println("b imported %(A)")
+
+IO.println("end b")

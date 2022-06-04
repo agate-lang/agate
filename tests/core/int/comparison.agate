@@ -1,0 +1,15 @@
+IO.println(1 < 2)    # expect: true
+IO.println(2 < 2)    # expect: false
+IO.println(2 < 1)    # expect: false
+
+IO.println(1 <= 2)    # expect: true
+IO.println(2 <= 2)    # expect: true
+IO.println(2 <= 1)    # expect: false
+
+IO.println(1 > 2)    # expect: false
+IO.println(2 > 2)    # expect: false
+IO.println(2 > 1)    # expect: true
+
+IO.println(1 >= 2)    # expect: false
+IO.println(2 >= 2)    # expect: true
+IO.println(2 >= 1)    # expect: true

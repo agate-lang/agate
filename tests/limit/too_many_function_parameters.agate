@@ -1,0 +1,2 @@
+# result: compile error
+def f(a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q) { "!" } # expect: test:2: Error at ',': Functions and methods can not have more than 16 parameters.

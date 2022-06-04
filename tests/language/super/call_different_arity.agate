@@ -1,0 +1,22 @@
+class Base {
+  foo { IO.println("Base.foo") }
+  foo(a) { IO.println("Base.foo(a)") }
+  foo(a, b) { IO.println("Base.foo(a, b)") }
+}
+
+class Derived is Base {
+  construct new() {}
+
+  foo(a) {
+    IO.println("Derived.bar(a)")
+    super
+    super(1)
+    super(1, 2)
+  }
+}
+
+Derived.new().foo(1)
+# expect: Derived.bar(a)
+# expect: Base.foo
+# expect: Base.foo(a)
+# expect: Base.foo(a, b)

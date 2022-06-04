@@ -1,0 +1,7 @@
+# result: compile error
+class Foo {
+  bar=(value) { value }
+}
+
+def foo = Foo.new()
+(foo.bar) = "value" # expect: test:7: Error at '=': Unexpected assignment.

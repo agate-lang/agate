@@ -1,0 +1,11 @@
+# result: compile error
+class Foo {
+  construct new() {}
+
+  # No error on instance and static method with same signature.
+  baz() {}
+  static baz() {}
+
+  static bar() {}
+  static bar() {} # expect: test:10: Error at ')': Class Foo already defines a static method 'bar()'.
+}

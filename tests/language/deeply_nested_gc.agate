@@ -1,0 +1,8 @@
+def head
+
+for (i in 1..400000) {
+  head = { "next" : head }
+}
+
+System.gc()
+IO.println("done") # expect: done

@@ -1,0 +1,4 @@
+# result: compile error
+def fn = Fn.new {
+  IO.println(Foo) # expect: test:3: Error at 'Foo': Variable 'Foo' is used but not defined.
+}

@@ -1,0 +1,39 @@
+# Returns lists.
+def list = ["a", "b", "c", "d", "e"]
+IO.println(list[0..0]) # expect: [a]
+IO.println(list[1...1]) # expect: []
+IO.println(list[1..2]) # expect: [b, c]
+IO.println(list[1...2]) # expect: [b]
+IO.println(list[2..4]) # expect: [c, d, e]
+IO.println(list[2...5]) # expect: [c, d, e]
+
+# A backwards range reverses.
+IO.println(list[3..1]) # expect: [d, c, b]
+IO.println(list[3...1]) # expect: [d, c]
+IO.println(list[3...3]) # expect: []
+
+# Negative ranges index from the end.
+IO.println(list[-5..-2]) # expect: [a, b, c, d]
+IO.println(list[-5...-2]) # expect: [a, b, c]
+IO.println(list[-3..-5]) # expect: [c, b, a]
+IO.println(list[-3...-6]) # expect: [c, b, a]
+
+# Half-negative ranges are treated like the negative value is fixed before
+# walking the range.
+IO.println(list[-5..3]) # expect: [a, b, c, d]
+IO.println(list[-3...5]) # expect: [c, d, e]
+IO.println(list[-2..1]) # expect: [d, c, b]
+IO.println(list[-2...0]) # expect: [d, c, b]
+
+IO.println(list[1..-2]) # expect: [b, c, d]
+IO.println(list[2...-1]) # expect: [c, d]
+IO.println(list[4..-5]) # expect: [e, d, c, b, a]
+IO.println(list[3...-6]) # expect: [d, c, b, a]
+
+# An empty range at zero is allowed on an empty list.
+IO.println([][0...0]) # expect: []
+IO.println([][0..-1]) # expect: []
+
+# An empty range at the end is allowed on a list.
+IO.println([1, 2, 3][3...3]) # expect: []
+IO.println([1, 2, 3][3..-1]) # expect: []

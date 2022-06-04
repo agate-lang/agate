@@ -1,0 +1,8 @@
+once {
+  def a = "local"
+  once {
+    def a = "shadow"
+    IO.println(a) # expect: shadow
+  }
+  IO.println(a) # expect: local
+}

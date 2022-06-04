@@ -1,0 +1,6 @@
+# result: compile error
+def f() {
+  IO.println(not_defined)  # expect: test:3: Error at 'not_defined': Variable 'not_defined' is used but not defined.
+}
+
+f()

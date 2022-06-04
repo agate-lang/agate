@@ -1,0 +1,2 @@
+def A = A == nil
+IO.println(A) # expect: true

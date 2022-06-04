@@ -1,0 +1,10 @@
+IO.println(123)     # expect: 123
+IO.println(987654)  # expect: 987654
+IO.println(0)       # expect: 0
+IO.println(-0)      # expect: 0
+
+IO.println(123.456) # expect: 123.456
+IO.println(-0.001)  # expect: -0.001
+IO.println(-0.0)    # expect: -0
+
+# TODO: Literals at and beyond numeric limits.

@@ -1,0 +1,4 @@
+# result: compile error
+def f() {
+  this # expect: test:3: Error at 'this': Cannot use 'this' outside of a method.
+}

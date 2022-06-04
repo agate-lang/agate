@@ -1,0 +1,13 @@
+IO.println(Int == Int)  # expect: true
+IO.println(Int == Bool) # expect: false
+
+# Not equal to other types.
+IO.println(Int == 123)  # expect: false
+IO.println(Int == true) # expect: false
+
+IO.println(Int != Int)  # expect: false
+IO.println(Int != Bool) # expect: true
+
+# Not equal to other types.
+IO.println(Int != 123)  # expect: true
+IO.println(Int != true) # expect: true

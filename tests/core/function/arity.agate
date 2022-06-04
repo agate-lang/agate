@@ -1,0 +1,16 @@
+IO.println(Fn.new {}.arity) # expect: 0
+IO.println(Fn.new {|a| a}.arity) # expect: 1
+IO.println(Fn.new {|a, b| a}.arity) # expect: 2
+IO.println(Fn.new {|a, b, c| a}.arity) # expect: 3
+IO.println(Fn.new {|a, b, c, d| a}.arity) # expect: 4
+
+def f0() { }
+IO.println(f0.arity) # expect: 0
+def f1(a) { a }
+IO.println(f1.arity) # expect: 1
+def f2(a, b) { a }
+IO.println(f2.arity) # expect: 2
+def f3(a, b, c) { a }
+IO.println(f3.arity) # expect: 3
+def f4(a, b, c, d) { a }
+IO.println(f4.arity) # expect: 4

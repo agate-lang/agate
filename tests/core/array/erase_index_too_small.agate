@@ -1,0 +1,3 @@
+# result: runtime error
+def a = [1, 2, 3]
+a.erase(-5) # expect: Index out of bounds.

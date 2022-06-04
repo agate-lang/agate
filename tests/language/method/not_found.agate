@@ -1,0 +1,6 @@
+# result: runtime error
+class Foo {
+  construct new() {}
+}
+
+Foo.new().someUnknownMethod # expect: Foo does not implement 'someUnknownMethod'.

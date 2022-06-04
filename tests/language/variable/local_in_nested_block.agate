@@ -1,0 +1,6 @@
+once {
+  def a = "outer"
+  once {
+    IO.println(a) # expect: outer
+  }
+}

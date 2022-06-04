@@ -1,0 +1,2 @@
+# result: compile error
+@@field = "wat" # expect: test:2: Error at '@@field': Cannot use a static field outside of a class definition.

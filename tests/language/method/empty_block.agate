@@ -1,0 +1,6 @@
+class Foo {
+  construct new() {}
+  bar {}
+}
+
+IO.println(Foo.new().bar) # expect: nil

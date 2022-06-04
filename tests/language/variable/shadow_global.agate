@@ -1,0 +1,6 @@
+def a = "global"
+once {
+  def a = "shadow"
+  IO.println(a) # expect: shadow
+}
+IO.println(a) # expect: global

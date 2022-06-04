@@ -1,0 +1,6 @@
+def list = [1, 2, 3, 4, "foo"]
+
+IO.println(list.contains(2))      # expect: true
+IO.println(list.contains(5))      # expect: false
+IO.println(list.contains("foo"))  # expect: true
+IO.println(list.contains("bar"))  # expect: false

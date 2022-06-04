@@ -1,0 +1,4 @@
+class Foo {
+  construct new() {}
+}
+IO.println(!Foo.new()) # expect: false

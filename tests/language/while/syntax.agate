@@ -1,0 +1,16 @@
+# Single-expression body.
+def c = 0
+while (c < 3) { IO.println(c = c + 1) }
+# expect: 1
+# expect: 2
+# expect: 3
+
+# Block body.
+def a = 0
+while (a < 3) {
+  IO.println(a)
+  a = a + 1
+}
+# expect: 0
+# expect: 1
+# expect: 2

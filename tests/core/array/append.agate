@@ -1,0 +1,8 @@
+def a = [1]
+a.append(2)
+IO.println(a) # expect: [1, 2]
+a.append(3)
+IO.println(a) # expect: [1, 2, 3]
+
+# Returns appended element.
+IO.println(a.append(4)) # expect: 4

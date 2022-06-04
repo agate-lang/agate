@@ -1,0 +1,8 @@
+# Escape characters.
+IO.println("\"")     # expect: "
+IO.println("\\")     # expect: \
+IO.println("(\n)")   # expect: (
+                       # expect: )
+IO.println("\%")     # expect: %
+
+# TODO: Non-printing escapes like \t.

@@ -1,0 +1,4 @@
+# nontest
+IO.println("foo")
+return 42
+IO.println("bar")

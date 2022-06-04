@@ -1,0 +1,2 @@
+# result: runtime error
+"foo".split(1) # expect: Separator must be a character or a non-empty string.

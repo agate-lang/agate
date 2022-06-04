@@ -1,0 +1,8 @@
+# Full string.
+IO.println("%(1 + 2)") # expect: 3
+
+# Multiple in one string.
+IO.println("str%(1 + 2)(%(3 + 4)\%%(5 + 6)") # expect: str3(7%11
+
+# Nested.
+IO.println("[%("{%("in" + "ner")}")]") # expect: [{inner}]

@@ -1,0 +1,19 @@
+def start = System.clock
+
+def map = {}
+
+for (i in 1..2000000) {
+  map[i] = i
+}
+
+def sum = 0
+for (i in 1..2000000) {
+  sum = sum + map[i]
+}
+IO.println(sum)
+
+for (i in 1..2000000) {
+  map.erase(i)
+}
+
+IO.println("elapsed: %(System.clock - start)")

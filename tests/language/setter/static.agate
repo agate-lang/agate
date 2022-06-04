@@ -1,0 +1,7 @@
+class Foo {
+  static bar=(value) {
+    IO.println(value)
+  }
+}
+
+Foo.bar = "value" # expect: value

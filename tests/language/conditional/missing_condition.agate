@@ -1,0 +1,2 @@
+# result: compile error
+? 1 : 2 # expect: test:1: Error at newline: Expected expression.

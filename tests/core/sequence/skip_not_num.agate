@@ -1,0 +1,2 @@
+# result: runtime error
+[1, 2, 3].skip("s") # expect: Count must be a non-negative integer.

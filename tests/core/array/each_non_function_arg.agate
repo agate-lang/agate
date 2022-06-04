@@ -1,0 +1,2 @@
+# result: runtime error
+[1, 2, 3].each("string") # expect: Can only call functions.

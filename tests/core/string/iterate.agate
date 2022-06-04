@@ -1,0 +1,24 @@
+def s = "abçd"
+IO.println(s.iterate(nil)) # expect: 0
+IO.println(s.iterate(0)) # expect: 1
+IO.println(s.iterate(1)) # expect: 2
+# Skip 3 because that's the middle of the ç sequence.
+IO.println(s.iterate(2)) # expect: 4
+# Iterating from the middle of a UTF-8 sequence goes to the next one.
+IO.println(s.iterate(3)) # expect: 4
+IO.println(s.iterate(4)) # expect: nil
+
+# Out of bounds.
+IO.println(s.iterate(123)) # expect: nil
+IO.println(s.iterate(-1)) # expect: nil
+
+# Nothing to iterate in an empty string.
+IO.println("".iterate(nil)) # expect: nil
+
+# 8-bit clean.
+IO.println("a\0b\0c".iterate(nil)) # expect: 0
+IO.println("a\0b\0c".iterate(0)) # expect: 1
+IO.println("a\0b\0c".iterate(1)) # expect: 2
+IO.println("a\0b\0c".iterate(2)) # expect: 3
+IO.println("a\0b\0c".iterate(3)) # expect: 4
+IO.println("a\0b\0c".iterate(4)) # expect: nil

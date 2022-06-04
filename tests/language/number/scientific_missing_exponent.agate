@@ -1,0 +1,2 @@
+# result: compile error
+def x = 1e # expect: test:2: Error: Could not parse float '1e'.

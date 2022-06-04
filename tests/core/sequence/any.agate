@@ -1,0 +1,10 @@
+def a = [1, 2, 3]
+IO.println(a.any {|x| x > 3 }) # expect: false
+IO.println(a.any {|x| x > 1 }) # expect: true
+IO.println([].any {|x| true }) # expect: false
+
+# Returns first truthy value.
+IO.println(a.any {|x| x }) # expect: 1
+
+# Returns last falsey value.
+IO.println(a.any {|x| x < 2 ? nil : false }) # expect: false

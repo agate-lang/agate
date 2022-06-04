@@ -1,0 +1,45 @@
+def a = {"one": 1, "two": 2, "three": 3, "four": 4}
+
+# The precise numeric values aren't defined since they are indexes into the
+# entry table and the hashing process isn't specified. So we just validate
+# what we can assume about them.
+
+IO.println(a.iterate(nil) is Int) # expect: true
+IO.println(a.iterate(nil) >= 0) # expect: true
+
+IO.println(a.iterate(0) is Int) # expect: true
+IO.println(a.iterate(0) > 0) # expect: true
+IO.println(a.iterate(1) is Int) # expect: true
+IO.println(a.iterate(1) > 0) # expect: true
+IO.println(a.iterate(2) is Int) # expect: true
+IO.println(a.iterate(2) > 0) # expect: true
+IO.println(a.iterate(3) is Int) # expect: true
+IO.println(a.iterate(3) > 0) # expect: true
+
+def previous = -1
+def iterator = a.iterate(nil)
+while (iterator) {
+  IO.println(iterator > previous)
+  IO.println(iterator is Int)
+  previous = iterator
+  iterator = a.iterate(iterator)
+}
+# First entry:
+# expect: true
+# expect: true
+# Second entry:
+# expect: true
+# expect: true
+# Third entry:
+# expect: true
+# expect: true
+# Fourth entry:
+# expect: true
+# expect: true
+
+# Out of bounds.
+IO.println(a.iterate(16)) # expect: nil
+IO.println(a.iterate(-1)) # expect: nil
+
+# Nothing to iterate in an empty map.
+IO.println({}.iterate(nil)) # expect: nil

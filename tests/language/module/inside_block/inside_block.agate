@@ -1,0 +1,10 @@
+def Module = "outer"
+
+if (true) {
+  import "./module" for Module
+  # expect: ran module
+
+  IO.println(Module) # expect: from module
+}
+
+IO.println(Module) # expect: outer

@@ -1,0 +1,4 @@
+def map = Map.new()
+
+IO.println(map.count) # expect: 0
+IO.println(map) # expect: {}

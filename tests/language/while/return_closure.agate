@@ -1,0 +1,10 @@
+def f = Fn.new {
+  while (true) {
+    def i = "i"
+    return Fn.new { IO.println(i) }
+  }
+}
+
+def g = f()
+g()
+# expect: i

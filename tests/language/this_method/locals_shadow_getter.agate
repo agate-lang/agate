@@ -1,0 +1,19 @@
+class Foo {
+  construct new() {}
+
+  bar { "getter" }
+
+  test {
+    IO.println(.bar) # expect: getter
+
+    once {
+      IO.println(.bar) # expect: getter
+      def bar = "local"
+      IO.println(bar) # expect: local
+    }
+
+    IO.println(.bar) # expect: getter
+  }
+}
+
+Foo.new().test

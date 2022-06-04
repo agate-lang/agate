@@ -1,0 +1,5 @@
+import "./module_return"
+
+IO.println("baz") 
+# expect: foo
+# expect: baz

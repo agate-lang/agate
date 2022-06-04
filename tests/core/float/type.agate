@@ -1,0 +1,4 @@
+IO.println(123.0 is Float)      # expect: true
+IO.println(123.0 is Object)     # expect: true
+IO.println(123.0 is String)     # expect: false
+IO.println(123.0.type == Float) # expect: true

@@ -1,0 +1,19 @@
+IO.println(123.0 == 123.0)  # expect: true
+IO.println(123.0 == 124.0)  # expect: false
+IO.println(-3.0 == 3.0)     # expect: false
+IO.println(0.0 == -0.0)     # expect: true
+
+# Not equal to other types.
+IO.println(123.0 == "123") # expect: false
+IO.println(1.0 == true)    # expect: false
+IO.println(0.0 == false)   # expect: false
+
+IO.println(123.0 != 123.0)  # expect: false
+IO.println(123.0 != 124.0)  # expect: true
+IO.println(-3.0 != 3.0)     # expect: true
+IO.println(0.0 != -0.0)     # expect: false
+
+# Not equal to other types.
+IO.println(123.0 != "123") # expect: true
+IO.println(1.0 != true)    # expect: true
+IO.println(0.0 != false)   # expect: true

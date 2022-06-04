@@ -1,0 +1,8 @@
+# False and nil are false.
+if (false) { IO.println("bad") } else { IO.println("false") } # expect: false
+if (nil) { IO.println("bad") } else { IO.println("null") } # expect: null
+
+# Everything else is true.
+if (true) { IO.println(true) } # expect: true
+if (0) { IO.println(0) } # expect: 0
+if ("") { IO.println("empty") } # expect: empty

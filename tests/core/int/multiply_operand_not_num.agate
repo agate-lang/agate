@@ -1,0 +1,2 @@
+# result: runtime error
+1 * false # expect: Right operand must be an integer.

@@ -1,0 +1,2 @@
+# result: runtime error
+[1, 2, 3] + 4 # expect: Int does not implement 'iterate(_)'.

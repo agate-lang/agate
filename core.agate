@@ -1,0 +1,376 @@
+class Nil { }
+class Bool { }
+class Int { }
+class Float { }
+class Char { }
+class Fn { }
+
+class Sequence {
+  all(predicate) {
+    def value = true
+    for (element in this) {
+      value = predicate(element)
+      if (!value) {
+        return value
+      }
+    }
+    return value
+  }
+
+  any(predicate) {
+    def value = false
+    for (element in this) {
+      value = predicate(element)
+      if (value) {
+        return value
+      }
+    }
+    return value
+  }
+
+  none(predicate) {
+    return !.any(predicate)
+  }
+
+  count {
+    def counter = 0
+    for (element in this) {
+      counter = counter + 1
+    }
+    return counter
+  }
+
+  count(predicate) {
+    def counter = 0
+    for (element in this) {
+      if (predicate(element)) {
+        counter = counter + 1
+      }
+    }
+    return counter
+  }
+
+  contains(value) {
+    for (element in this) {
+      if (element == value) {
+        return true
+      }
+    }
+    return false
+  }
+
+  empty { .iterate(nil) ? false : true }
+
+  each(fn) {
+    for (element in this) {
+      fn(element)
+    }
+  }
+
+  join() { .join("") }
+
+  join(sep) {
+    def buf = Buffer.new()
+    def first = true
+    for (element in this) {
+      if (first) {
+        first = false
+      } else {
+        buf.append(sep)
+      }
+      buf.append(element.to_s)
+    }
+    return buf.to_s
+  }
+
+  map(fn) { __MapSequence.new(this, fn) }
+
+  skip(count) {
+    if (!(count is Int) || count < 0) {
+      System.abort("Count must be a non-negative integer.")
+    }
+    return __SkipSequence.new(this, count)
+  }
+
+  take(count) {
+    if (!(count is Int) || count < 0) {
+      System.abort("Count must be a non-negative integer.")
+    }
+    return __TakeSequence.new(this, count)
+  }
+
+  where(predicate) { __WhereSequence.new(this, predicate) }
+
+  reduce(val, op) {
+    for (element in this) {
+      val = op(val, element)
+    }
+    return val
+  }
+
+  reduce(op) {
+    def iter = .iterate(nil)
+    if (iter == nil) {
+      System.abort("Cannot reduce an empty sequence.")
+    }
+    def result = .iterator_value(iter)
+    while (iter = .iterate(iter)) {
+      result = op(result, .iterator_value(iter))
+    }
+    return result
+  }
+
+  to_a {
+    def array = Array.new()
+    for (element in this) {
+      array.append(element)
+    }
+    return array
+  }
+}
+
+class __MapSequence is Sequence {
+  construct new(seq, fn) {
+    @seq = seq
+    @fn = fn
+  }
+
+  iterate(iterator) { @seq.iterate(iterator) }
+  iterator_value(iterator) { @fn(@seq.iterator_value(iterator)) }
+}
+
+class __SkipSequence is Sequence {
+  construct new(seq, count) {
+    @seq = seq
+    @count = count
+  }
+
+  iterate(iterator) {
+    if (iterator) {
+      return @seq.iterate(iterator)
+    }
+    iterator = @seq.iterate(iterator)
+    def count = @count
+    while (count > 0 && iterator) {
+      iterator = @seq.iterate(iterator)
+      count = count - 1
+    }
+    return iterator
+  }
+
+  iterator_value(iterator) { @seq.iterator_value(iterator) }
+}
+
+class __TakeSequence is Sequence {
+  construct new(seq, count) {
+    @seq = seq
+    @count = count
+  }
+
+  iterate(iterator) {
+    if (!iterator) {
+      @taken = 1
+    } else {
+      @taken = @taken + 1
+    }
+    return @taken > @count ? nil : @seq.iterate(iterator)
+  }
+
+  iterator_value(iterator) { @seq.iterator_value(iterator) }
+}
+
+class __WhereSequence is Sequence {
+  construct new(seq, fn) {
+    @seq = seq
+    @fn = fn
+  }
+
+  iterate(iterator) {
+    while (iterator = @seq.iterate(iterator)) {
+      if (@fn(@seq.iterator_value(iterator))) {
+        break
+      }
+    }
+    return iterator
+  }
+
+  iterator_value(iterator) { @seq.iterator_value(iterator) }
+}
+
+class Array is Sequence {
+  append_all(seq) {
+    for (elem in seq) {
+      .append(elem)
+    }
+    return seq
+  }
+
+  sort() { .sort() {|lhs,rhs| lhs < rhs } }
+
+  sort(comp) {
+    if (!(comp is Fn) || comp.arity != 2) {
+      System.abort("comp must be a function with two parameters.")
+    }
+    .__quicksort(0, .count - 1, comp)
+    return this
+  }
+
+  partition() { .partition() {|lhs,rhs| lhs < rhs } }
+  partition(comp) { .__partition(0, .count - 1, comp) }
+
+  to_s { "[%(.join(", "))]" }
+
+  __quicksort(lo, hi, comp) {
+    if (lo < hi) {
+      def p = .__partition(lo, hi, comp)
+      .__quicksort(lo, p - 1, comp)
+      .__quicksort(p + 1, hi, comp)
+    }
+  }
+
+  __partition(lo, hi, comp) {
+    def p = this[hi]
+    def l = lo
+    for (i in lo...hi) {
+      if (comp(this[i], p)) {
+        .swap(i, l)
+        l = l + 1
+      }
+    }
+    .swap(l, hi)
+    return l
+  }
+
+  to_a { this[0..-1] }
+
+  +(other) {
+    def result = .to_a
+    result.append_all(other)
+    return result
+  }
+
+  *(count) {
+    if (!(count is Int) || count < 0) {
+      System.abort("Count must be a non-negative integer.")
+    }
+    def result = []
+    for (i in 0...count) {
+      result.append_all(this)
+    }
+    return result
+  }
+}
+
+class Buffer is Sequence {
+}
+
+class String is Sequence {
+  ltrim() { .__trim(" \n\t\r", true, false) }
+  ltrim(chars) { .__trim(chars, true, false) }
+
+  rtrim() { .__trim(" \n\t\r", false, true) }
+  rtrim(chars) { .__trim(chars, false, true) }
+
+  trim() { .__trim(" \n\t\r", true, true) }
+  trim(chars) { .__trim(chars, true, true) }
+}
+
+class MapEntry {
+  construct new(key, value) {
+    @key = key
+    @value = value
+  }
+
+  key { @key }
+  value { @value }
+
+  to_s { "%(@key): %(@value)" }
+}
+
+class __MapKeySequence is Sequence {
+  construct new(map) {
+    @map = map
+  }
+
+  iterate(iterator) { @map.iterate(iterator) }
+  iterator_value(iterator) { @map.key_from_iterator(iterator) }
+}
+
+class __MapValueSequence is Sequence {
+  construct new(map) {
+    @map = map
+  }
+
+  iterate(iterator) { @map.iterate(iterator) }
+  iterator_value(iterator) { @map.value_from_iterator(iterator) }
+}
+
+class Map is Sequence {
+  keys { __MapKeySequence.new(this) }
+  values { __MapValueSequence.new(this) }
+
+  iterator_value(iterator) { MapEntry.new(.key_from_iterator(iterator), .value_from_iterator(iterator)) }
+
+  contains(key) { .__contains(key, key.hash) }
+  insert(key, value) { .__insert(key, value, key.hash) }
+  erase(key) { .__erase(key, key.hash) }
+
+  [key] { .__subscript_getter(key, key.hash) }
+  [key]=(value) { .__subscript_setter(key, value, key.hash) }
+
+  to_s { "{%(.join(", "))}" }
+
+  __put(key, value) { .__put(key, value, key.hash) }
+}
+
+class Range is Sequence {
+  to_s { "%(.from)%(.is_inclusive ? ".." : "...")%(.to)" }
+}
+
+class IO {
+  static print(obj) {
+    .__print_object(obj)
+    return obj
+  }
+
+  static print_all(seq) {
+    for (obj in seq) {
+      .__print_object(obj)
+    }
+  }
+
+  static println() {
+    .__print("\n")
+  }
+
+  static println(obj) {
+    .__print_object(obj)
+    .__print("\n")
+    return obj
+  }
+
+  static println_all(seq) {
+    for (obj in seq) {
+      .__print_object(obj)
+    }
+    .__print("\n")
+  }
+
+  static __print_object(obj) {
+    def str = obj.to_s
+    if (str is String) {
+      .__print(str)
+    } else {
+      .__print("[invalid to_s]")
+    }
+  }
+}
+
+class Math {
+  static PI { 3.141592653589793 }
+  static min(a, b) { a < b ? a : b }
+  static max(a, b) { a < b ? b : a }
+  static clamp(v, lo, hi) { v < lo ? lo : (v < hi ? v : hi) }
+}
+
+class System { }

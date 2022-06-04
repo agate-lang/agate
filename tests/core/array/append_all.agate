@@ -1,0 +1,11 @@
+def a = [1]
+a.append_all([2, 3])
+IO.println(a) # expect: [1, 2, 3]
+a.append_all([])
+IO.println(a) # expect: [1, 2, 3]
+a.append_all(4..6)
+IO.println(a) # expect: [1, 2, 3, 4, 5, 6]
+
+# Returns argument.
+def range = 7..9
+IO.println(a.append_all(range) == range) # expect: true

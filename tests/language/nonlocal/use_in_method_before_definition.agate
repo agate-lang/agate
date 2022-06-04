@@ -1,0 +1,16 @@
+class Foo {
+  construct new() {}
+
+  method {
+    IO.println(Global)
+  }
+
+  static classMethod {
+    IO.println(Global)
+  }
+}
+
+def Global = "global"
+
+Foo.new().method # expect: global
+Foo.classMethod # expect: global

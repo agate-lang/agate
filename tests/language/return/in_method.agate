@@ -1,0 +1,10 @@
+class Foo {
+  construct new() {}
+
+  method {
+    return "ok"
+    IO.println("bad")
+  }
+}
+
+IO.println(Foo.new().method) # expect: ok

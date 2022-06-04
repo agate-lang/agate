@@ -1,0 +1,8 @@
+# False and nil are false.
+IO.println(false && "bad") # expect: false
+IO.println(nil && "bad") # expect: nil
+
+# Everything else is true.
+IO.println(true && "ok") # expect: ok
+IO.println(0 && "ok") # expect: ok
+IO.println("" && "ok") # expect: ok

@@ -1,0 +1,3 @@
+# result: compile error
+[1, 2,
+# expect: test:3: Error at newline: Expected expression.

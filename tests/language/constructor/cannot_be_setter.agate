@@ -1,0 +1,6 @@
+# result: compile error
+class Foo {
+  construct name=(value) { # expect: test:3: Error at '=': A constructor cannot be a setter.
+    IO.println("ok")
+  }
+}

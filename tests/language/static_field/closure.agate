@@ -1,0 +1,16 @@
+class Foo {
+  static initialize { @@field = "Foo field" }
+
+  static close_over_get {
+    return Fn.new { @@field }
+  }
+
+  static close_over_set {
+    return Fn.new { @@field = "new value" }
+  }
+}
+
+Foo.initialize
+IO.println((Foo.close_over_get)()) # expect: Foo field
+(Foo.close_over_set)()
+IO.println((Foo.close_over_get)()) # expect: new value

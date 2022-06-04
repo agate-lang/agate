@@ -1,0 +1,4 @@
+IO.println("s" is String)      # expect: true
+IO.println("s" is Object)      # expect: true
+IO.println("s" is Int)         # expect: false
+IO.println("s".type == String) # expect: true

@@ -1,0 +1,13 @@
+# This is a regression test for a bug where inserting in a map would not
+# correctly reuse tombstone entries, eventually deadlocking on insert.
+def map = {}
+
+for (i in 0...100) {
+  map[i] = i
+
+  if (i >= 10) {
+    map.erase(i - 10)
+  }
+}
+
+IO.println(map.count) # expect: 10

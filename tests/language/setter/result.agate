@@ -1,0 +1,7 @@
+class Foo {
+  construct new() {}
+  bar=(value) { "result" }
+}
+
+def foo = Foo.new()
+IO.println(foo.bar = "value") # expect: result

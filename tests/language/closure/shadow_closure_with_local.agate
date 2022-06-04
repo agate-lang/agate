@@ -1,0 +1,11 @@
+once {
+  def foo = "closure"
+  Fn.new {
+    once {
+      IO.println(foo) # expect: closure
+      def foo = "shadow"
+      IO.println(foo) # expect: shadow
+    }
+    IO.println(foo) # expect: closure
+  }()
+}

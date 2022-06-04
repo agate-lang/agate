@@ -1,0 +1,7 @@
+IO.println("".to_s == "") # expect: true
+IO.println("blah".to_s == "blah") # expect: true
+
+# 8-bit clean.
+IO.println("a\0b\0c".to_s == "a\0b\0c") # expect: true
+IO.println("a\0b\0c".to_s == "a") # expect: false
+IO.println("a\0b\0c".to_s) # expect: a

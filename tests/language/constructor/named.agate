@@ -1,0 +1,14 @@
+class Foo {
+  construct named() { @field = "named" }
+  construct other() { @field = "other" }
+
+  to_s { @field }
+}
+
+IO.println(Foo.named()) # expect: named
+IO.println(Foo.other()) # expect: other
+
+# Returns the new instance.
+def foo = Foo.named()
+IO.println(foo is Foo) # expect: true
+IO.println(foo.to_s) # expect: named

@@ -1,0 +1,2 @@
+# result: runtime error
+Int.new() # expect: Int metaclass does not implement 'new()'.

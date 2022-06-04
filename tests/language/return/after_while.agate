@@ -1,0 +1,5 @@
+IO.println(Fn.new {
+  while (true) {
+    return "ok"
+  }
+}()) # expect: ok

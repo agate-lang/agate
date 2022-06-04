@@ -1,0 +1,18 @@
+# Handle empty list.
+IO.println([].to_s) # expect: []
+
+# Does not quote strings.
+IO.println([1, "2", true].to_s) # expect: [1, 2, true]
+
+# Nested lists.
+IO.println([1, [2, [3], 4], 5]) # expect: [1, [2, [3], 4], 5]
+
+# Calls to_s on elements.
+class Foo {
+  construct new() {}
+  to_s { "Foo.to_s" }
+}
+
+IO.println([1, Foo.new(), 2]) # expect: [1, Foo.to_s, 2]
+
+# TODO: Handle lists that contain themselves.

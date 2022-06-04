@@ -1,0 +1,7 @@
+# result: compile error
+class Foo {
+  bar {
+    def a = "value"
+    def a = "other" # expect: test:5: Error at '"other"': Variable is already declared in this scope.
+  }
+}

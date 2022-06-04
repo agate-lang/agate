@@ -1,0 +1,5 @@
+def map = {
+  "": "empty string"
+}
+
+IO.println(map[""]) # expect: empty string

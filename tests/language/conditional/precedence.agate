@@ -1,0 +1,58 @@
+class Foo {
+  construct new() {}
+  static bar { true }
+  static baz { 1 }
+}
+
+# Condition precedence.
+IO.println(true ? 1 : 2) # expect: 1
+IO.println((true) ? 1 : 2) # expect: 1
+IO.println([true][0] ? 1 : 2) # expect: 1
+IO.println(Foo.bar ? 1 : 2) # expect: 1
+IO.println(3..4 ? 1 : 2) # expect: 1
+IO.println(3 * 4 ? 1 : 2) # expect: 1
+IO.println(3 + 4 ? 1 : 2) # expect: 1
+IO.println(true || false ? 1 : 2) # expect: 1
+IO.println(!false ? 1 : 2) # expect: 1
+IO.println(~0 ? 1 : 2) # expect: 1
+IO.println(3 is Int ? 1 : 2) # expect: 1
+IO.println(Foo.new() ? 1 : 2) # expect: 1
+
+def a = 0
+IO.println(a = 3 ? 1 : 2) # expect: 1
+IO.println(a) # expect: 1
+
+# Then branch precedence.
+IO.println(true ? (1) : 2) # expect: 1
+IO.println(true ? [1][0] : 2) # expect: 1
+IO.println(true ? Foo.baz : 2) # expect: 1
+IO.println(true ? 3..4 : 2) # expect: 3..4
+IO.println(true ? 3 * 4 : 2) # expect: 12
+IO.println(true ? 3 + 4 : 2) # expect: 7
+IO.println(true ? 1 || false : 2) # expect: 1
+IO.println(true ? !true : 2) # expect: false
+IO.println(true ? ~0 : 2) # expect: -1
+IO.println(true ? 3 is Bool : 2) # expect: false
+IO.println(true ? Foo.new() : 2) # expect: instance of Foo
+
+IO.println(true ? a = 5 : 2) # expect: 5
+IO.println(a) # expect: 5
+
+# Else branch precedence.
+IO.println(false ? 1 : (2)) # expect: 2
+IO.println(false ? 1 : [2][0]) # expect: 2
+IO.println(false ? 2 : Foo.baz) # expect: 1
+IO.println(false ? 1 : 3..4) # expect: 3..4
+IO.println(false ? 1 : 3 * 4) # expect: 12
+IO.println(false ? 1 : 3 + 4) # expect: 7
+IO.println(false ? 1 : 2 || false) # expect: 2
+IO.println(false ? 1 : !false) # expect: true
+IO.println(false ? 1 : ~0) # expect: -1
+IO.println(false ? 1 : 3 is Int) # expect: true
+IO.println(false ? 1 : Foo.new()) # expect: instance of Foo
+
+# Associativity.
+IO.println(true ? 2 : true ? 4 : 5) # expect: 2
+IO.println(false ? 2 : true ? 4 : 5) # expect: 4
+IO.println(true ? true ? 4 : 5 : 2) # expect: 4
+IO.println(false ? true ? 4 : 5 : 2) # expect: 2

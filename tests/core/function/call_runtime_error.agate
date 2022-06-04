@@ -1,0 +1,3 @@
+# result: runtime error
+def f1(a, b) { a + b } # expect: Bool does not implement '+(_)'.
+f1(true, false)

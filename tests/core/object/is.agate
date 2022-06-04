@@ -1,0 +1,33 @@
+IO.println(Int is Class) # expect: true
+IO.println(true is Bool) # expect: true
+IO.println(Fn.new { 1 } is Fn) # expect: true
+IO.println(123 is Int) # expect: true
+IO.println(123.4 is Float) # expect: true
+IO.println(nil is Nil) # expect: true
+IO.println("s" is String) # expect: true
+
+IO.println(Int is Bool) # expect: false
+IO.println(nil is Class) # expect: false
+IO.println(true is Fn) # expect: false
+IO.println(Fn.new { 1 } is Int) # expect: false
+IO.println("s" is Nil) # expect: false
+IO.println(123 is Float) # expect: false
+IO.println(123.4 is Int) # expect: false
+
+# Everything extends Object.
+IO.println(Int is Object) # expect: true
+IO.println(nil is Object) # expect: true
+IO.println(true is Object) # expect: true
+IO.println(Fn.new { 1 } is Object) # expect: true
+IO.println("s" is Object) # expect: true
+IO.println(123 is Object) # expect: true
+IO.println(123.4 is Object) # expect: true
+
+# Classes extend Class.
+IO.println(Int is Class) # expect: true
+IO.println(nil is Class) # expect: false
+IO.println(true is Class) # expect: false
+IO.println(Fn.new { 1 } is Class) # expect: false
+IO.println("s" is Class) # expect: false
+IO.println(123 is Class) # expect: false
+IO.println(123.4 is Class) # expect: false

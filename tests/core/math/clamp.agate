@@ -1,0 +1,11 @@
+IO.println(Math.clamp(4, 0, 10))    # expect: 4
+IO.println(Math.clamp(4, 0, 1))     # expect: 1
+IO.println(Math.clamp(2, 0, 1))     # expect: 1
+IO.println(Math.clamp(-1, 0, 1))    # expect: 0
+IO.println(Math.clamp(-1, -20, 0))  # expect: -1
+
+IO.println(Math.clamp(4.0, 0.0, 10.0))    # expect: 4
+IO.println(Math.clamp(4.0, 0.0, 1.0))     # expect: 1
+IO.println(Math.clamp(2.0, 0.0, 1.0))     # expect: 1
+IO.println(Math.clamp(-1.0, 0.0, 1.0))    # expect: 0
+IO.println(Math.clamp(-1.0, -20.0, 0.0))  # expect: -1

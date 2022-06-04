@@ -1,0 +1,7 @@
+# Infix.
+IO.println(5 - 3)      # expect: 2
+IO.println(3 - 2 - 1)  # expect: 0
+
+# Unary negation.
+def a = 3
+IO.println(-a) # expect: -3

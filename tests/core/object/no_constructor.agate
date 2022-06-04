@@ -1,0 +1,2 @@
+# result: runtime error
+Object.new() # expect: Object metaclass does not implement 'new()'.

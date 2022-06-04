@@ -1,0 +1,12 @@
+class Foo {
+  construct new() {}
+  static bar { Bar.new() }
+}
+
+class Bar {
+  construct new() {}
+  static foo { Foo.new() }
+}
+
+IO.println(Foo.bar) # expect: instance of Bar
+IO.println(Bar.foo) # expect: instance of Foo

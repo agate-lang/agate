@@ -1,0 +1,4 @@
+# This is a regression test to ensure map handles a nil entry array.
+
+def map = {}
+IO.println(map["key"]) # expect: nil

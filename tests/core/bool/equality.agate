@@ -1,0 +1,23 @@
+IO.println(true == true)    # expect: true
+IO.println(true == false)   # expect: false
+IO.println(false == true)   # expect: false
+IO.println(false == false)  # expect: true
+
+# Not equal to other types.
+IO.println(true == 1)        # expect: false
+IO.println(false == 0)       # expect: false
+IO.println(true == "true")   # expect: false
+IO.println(false == "false") # expect: false
+IO.println(false == "")      # expect: false
+
+IO.println(true != true)    # expect: false
+IO.println(true != false)   # expect: true
+IO.println(false != true)   # expect: true
+IO.println(false != false)  # expect: false
+
+# Not equal to other types.
+IO.println(true != 1)        # expect: true
+IO.println(false != 0)       # expect: true
+IO.println(true != "true")   # expect: true
+IO.println(false != "false") # expect: true
+IO.println(false != "")      # expect: true

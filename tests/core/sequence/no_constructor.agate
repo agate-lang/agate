@@ -1,0 +1,2 @@
+# result: runtime error
+Sequence.new() # expect: Sequence metaclass does not implement 'new()'.

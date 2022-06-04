@@ -1,0 +1,8 @@
+# Infix.
+IO.println(5.0 - 3.0)      # expect: 2
+IO.println(3.1 - 0.24) # expect: 2.86
+IO.println(3.0 - 2.0 - 1.0)  # expect: 0
+
+# Unary negation.
+def a = 3.0
+IO.println(-a) # expect: -3

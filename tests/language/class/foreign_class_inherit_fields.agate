@@ -1,0 +1,8 @@
+# result: runtime error
+class Foo {
+  method() {
+    @field = "value"
+  }
+}
+
+foreign class Bar is Foo {} # expect: Foreign class 'Bar' cannot inherit from a class with fields.

@@ -1,0 +1,2 @@
+# result: runtime error
+Fn.new(3) # expect: Argument must be a function.

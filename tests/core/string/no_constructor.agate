@@ -1,0 +1,2 @@
+# result: runtime error
+String.new() # expect: String metaclass does not implement 'new()'.

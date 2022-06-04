@@ -1,0 +1,4 @@
+# result: compile error
+def f(a) {
+  def a = "oops" # expect: test:3: Error at '"oops"': Variable is already declared in this scope.
+}

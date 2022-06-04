@@ -1,0 +1,2 @@
+# result: runtime error
+1 is false # expect: Right operand must be a class.

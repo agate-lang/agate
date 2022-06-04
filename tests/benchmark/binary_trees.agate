@@ -1,0 +1,52 @@
+# Ported from the Python version.
+
+class Tree {
+  construct new(item, depth) {
+    @item = item
+    if (depth > 0) {
+      def item2 = item + item
+      depth = depth - 1
+      @left = Tree.new(item2 - 1, depth)
+      @right = Tree.new(item2, depth)
+    }
+  }
+
+  check {
+    if (@left == nil) {
+      return @item
+    }
+
+    return @item + @left.check - @right.check
+  }
+}
+
+def minDepth = 4
+def maxDepth = 12
+def stretchDepth = maxDepth + 1
+
+def start = System.clock
+
+IO.println("stretch tree of depth %(stretchDepth) check: " + "%(Tree.new(0, stretchDepth).check)")
+
+def longLivedTree = Tree.new(0, maxDepth)
+
+# iterations = 2 ** maxDepth
+def iterations = 1
+for (d in 0...maxDepth) {
+  iterations = iterations * 2
+}
+
+def depth = minDepth
+while (depth < stretchDepth) {
+  def check = 0
+  for (i in 1..iterations) {
+    check = check + Tree.new(i, depth).check + Tree.new(-i, depth).check
+  }
+
+  IO.println("%(iterations * 2) trees of depth %(depth) check: %(check)")
+  iterations = iterations / 4
+  depth = depth + 2
+}
+
+IO.println("long lived tree of depth %(maxDepth) check: %(longLivedTree.check)")
+IO.println("elapsed: %(System.clock - start)")

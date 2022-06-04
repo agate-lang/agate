@@ -1,0 +1,2 @@
+# result: compile error
+this # expect: test:2: Error at 'this': Cannot use 'this' outside of a method.

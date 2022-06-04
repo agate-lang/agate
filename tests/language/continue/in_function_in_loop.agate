@@ -1,0 +1,8 @@
+# result: compile error
+def done = false
+while (!done) {
+  Fn.new {
+    continue # expect: test:5: Error at 'continue': Cannot use 'continue' outside of a loop.
+  }
+  done = true
+}

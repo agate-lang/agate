@@ -1,0 +1,2 @@
+IO.println(Math.atan(0.0))  # expect: 0
+IO.println(Math.atan(1.0))  # expect: 0.78539816339745

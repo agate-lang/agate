@@ -1,0 +1,4 @@
+IO.println(Math.max(4, 6)) # expect: 6
+IO.println(Math.min(4, 6)) # expect: 4
+IO.println(Math.max(4.0, 6.0)) # expect: 6
+IO.println(Math.min(4.0, 6.0)) # expect: 4

@@ -1,0 +1,13 @@
+def list = []
+
+for (i in [1, 2, 3]) {
+  def j = i + 1
+  list.append(Fn.new { IO.println(j) })
+}
+
+for (f in list) {
+  f()
+}
+# expect: 2
+# expect: 3
+# expect: 4

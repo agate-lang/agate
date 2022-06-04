@@ -1,0 +1,51 @@
+# Single expression body.
+Fn.new { IO.println("ok") }() # expect: ok
+
+def f0() { IO.println("ok") } # expect: ok
+f0()
+
+# Curly body.
+Fn.new {
+  IO.println("ok") # expect: ok
+}()
+
+def f1() {
+  IO.println("ok") # expect: ok
+}
+f1()
+
+# Multiple statements.
+Fn.new {
+  IO.println("1") # expect: 1
+  IO.println("2") # expect: 2
+}()
+
+def f2() {
+  IO.println("1") # expect: 1
+  IO.println("2") # expect: 2
+}
+f2()
+
+# Extra newlines.
+Fn.new {
+
+
+  IO.println("1") # expect: 1
+
+
+  IO.println("2") # expect: 2
+
+
+}()
+
+def f3() {
+
+
+  IO.println("1") # expect: 1
+
+
+  IO.println("2") # expect: 2
+
+
+}
+f3()

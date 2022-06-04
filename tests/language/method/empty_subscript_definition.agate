@@ -1,0 +1,4 @@
+# result: compile error
+class Foo {
+  [] { "empty" } # expect: test:3: Error at ']': Expect variable name.
+}

@@ -1,0 +1,4 @@
+IO.println(Math.log2(1024.0)) # expect: 10
+IO.println(Math.log2(2048.0)) # expect: 11
+IO.println(Math.log2(100.0))  # expect: 6.6438561897747
+IO.println(Math.log2(-1.0))   # expect: nan

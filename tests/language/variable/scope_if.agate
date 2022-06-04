@@ -1,0 +1,15 @@
+# Create a local scope for the 'then' expression.
+def a = "out"
+if (true) {
+  def a = "in"
+}
+IO.println(a) # expect: out
+
+# Create a local scope for the 'else' expression.
+def b = "out"
+if (false) {
+  "dummy"
+} else {
+  def b = "in"
+}
+IO.println(b) # expect: out

@@ -1,0 +1,2 @@
+# result: runtime error
+"abcd".find("bc", 4) # expect: Start out of bounds.

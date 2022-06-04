@@ -1,0 +1,2 @@
+# result: runtime error
+Class.new() # expect: Class does not implement 'new()'.

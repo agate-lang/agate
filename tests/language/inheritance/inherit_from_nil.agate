@@ -1,0 +1,2 @@
+# result: runtime error
+class Foo is nil {} # expect: Class 'Foo' cannot inherit from a non-class object.

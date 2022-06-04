@@ -1,0 +1,12 @@
+def fibo(n) {
+  if (n < 2) {
+    return n
+  }
+  return fibo(n - 1) + fibo(n - 2)
+}
+
+def start = System.clock
+for (i in 1..5) {
+  IO.println(fibo(28))
+}
+IO.println("elapsed: %(System.clock - start)")

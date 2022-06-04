@@ -1,0 +1,7 @@
+# result: runtime error
+def a = {1: "one"}
+
+# The maximum value is based on the map's capacity, not its count, so use a
+# sufficiently large enough value for the test to make not affected by growth
+# strategy.
+a.iterator_value(-9999) # expect: Iterator out of bounds.

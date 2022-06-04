@@ -1,0 +1,3 @@
+# result: compile error
+if # expect: test:2: Error at newline: Expect '(' after 'if'.
+(true) IO.println("bad")

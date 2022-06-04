@@ -1,0 +1,14 @@
+class Foo {}
+
+# Object's class is a class.
+IO.println(Object is Class) # expect: true
+
+# Its metatype is also a class.
+IO.println(Object.type is Class) # expect: true
+
+# The metatype's metatype is Class.
+IO.println(Object.type.type == Class) # expect: true
+
+# Object has a distinct metaclass.
+IO.println(Object.type.name) # expect: Object metaclass
+

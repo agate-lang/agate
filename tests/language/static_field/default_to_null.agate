@@ -1,0 +1,5 @@
+class Foo {
+  static write { IO.println(@@field) }
+}
+
+Foo.write # expect: nil

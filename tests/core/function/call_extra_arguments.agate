@@ -1,0 +1,33 @@
+def f0 = Fn.new { IO.println("zero") }
+def f1 = Fn.new {|a| IO.println("one %(a)") }
+def f2 = Fn.new {|a, b| IO.println("two %(a) %(b)") }
+def f3 = Fn.new {|a, b, c| IO.println("three %(a) %(b) %(c)") }
+
+f0("a") # expect: zero
+f0("a", "b") # expect: zero
+
+f1("a", "b") # expect: one a
+f1("a", "b", "c") # expect: one a
+
+f2("a", "b", "c") # expect: two a b
+f2("a", "b", "c", "d") # expect: two a b
+
+f3("a", "b", "c", "d") # expect: three a b c
+f3("a", "b", "c", "d", "e") # expect: three a b c
+
+def g0() { IO.println("zero") }
+def g1(a) { IO.println("one %(a)") }
+def g2(a, b) { IO.println("two %(a) %(b)") }
+def g3(a, b, c) { IO.println("three %(a) %(b) %(c)") }
+
+g0("a") # expect: zero
+g0("a", "b") # expect: zero
+
+g1("a", "b") # expect: one a
+g1("a", "b", "c") # expect: one a
+
+g2("a", "b", "c") # expect: two a b
+g2("a", "b", "c", "d") # expect: two a b
+
+g3("a", "b", "c", "d") # expect: three a b c
+g3("a", "b", "c", "d", "e") # expect: three a b c

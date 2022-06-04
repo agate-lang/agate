@@ -1,0 +1,16 @@
+class Foo {
+  construct new() { }
+
+  static say_name {
+    IO.println(Foo)
+  }
+
+  say_name {
+    IO.println(Foo)
+  }
+
+  static to_s { "Foo!" }
+}
+
+Foo.say_name # expect: Foo!
+Foo.new().say_name # expect: Foo!

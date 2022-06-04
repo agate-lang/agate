@@ -1,0 +1,18 @@
+class Baz {
+  construct new() {}
+}
+
+class Bar {
+  construct new() {
+  }
+}
+
+class Foo {
+  construct new() {
+    return
+  }
+}
+IO.println(Baz.new()) # expect: instance of Baz
+IO.println(Bar.new()) # expect: instance of Bar
+IO.println(Foo.new()) # expect: instance of Foo
+IO.println(Foo.new() != nil) # expect: true

@@ -1,0 +1,2 @@
+# result: runtime error
+class Subclass is Bool {} # expect: Class 'Subclass' cannot inherit from built-in class 'Bool'.

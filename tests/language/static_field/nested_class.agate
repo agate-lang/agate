@@ -1,0 +1,40 @@
+class Outer {
+  construct new() {}
+
+  static staticMethod {
+    @@field = "outer"
+    IO.println(@@field) # expect: outer
+
+    class Inner {
+      construct new() {}
+
+      static staticMethod {
+        @@field = "inner"
+        IO.println(@@field) # expect: inner
+      }
+    }
+
+    Inner.staticMethod
+    IO.println(@@field) # expect: outer
+  }
+
+  instanceMethod {
+    @@field = "outer"
+    IO.println(@@field) # expect: outer
+
+    class Inner {
+      construct new() {}
+
+      instanceMethod {
+        @@field = "inner"
+        IO.println(@@field) # expect: inner
+      }
+    }
+
+    Inner.new().instanceMethod
+    IO.println(@@field) # expect: outer
+  }
+}
+
+Outer.staticMethod
+Outer.new().instanceMethod

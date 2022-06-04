@@ -1,0 +1,39 @@
+class Foo {
+  construct new() {}
+
+  foo(a, b) {
+    @field1 = a
+    @field2 = b
+  }
+
+  foo_print {
+    IO.println(@field1)
+    IO.println(@field2)
+  }
+}
+
+class Bar is Foo {
+  construct new() {}
+
+  bar(a, b) {
+    @field1 = a
+    @field2 = b
+  }
+
+  bar_print {
+    IO.println(@field1)
+    IO.println(@field2)
+  }
+}
+
+def bar = Bar.new()
+bar.foo("foo 1", "foo 2")
+bar.bar("bar 1", "bar 2")
+
+bar.foo_print
+# expect: foo 1
+# expect: foo 2
+
+bar.bar_print
+# expect: bar 1
+# expect: bar 2

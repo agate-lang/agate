@@ -1,0 +1,17 @@
+class TestSequence is Sequence {
+  construct new() { }
+
+  iterate(iterator) {
+    if (iterator == nil) {
+      return 1
+    }
+    if (iterator == 10) {
+      return nil
+    }
+    return iterator + 1
+  }
+
+  iterator_value(iterator) { iterator }
+}
+
+IO.println(TestSequence.new().count) # expect: 10

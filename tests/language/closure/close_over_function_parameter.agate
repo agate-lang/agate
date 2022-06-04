@@ -1,0 +1,9 @@
+def f = nil
+
+Fn.new {|param|
+  f = Fn.new {
+    IO.println(param)
+  }
+}("param")
+
+f() # expect: param

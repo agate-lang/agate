@@ -1,0 +1,2 @@
+# result: compile error
+foreign blah A {} # expect: test:2: Error at 'blah': Expect 'class' after 'foreign'.

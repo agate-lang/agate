@@ -1,0 +1,4 @@
+def list = ["a", "b",]
+
+IO.println(list[0]) # expect: a
+IO.println(list[1]) # expect: b

@@ -1,0 +1,12 @@
+def f = Fn.new {
+  IO.println("evaluate sequence")
+  return [1, 2, 3]
+}
+
+for (i in f()) {
+  IO.println(i)
+}
+# expect: evaluate sequence
+# expect: 1
+# expect: 2
+# expect: 3

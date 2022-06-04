@@ -1,0 +1,3 @@
+# result: compile error
+# expect: test:3: Error: Invalid escape character 'm' (0x6D).
+"not a \m real escape"

@@ -1,0 +1,18 @@
+IO.println(123.0.fractional)    # expect: 0
+IO.println((-123.0).fractional) # expect: -0
+IO.println(0.0.fractional)      # expect: 0
+IO.println((-0.0).fractional)   # expect: -0
+IO.println(0.123.fractional)    # expect: 0.123
+IO.println(12.3.fractional)     # expect: 0.3
+IO.println((-0.123).fractional) # expect: -0.123
+IO.println((-12.3).fractional)  # expect: -0.3
+
+# Using 32-bit representation, a longer mantissa will lead to approximation.
+IO.println((1.23456789012345).fractional)  # expect: 0.23456789012345
+IO.println((-1.23456789012345).fractional)  # expect: -0.23456789012345
+
+IO.println((0.000000000000000000000000000000000000000001).fractional)  # expect: 1e-42
+IO.println((-0.000000000000000000000000000000000000000001).fractional)  # expect: -1e-42
+
+IO.println((1.000000000000000000000000000000000000000001).fractional)  # expect: 0
+IO.println((-1.000000000000000000000000000000000000000001).fractional)  # expect: -0

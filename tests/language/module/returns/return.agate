@@ -1,0 +1,3 @@
+IO.println("foo") # expect: foo
+return
+IO.println("bar")

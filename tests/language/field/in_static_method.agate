@@ -1,0 +1,6 @@
+# result: compile error
+class Foo {
+  static bar {
+    @field = "wat" # expect: test:4: Error at '@field': Cannot use an instance field in a static method.
+  }
+}

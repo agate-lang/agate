@@ -1,0 +1,12 @@
+# Empty body.
+class A { }
+
+# Newline body.
+class B {
+
+}
+
+# Newline after last method.
+class C {
+  method {}
+}

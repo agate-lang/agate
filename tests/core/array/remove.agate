@@ -1,0 +1,18 @@
+def a = [1, 2, 3]
+a.remove(2)
+IO.println(a) # expect: [1, 3]
+
+def b = [1, 2, 3]
+b.remove(1)
+IO.println(b) # expect: [2, 3]
+
+def c = [1, 2, 3]
+c.remove(3)
+IO.println(c) # expect: [1, 2]
+
+# Return the removed value.
+IO.println([3, 4, 5].remove(4)) # expect: 4
+IO.println([3, 4, 5].remove(5)) # expect: 5
+
+# Return nil when not found
+IO.println([1, 2, 3].remove(8)) # expect: nil

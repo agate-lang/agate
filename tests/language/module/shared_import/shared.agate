@@ -1,0 +1,3 @@
+# nontest
+IO.println("shared")
+def Shared = "shared"

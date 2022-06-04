@@ -1,0 +1,5 @@
+IO.println("".count)   # expect: 0
+IO.println("a string") # expect: a string
+
+# Non-ASCII.
+IO.println("A~¶Þॐஃ") # expect: A~¶Þॐஃ

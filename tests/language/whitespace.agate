@@ -1,0 +1,26 @@
+# No indent
+IO.println("ok") # expect: ok
+
+# Indent with space
+  IO.println("ok") # expect: ok
+
+# Indent with tab
+	IO.println("ok") # expect: ok
+
+# Indent with space then tab
+  	IO.println("ok") # expect: ok
+
+# Indent with tab then space
+	  IO.println("ok") # expect: ok
+
+# Indent with mixed tab and space
+  	  	IO.println("ok") # expect: ok
+
+# Space in with code
+IO . println ( "ok" ) # expect: ok
+
+# Tab in with code
+IO	.	println	(	"ok"	) # expect: ok
+
+# Tab and space mixed in with code
+IO	 . 	println 	(	 "ok" 	) # expect: ok

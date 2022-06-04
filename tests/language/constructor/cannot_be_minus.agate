@@ -1,0 +1,6 @@
+# result: compile error
+class Foo {
+  construct -(value) { # expect: test:3: Error at '-': Expect constructor name after 'construct'.
+    IO.println("ok")
+  }
+}

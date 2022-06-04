@@ -1,0 +1,9 @@
+def a = "a"
+def b = "b"
+def c = "c"
+
+# Assignment is right-associative.
+a = b = c
+IO.println(a) # expect: c
+IO.println(b) # expect: c
+IO.println(c) # expect: c

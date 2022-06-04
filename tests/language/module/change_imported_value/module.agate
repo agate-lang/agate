@@ -1,0 +1,12 @@
+# nontest
+def Module = "before"
+
+class Other {
+  static change {
+    Module = "after"
+  }
+
+  static show {
+    IO.println(Module)
+  }
+}

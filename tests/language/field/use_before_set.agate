@@ -1,0 +1,10 @@
+class Foo {
+  construct new() {}
+  write { IO.println(@field) } # Compile a use of the field...
+  init { @field = "value" }  # ...before an assignment to it.
+}
+
+def foo = Foo.new()
+# But invoke them in the right order.
+foo.init
+foo.write # expect: value

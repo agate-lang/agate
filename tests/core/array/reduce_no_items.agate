@@ -1,0 +1,2 @@
+# result: runtime error
+[].reduce {|a, b| 1 } # expect: Cannot reduce an empty sequence.

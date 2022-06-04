@@ -1,0 +1,9 @@
+# result: runtime error
+class Foo {
+  construct new() {
+    IO.println("ok")
+  }
+}
+
+def foo = Foo.new() # expect: ok
+foo.new() # expect: Foo does not implement 'new()'.

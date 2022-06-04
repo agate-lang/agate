@@ -1,0 +1,3 @@
+IO.println(Math.pow(2.0, 4.0))  # expect: 16
+IO.println(Math.pow(2.0, 10.0)) # expect: 1024
+IO.println(Math.pow(1.0, 0.0))  # expect: 1

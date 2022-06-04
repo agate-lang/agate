@@ -1,0 +1,53 @@
+class Foo {
+  construct new() {}
+
+  +(other) { "infix + %(other)" }
+  -(other) { "infix - %(other)" }
+  *(other) { "infix * %(other)" }
+  /(other) { "infix / %(other)" }
+  %(other) { "infix \% %(other)" }
+  <(other) { "infix < %(other)" }
+  >(other) { "infix > %(other)" }
+  <=(other) { "infix <= %(other)" }
+  >=(other) { "infix >= %(other)" }
+  ==(other) { "infix == %(other)" }
+  !=(other) { "infix != %(other)" }
+  &(other) { "infix & %(other)" }
+  |(other) { "infix | %(other)" }
+  ^(other) { "infix ^ %(other)" }
+  ..(other) { "infix .. %(other)" }
+  ...(other) { "infix ... %(other)" }
+  <<(other) { "infix << %(other)" }
+  >>(other) { "infix >> %(other)" }
+  is(other) { "infix is %(other)" }
+
+  ! { "prefix !" }
+  ~ { "prefix ~" }
+  - { "prefix -" }
+  + { "prefix +" }
+}
+
+def foo = Foo.new()
+IO.println(foo + "a") # expect: infix + a
+IO.println(foo - "a") # expect: infix - a
+IO.println(foo * "a") # expect: infix * a
+IO.println(foo / "a") # expect: infix / a
+IO.println(foo % "a") # expect: infix % a
+IO.println(foo < "a") # expect: infix < a
+IO.println(foo > "a") # expect: infix > a
+IO.println(foo <= "a") # expect: infix <= a
+IO.println(foo >= "a") # expect: infix >= a
+IO.println(foo == "a") # expect: infix == a
+IO.println(foo != "a") # expect: infix != a
+IO.println(foo & "a") # expect: infix & a
+IO.println(foo | "a") # expect: infix | a
+IO.println(foo ^ "a") # expect: infix ^ a
+IO.println(foo .. "a") # expect: infix .. a
+IO.println(foo ... "a") # expect: infix ... a
+IO.println(foo << "a") # expect: infix << a
+IO.println(foo >> "a") # expect: infix >> a
+IO.println(!foo) # expect: prefix !
+IO.println(~foo) # expect: prefix ~
+IO.println(-foo) # expect: prefix -
+IO.println(+foo) # expect: prefix +
+IO.println(foo is "a") # expect: infix is a

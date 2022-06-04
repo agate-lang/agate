@@ -1,0 +1,8 @@
+# nontest
+def Module1 = "from module one"
+def Module2 = "from module two"
+def Module3 = "from module three"
+def Module4 = "from module four"
+def Module5 = "from module five"
+
+IO.println("ran module")

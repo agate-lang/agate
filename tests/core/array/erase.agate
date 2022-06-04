@@ -1,0 +1,27 @@
+def a = [1, 2, 3]
+a.erase(0)
+IO.println(a) # expect: [2, 3]
+
+def b = [1, 2, 3]
+b.erase(1)
+IO.println(b) # expect: [1, 3]
+
+def c = [1, 2, 3]
+c.erase(2)
+IO.println(c) # expect: [1, 2]
+
+# Index backwards from end.
+def d = [1, 2, 3]
+d.erase(-3)
+IO.println(d) # expect: [2, 3]
+
+def e = [1, 2, 3]
+e.erase(-2)
+IO.println(e) # expect: [1, 3]
+
+def f = [1, 2, 3]
+f.erase(-1)
+IO.println(f) # expect: [1, 2]
+
+# Return the removed value.
+IO.println([3, 4, 5].erase(1)) # expect: 4

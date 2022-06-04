@@ -1,0 +1,14 @@
+# Evaluate the 'then' expression if the condition is true.
+if (true) {
+  IO.println("good") # expect: good
+}
+if (false) {
+  IO.println("bad")
+}
+
+# Allow block body.
+if (true) { IO.println("block") } # expect: block
+
+# Assignment in if condition.
+def a = false
+if (a = true) { IO.println(a) } # expect: true

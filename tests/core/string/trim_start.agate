@@ -1,0 +1,16 @@
+IO.println("".ltrim() == "") # expect: true
+IO.println("foo".ltrim() == "foo") # expect: true
+IO.println(" \t\r\nfoo b\tar \t\r\n".ltrim() == "foo b\tar \t\r\n") # expect: true
+IO.println(" \t\r\n \t\r\n".ltrim() == "") # expect: true
+IO.println(" \n\n\tsøméஃthîng".ltrim() == "søméஃthîng") # expect: true
+
+IO.println("".ltrim("abc") == "") # expect: true
+IO.println("foo".ltrim("abc") == "foo") # expect: true
+IO.println("foo".ltrim("") == "foo") # expect: true
+IO.println("cbacbfoobarab".ltrim("abc") == "foobarab") # expect: true
+IO.println("abcbacba".ltrim("abc") == "") # expect: true
+IO.println("søméஃthîng".ltrim("ஃmésø") == "thîng") # expect: true
+
+# 8-bit clean.
+IO.println(" \t\ra\0b".ltrim() == "a\0b") # expect: true
+IO.println("\0a\0b\0c\0".ltrim("a\0") == "b\0c\0") # expect: true

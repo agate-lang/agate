@@ -1,0 +1,3 @@
+def words = ""
+["One", "Two", "Three"].each {|word| words = words + word }
+IO.println(words) # expect: OneTwoThree

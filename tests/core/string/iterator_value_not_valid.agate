@@ -1,0 +1,3 @@
+# result: runtime error
+def s = "abçd"
+IO.println(s.iterator_value(3)) # expect: Iterator does not point to a valid character.

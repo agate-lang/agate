@@ -1,0 +1,40 @@
+class A {
+  construct new(arg) {
+    IO.println("new A %(arg)")
+    @field = arg
+  }
+
+  a_field { @field }
+}
+
+class B is A {
+  construct new(arg1, arg2) {
+    super(arg2)
+    IO.println("new B %(arg1)")
+    @field = arg1
+  }
+
+  b_field { @field }
+}
+
+class C is B {
+  construct new() {
+    super("one", "two")
+    IO.println("new C")
+    @field = "c"
+  }
+
+  c_field { @field }
+}
+
+def c = C.new()
+# expect: new A two
+# expect: new B one
+# expect: new C
+IO.println(c is A) # expect: true
+IO.println(c is B) # expect: true
+IO.println(c is C) # expect: true
+
+IO.println(c.a_field) # expect: two
+IO.println(c.b_field) # expect: one
+IO.println(c.c_field) # expect: c

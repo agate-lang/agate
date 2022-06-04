@@ -1,0 +1,2 @@
+# result: compile error
+import "./module" NoString # expect: test:2: Error at 'NoString': Expect newline after declaration.

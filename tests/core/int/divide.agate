@@ -1,0 +1,2 @@
+IO.println(8 / 2) # expect: 4
+IO.println(8 / 3) # expect: 2

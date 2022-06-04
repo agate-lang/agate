@@ -1,0 +1,27 @@
+class Foo {
+  construct new() {}
+
+  set(a, b, c, d, e) {
+    @@a = a
+    @@b = b
+    @@c = c
+    @@d = d
+    @@e = e
+  }
+
+  write() {
+    IO.println(@@a)
+    IO.println(@@b)
+    IO.println(@@c)
+    IO.println(@@d)
+    IO.println(@@e)
+  }
+}
+
+Foo.new().set(1, 2, 3, 4, 5)
+Foo.new().write()
+# expect: 1
+# expect: 2
+# expect: 3
+# expect: 4
+# expect: 5

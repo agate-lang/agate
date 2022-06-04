@@ -1,0 +1,2 @@
+# result: runtime error
+"s".iterate(1.5) # expect: Iterator must be an integer.

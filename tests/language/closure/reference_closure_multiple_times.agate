@@ -1,0 +1,13 @@
+def f = nil
+
+once {
+  def a = "a"
+  f = Fn.new {
+    IO.println(a)
+    IO.println(a)
+  }
+}
+
+f()
+# expect: a
+# expect: a

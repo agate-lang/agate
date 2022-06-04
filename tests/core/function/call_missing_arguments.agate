@@ -1,0 +1,3 @@
+# result: runtime error
+def f2(a, b) { IO.println(a + b) }
+f2("a") # expect: Function expects more arguments.

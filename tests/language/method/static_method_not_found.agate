@@ -1,0 +1,4 @@
+# result: runtime error
+class Foo {}
+
+Foo.bar # expect: Foo metaclass does not implement 'bar'.

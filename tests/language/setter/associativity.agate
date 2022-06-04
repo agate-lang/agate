@@ -1,0 +1,18 @@
+class Foo {
+  construct new(value) { @value = value }
+  toString { @value }
+  bar=(value) {
+    @value = value
+    return value
+  }
+}
+
+def a = Foo.new("a")
+def b = Foo.new("b")
+def c = Foo.new("c")
+
+# Assignment is right-associative.
+a.bar = b.bar = c.bar = "d"
+IO.println(a.toString) # expect: d
+IO.println(b.toString) # expect: d
+IO.println(c.toString) # expect: d

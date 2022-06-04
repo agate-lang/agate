@@ -1,0 +1,2 @@
+# result: compile error
+def false = "value" # expect: test:2: Error at 'false': Expect function or variable name.

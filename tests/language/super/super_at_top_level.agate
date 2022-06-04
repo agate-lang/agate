@@ -1,0 +1,2 @@
+# result: compile error
+super # expect: test:2: Error at 'super': Cannot use 'super' outside a method.

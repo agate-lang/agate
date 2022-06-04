@@ -1,0 +1,3 @@
+# result: compile error
+def Collides
+import "./module" for Collides # expect: test:3: Error at 'Collides': Module variable is already defined.

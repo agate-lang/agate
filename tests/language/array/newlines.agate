@@ -1,0 +1,24 @@
+# Allow after '[' and ',', and before ']'.
+def list = [
+
+"a",
+"b"
+
+]
+
+IO.println(list[0]) # expect: a
+IO.println(list[1]) # expect: b
+
+# Newline after trailing comma.
+list = ["c",
+
+]
+
+IO.println(list[0]) # expect: c
+
+# Newline in empty list.
+list = [
+
+]
+
+IO.println(list.count) # expect: 0

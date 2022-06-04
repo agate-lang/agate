@@ -1,0 +1,3 @@
+# result: compile error
+# Semicolons are not valid separators.
+def a = "ok"; IO.println(a) # expect: test:3: Error: Unexpected character: ';' (0X3B).

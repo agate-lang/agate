@@ -1,0 +1,25 @@
+def f = nil
+def g = nil
+
+once {
+  def local = "local"
+  f = Fn.new {
+    IO.println(local)
+    local = "after f"
+    IO.println(local)
+  }
+
+  g = Fn.new {
+    IO.println(local)
+    local = "after g"
+    IO.println(local)
+  }
+}
+
+f()
+# expect: local
+# expect: after f
+
+g()
+# expect: after f
+# expect: after g

@@ -1,0 +1,13 @@
+def a = ["one", "two", "three", "four"]
+IO.println(a.iterate(nil)) # expect: 0
+IO.println(a.iterate(0)) # expect: 1
+IO.println(a.iterate(1)) # expect: 2
+IO.println(a.iterate(2)) # expect: 3
+IO.println(a.iterate(3)) # expect: nil
+
+# Out of bounds.
+IO.println(a.iterate(123)) # expect: nil
+IO.println(a.iterate(-1)) # expect: nil
+
+# Nothing to iterate in an empty list.
+IO.println([].iterate(nil)) # expect: nil

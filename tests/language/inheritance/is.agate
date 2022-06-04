@@ -1,0 +1,22 @@
+class A {
+  construct new() {}
+}
+class B is A {
+  construct new() {}
+}
+class C is B {
+  construct new() {}
+}
+def a = A.new()
+def b = B.new()
+def c = C.new()
+
+IO.println(a is A) # expect: true
+IO.println(a is B) # expect: false
+IO.println(a is C) # expect: false
+IO.println(b is A) # expect: true
+IO.println(b is B) # expect: true
+IO.println(b is C) # expect: false
+IO.println(c is A) # expect: true
+IO.println(c is B) # expect: true
+IO.println(c is C) # expect: true

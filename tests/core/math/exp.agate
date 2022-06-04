@@ -1,0 +1,3 @@
+IO.println(Math.exp(5.0))  # expect: 148.41315910258
+IO.println(Math.exp(10.0)) # expect: 22026.465794807
+IO.println(Math.exp(-1.0)) # expect: 0.36787944117144

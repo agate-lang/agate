@@ -1,0 +1,8 @@
+# result: runtime error
+class Foo {
+  static method_on_foo { IO.println("foo") }
+}
+
+class Bar is Foo {}
+
+Bar.method_on_foo # expect: Bar metaclass does not implement 'method_on_foo'.

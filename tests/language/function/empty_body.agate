@@ -1,0 +1,5 @@
+def f0 = Fn.new { }
+IO.println(f0()) # expect: nil
+
+def f1() { }
+IO.println(f1()) # expect: nil

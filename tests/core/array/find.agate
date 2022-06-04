@@ -1,0 +1,8 @@
+
+def list = [0, 1, 2, 3, 4]
+IO.println(list.find(4))   # expect: 4
+IO.println(list.find(2))   # expect: 2
+IO.println(list.find(3))   # expect: 3
+IO.println(list.find(0))   # expect: 0
+IO.println(list.find(100)) # expect: -1
+IO.println(list.find(-1))  # expect: -1

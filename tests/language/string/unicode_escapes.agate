@@ -1,0 +1,24 @@
+# One byte UTF-8 Sequences.
+IO.println("\u0041")     # expect: A
+IO.println("\u007e")     # expect: ~
+
+# Two byte sequences.
+IO.println("\u00b6")     # expect: ¶
+IO.println("\u00de")     # expect: Þ
+
+# Three byte sequences.
+IO.println("\u0950")     # expect: ॐ
+IO.println("\u0b83")     # expect: ஃ
+
+# Capitalized hex.
+IO.println("\u00B6")     # expect: ¶
+IO.println("\u00DE")     # expect: Þ
+
+# Big escapes:
+def smile = "\U0001F603"
+def byteSmile = "\xf0\x9f\x98\x83"
+IO.println(byteSmile == smile) # expect: true
+
+IO.println("<\U0001F64A>")       # expect: <🙊>
+IO.println("<\U0001F680>")       # expect: <🚀>
+IO.println("<\U00010318>")       # expect: <𐌘>

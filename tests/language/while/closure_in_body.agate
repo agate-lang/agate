@@ -1,0 +1,15 @@
+def list = []
+
+def i = 1
+while (i < 4) {
+  def j = i + 1
+  list.append(Fn.new { IO.println(j) })
+  i = i + 1
+}
+
+for (f in list) {
+  f()
+}
+# expect: 2
+# expect: 3
+# expect: 4

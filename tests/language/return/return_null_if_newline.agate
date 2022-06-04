@@ -1,0 +1,6 @@
+def f = Fn.new {
+  return
+  IO.println("bad")
+}
+
+IO.println(f()) # expect: nil

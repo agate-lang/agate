@@ -1,0 +1,21 @@
+def f = nil
+
+Fn.new {
+  def a = "a"
+  Fn.new {
+    def b = "b"
+    Fn.new {
+      def c = "c"
+      f = Fn.new {
+        IO.println(a)
+        IO.println(b)
+        IO.println(c)
+      }
+    }()
+  }()
+}()
+
+f()
+# expect: a
+# expect: b
+# expect: c

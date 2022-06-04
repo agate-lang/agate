@@ -1,0 +1,2 @@
+# result: runtime error
+def result = {}.contains([]) # expect: Array does not implement 'hash'.

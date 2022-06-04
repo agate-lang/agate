@@ -1,0 +1,19 @@
+def colors = " .-:;+=xX$& ".to_b
+for (screen_y in 0...24) {
+  def y = screen_y.to_f / 12.0 - 1.0
+  for (screen_x in 0...80) {
+    def x = screen_x.to_f / 30.0 - 2.0
+    def x0 = x
+    def y0 = y
+    def iter = 0
+    while (iter < colors.count - 1 && x0 * x0 + y0 * y0 <= 4.0) {
+      def x1 = (x0 * x0) - (y0 * y0) + x
+      def y1 = 2.0 * x0 * y0 + y
+      x0 = x1
+      y0 = y1
+      iter = iter + 1
+    }
+    IO.print(colors[iter])
+  }
+  IO.println()
+}

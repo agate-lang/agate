@@ -1,0 +1,28 @@
+IO.println("".contains(""))              # expect: true
+IO.println("anything".contains(""))      # expect: true
+IO.println("something".contains("meth")) # expect: true
+IO.println("something".contains("some")) # expect: true
+IO.println("something".contains("ing"))  # expect: true
+IO.println("something".contains("math")) # expect: false
+
+IO.println("something".contains('s')) # expect: true
+IO.println("something".contains('g')) # expect: true
+IO.println("something".contains('a')) # expect: false
+
+# Non-ASCII.
+IO.println("søméthîng".contains("méth"))  # expect: true
+IO.println("søméthîng".contains("meth")) # expect: false
+
+IO.println("søméthîng".contains('é')) # expect: true
+IO.println("søméthîng".contains('ê')) # expect: false
+
+# 8-bit clean.
+IO.println("a\0b\0c".contains("\0")) # expect: true
+IO.println("a\0b\0c".contains("b")) # expect: true
+IO.println("a\0b\0c".contains("b\0c")) # expect: true
+IO.println("a\0b\0c".contains("bc")) # expect: false
+
+IO.println("a\0b\0c".contains('\0')) # expect: true
+IO.println("a\0b\0c".contains('b')) # expect: true
+IO.println("a\0b\0c".contains('d')) # expect: false
+

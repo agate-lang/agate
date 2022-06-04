@@ -1,0 +1,8 @@
+# result: compile error
+def done = false
+while (!done) {
+  Fn.new {
+    break # expect: test:5: Error at 'break': Cannot use 'break' outside of a loop.
+  }
+  done = true
+}

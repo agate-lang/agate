@@ -1,0 +1,3 @@
+# result: compile error
+
+assert(nil is Nil) # expect: test:3: Error at ')': Expect ',' after condition.

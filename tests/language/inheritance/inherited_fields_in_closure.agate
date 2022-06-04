@@ -1,0 +1,36 @@
+class Foo {
+  construct new() { @field = "Foo field" }
+
+  close_over_foo_get {
+    return Fn.new { Fn.new { @field } }
+  }
+
+  close_over_foo_set {
+    return Fn.new { Fn.new { @field = "new foo value" } }
+  }
+}
+
+class Bar is Foo {
+  construct new() {
+    super()
+    @field = "Bar field"
+  }
+
+  close_over_bar_get {
+    return Fn.new { Fn.new { @field } }
+  }
+
+  close_over_bar_set {
+    return Fn.new { Fn.new { @field = "new bar value" } }
+  }
+}
+
+def bar = Bar.new()
+IO.println((bar.close_over_foo_get)()()) # expect: Foo field
+IO.println((bar.close_over_bar_get)()()) # expect: Bar field
+(bar.close_over_foo_set)()()
+IO.println((bar.close_over_foo_get)()()) # expect: new foo value
+IO.println((bar.close_over_bar_get)()()) # expect: Bar field
+(bar.close_over_bar_set)()()
+IO.println((bar.close_over_foo_get)()()) # expect: new foo value
+IO.println((bar.close_over_bar_get)()()) # expect: new bar value

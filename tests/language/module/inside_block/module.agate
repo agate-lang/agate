@@ -1,0 +1,3 @@
+# nontest
+def Module = "from module"
+IO.println("ran module")

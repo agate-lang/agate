@@ -1,0 +1,3 @@
+# result: compile error
+Fn.new { IO.println("ok") # expect: test:2: Error at newline: Expect '}' after single line block.
+}()

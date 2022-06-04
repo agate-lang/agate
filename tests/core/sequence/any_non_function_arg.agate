@@ -1,0 +1,2 @@
+# result: runtime error
+[1, 2, 3].any("string") # expect: Can only call functions.

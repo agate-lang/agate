@@ -1,0 +1,2 @@
+# result: runtime error
+"foo".contains(1) # expect: Argument must be a character or a string.

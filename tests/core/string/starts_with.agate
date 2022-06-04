@@ -1,0 +1,14 @@
+IO.println("abcd".starts_with("cd")) # expect: false
+IO.println("abcd".starts_with("a")) # expect: true
+IO.println("abcd".starts_with("abcd")) # expect: true
+IO.println("abcd".starts_with("abcde")) # expect: false
+IO.println("abcd".starts_with("")) # expect: true
+
+# Non-ASCII.
+IO.println("søméthîng".starts_with("sømé"))  # expect: true
+IO.println("søméthîng".starts_with("some")) # expect: false
+
+# 8-bit clean.
+IO.println("a\0b\0c".starts_with("a"))  # expect: true
+IO.println("a\0b\0c".starts_with("a\0"))  # expect: true
+IO.println("a\0b\0c".starts_with("b\0"))  # expect: false

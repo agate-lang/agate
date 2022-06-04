@@ -1,0 +1,2 @@
+IO.println({}.empty) # expect: true
+IO.println({1: 1}.empty) # expect: false

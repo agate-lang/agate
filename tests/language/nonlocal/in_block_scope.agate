@@ -1,0 +1,8 @@
+def Nonlocal = "outer"
+
+once {
+  def Nonlocal = "inner"
+  IO.println(Nonlocal) # expect: inner
+}
+
+IO.println(Nonlocal) # expect: outer

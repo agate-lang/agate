@@ -1,0 +1,14 @@
+def a = [1, 4, 2, 1, 5]
+def b = ["W", "o", "r", "l", "d"]
+def max(a,b) { a > b ? a : b }
+def sum = Fn.new {|a, b| a + b }
+
+IO.println(a.reduce(max)) # expect: 5
+IO.println(a.reduce(10, max)) # expect: 10
+
+IO.println(a.reduce(sum)) # expect: 13
+IO.println(a.reduce(-1, sum)) # expect: 12
+
+# sum also concatenates strings
+IO.println(b.reduce("Hello ", sum)) # expect: Hello World
+IO.println(b.reduce(sum)) # expect: World

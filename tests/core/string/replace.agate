@@ -1,0 +1,17 @@
+IO.println("something".replace("some", "no")) # expect: nothing
+IO.println("something".replace("thing", "one")) # expect: someone
+IO.println("something".replace("ometh", "umm"))  # expect: summing
+IO.println("something".replace("math", "ton")) # expect: something
+
+# Multiple.
+IO.println("somethingsomething".replace("some", "no")) # expect: nothingnothing
+IO.println("abc abc abc".replace(" ", "")) # expect: abcabcabc
+IO.println("abcabcabc".replace("abc", "")) # expect: 
+
+# Non-ASCII.
+IO.println("søméthîng".replace("sømé", "nø"))  # expect: nøthîng
+IO.println("søméthîng".replace("meth", "ton")) # expect: søméthîng
+
+# 8-bit clean.
+IO.println("a\0b\0c".replace("\0", "")) # expect: abc
+IO.println("a\0b\0c".replace("b", "") == "a\0\0c") # expect: true

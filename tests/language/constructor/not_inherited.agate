@@ -1,0 +1,8 @@
+# result: runtime error
+class Foo {
+  construct base() { }
+}
+
+class Bar is Foo { }
+
+Bar.base() # expect: Bar metaclass does not implement 'base()'.

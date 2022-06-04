@@ -1,0 +1,4 @@
+IO.println(nil is Nil)      # expect: true
+IO.println(nil is Object)   # expect: true
+IO.println(nil is Bool)     # expect: false
+IO.println(nil.type == Nil) # expect: true

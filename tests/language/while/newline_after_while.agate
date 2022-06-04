@@ -1,0 +1,3 @@
+# result: compile error
+while # expect: test:2: Error at newline: Expect '(' after 'while'.
+(true) IO.println("bad")

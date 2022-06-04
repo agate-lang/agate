@@ -1,0 +1,8 @@
+def f
+for (i in [1, 2, 3]) {
+  def j = 4
+  f = Fn.new { IO.println(i + j) }
+  break
+}
+
+f() # expect: 5

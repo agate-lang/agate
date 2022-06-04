@@ -1,0 +1,2 @@
+# result: compile error
+IO.println(not_defined)  # expect: test:2: Error at 'not_defined': Variable 'not_defined' is used but not defined.

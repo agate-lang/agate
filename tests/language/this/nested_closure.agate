@@ -1,0 +1,8 @@
+class Foo {
+  construct new() {}
+  closure { Fn.new { Fn.new { Fn.new { .to_s } } } }
+  to_s { "Foo" }
+}
+
+def closure = Foo.new().closure
+IO.println(closure()()()) # expect: Foo

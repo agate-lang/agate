@@ -1,0 +1,26 @@
+# False and nil are false.
+while (false) {
+  IO.println("bad")
+  break
+}
+
+while (nil) {
+  IO.println("bad")
+  break
+}
+
+# Everything else is true.
+while (true) {
+  IO.println("true") # expect: true
+  break
+}
+
+while (0) {
+  IO.println(0) # expect: 0
+  break
+}
+
+while ("") {
+  IO.println("string") # expect: string
+  break
+}

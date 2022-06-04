@@ -1,0 +1,3 @@
+# result: runtime error
+def list = [0, 1, 2, 3, 4]
+list.swap(8, 0) # expect: Index 0 out of bounds.

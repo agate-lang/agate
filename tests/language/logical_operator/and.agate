@@ -1,0 +1,16 @@
+# Note: These tests implicitly depend on ints being truthy.
+#       Also rely on IO.println() returning its argument.
+
+# Return the first non-true argument.
+IO.println(false && 1) # expect: false
+IO.println(true && 1) # expect: 1
+IO.println(1 && 2 && false) # expect: false
+
+# Return the last argument if all are true.
+IO.println(1 && true) # expect: true
+IO.println(1 && 2 && 3) # expect: 3
+
+# Short-circuit at the first false argument.
+IO.println(true) && IO.println(false) && IO.println(false)
+# expect: true
+# expect: false

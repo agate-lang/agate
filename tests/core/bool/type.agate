@@ -1,0 +1,4 @@
+IO.println(true is Bool)      # expect: true
+IO.println(true is Object)    # expect: true
+IO.println(true is Int)       # expect: false
+IO.println(true.type == Bool) # expect: true

@@ -1,0 +1,8 @@
+class Foo {
+  static name {
+    IO.println("Foo.name") # expect: Foo.name
+    IO.println(super)      # expect: Foo
+  }
+}
+
+Foo.name

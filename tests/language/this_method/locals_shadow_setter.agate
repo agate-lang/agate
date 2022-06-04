@@ -1,0 +1,22 @@
+class Foo {
+  construct new() {}
+
+  bar=(value) {
+    IO.println("setter")
+    return value
+  }
+
+  test {
+    .bar = "value" # expect: setter
+
+    once {
+      .bar = "value" # expect: setter
+      def bar = "local"
+      bar = "value" # no expectation
+    }
+
+    .bar = "value" # expect: setter
+  }
+}
+
+Foo.new().test

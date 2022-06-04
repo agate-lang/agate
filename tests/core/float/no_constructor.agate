@@ -1,0 +1,2 @@
+# result: runtime error
+Float.new() # expect: Float metaclass does not implement 'new()'.

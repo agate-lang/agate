@@ -1,0 +1,20 @@
+class A {
+  foo {
+    IO.println("A.foo")
+  }
+}
+
+class B is A {}
+
+class C is B {
+  construct new() {}
+
+  foo {
+    IO.println("C.foo")
+    super.foo
+  }
+}
+
+C.new().foo
+# expect: C.foo
+# expect: A.foo

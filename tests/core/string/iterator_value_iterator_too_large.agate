@@ -1,0 +1,2 @@
+# result: runtime error
+"123".iterator_value(4) # expect: Iterator out of bounds.

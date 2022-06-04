@@ -1,0 +1,3 @@
+IO.println(Int.MAX) # expect: 9223372036854775807
+IO.println(Int.MIN) # expect: -9223372036854775808
+IO.println(Int.LOWEST) # expect: -9223372036854775808

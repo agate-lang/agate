@@ -1,0 +1,2 @@
+def A
+IO.println(A) # expect: nil

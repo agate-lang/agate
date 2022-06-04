@@ -1,0 +1,3 @@
+IO.println(Foo) # expect: nil
+def Foo = "value"
+IO.println(Foo) # expect: value

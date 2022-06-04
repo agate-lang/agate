@@ -1,0 +1,3 @@
+# result: compile error
+def list = ["a"
+, "b"] # expect: test:3: Error at ',': Expect ']' after array elements.

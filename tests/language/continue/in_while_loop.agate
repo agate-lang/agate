@@ -1,0 +1,14 @@
+def i = 0
+while (true) {
+  i = i + 1
+  IO.println(i)
+  if (i <= 2) {
+    continue
+  }
+  IO.println(i)
+  break
+}
+# expect: 1
+# expect: 2
+# expect: 3
+# expect: 3

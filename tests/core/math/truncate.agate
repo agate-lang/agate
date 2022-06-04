@@ -1,0 +1,13 @@
+IO.println(Math.trunc(123.0))  # expect: 123
+IO.println(Math.trunc(-123.0)) # expect: -123
+IO.println(Math.trunc(0.0))    # expect: 0
+IO.println(Math.trunc(-0.0))   # expect: -0
+IO.println(Math.trunc(0.123))  # expect: 0
+IO.println(Math.trunc(12.3))   # expect: 12
+IO.println(Math.trunc(-0.123)) # expect: -0
+IO.println(Math.trunc(-12.3))  # expect: -12
+
+# Using 32-bit representation, values "beyond" those  two will lead to
+# approximation.
+IO.println(Math.trunc(12345678901234.5))   # expect: 12345678901234
+IO.println(Math.trunc(-12345678901234.5))  # expect: -12345678901234

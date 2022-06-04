@@ -1,0 +1,25 @@
+# Ordered range.
+IO.println((2..5).min) # expect: 2
+IO.println((3..3).min) # expect: 3
+IO.println((0..3).min) # expect: 0
+IO.println((-5..3).min) # expect: -5
+IO.println((-5..-2).min) # expect: -5
+
+# Backwards range.
+IO.println((5..2).min) # expect: 2
+IO.println((3..0).min) # expect: 0
+IO.println((3..-5).min) # expect: -5
+IO.println((-2..-5).min) # expect: -5
+
+# Exclusive ordered range.
+IO.println((2...5).min) # expect: 2
+IO.println((3...3).min) # expect: 3
+IO.println((0...3).min) # expect: 0
+IO.println((-5...3).min) # expect: -5
+IO.println((-5...-2).min) # expect: -5
+
+# Exclusive backwards range.
+IO.println((5...2).min) # expect: 2
+IO.println((3...0).min) # expect: 0
+IO.println((3...-5).min) # expect: -5
+IO.println((-2...-5).min) # expect: -5

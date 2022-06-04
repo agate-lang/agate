@@ -1,0 +1,6 @@
+def a = [1, 2, 3]
+def b = a.where {|x| x > 1 }.to_a
+IO.println(b) # expect: [2, 3]
+
+def c = a.where {|x| x > 10 }.to_a
+IO.println(c) # expect: []

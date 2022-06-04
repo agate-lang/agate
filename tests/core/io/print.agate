@@ -1,0 +1,11 @@
+class Foo {
+  construct new() { }
+  to_s { "Foo.to_s" }
+}
+
+# Calls toString on argument.
+IO.println(Foo.new()) # expect: Foo.to_s
+
+# Returns the argument.
+IO.println(IO.println(1) == 1)  # expect: 1
+                                # expect: true

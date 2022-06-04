@@ -1,0 +1,4 @@
+# result: runtime error
+def a = [1, 2, 3]
+
+a.count("string") # expect: Can only call functions.

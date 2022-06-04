@@ -1,0 +1,7 @@
+class Foo {
+  construct new() {}
+  bar { this }
+  baz { "baz" }
+}
+
+IO.println(Foo.new().bar.baz) # expect: baz

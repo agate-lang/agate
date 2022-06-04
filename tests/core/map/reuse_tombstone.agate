@@ -1,0 +1,9 @@
+# Regression test for #373.
+def map = {}
+map[2] = "two"
+map[0] = "zero"
+map.erase(2)
+map[0] = "zero again"
+map.erase(0)
+
+IO.println(map.contains(0)) # expect: false

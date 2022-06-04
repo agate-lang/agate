@@ -1,0 +1,2 @@
+# result: runtime error
+def x = 1.e # expect: Int does not implement 'e'.

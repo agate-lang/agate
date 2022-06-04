@@ -1,0 +1,12 @@
+class Base {
+  to_s { "Base" }
+}
+
+class Derived is Base {
+  construct new() {}
+  closure { Fn.new { super.to_s } }
+  to_s { "Derived" }
+}
+
+def closure = Derived.new().closure
+IO.println(closure()) # expect: Base

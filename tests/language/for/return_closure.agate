@@ -1,0 +1,9 @@
+def f = Fn.new {
+  for (i in [1, 2, 3]) {
+    return Fn.new { IO.println(i) }
+  }
+}
+
+def g = f()
+g()
+# expect: 1

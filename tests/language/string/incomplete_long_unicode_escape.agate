@@ -1,0 +1,3 @@
+# result: compile error
+# expect: test:3: Error: Malformed string.
+"\U01F603"

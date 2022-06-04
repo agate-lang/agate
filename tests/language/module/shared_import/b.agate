@@ -1,0 +1,5 @@
+# nontest
+IO.println("b")
+import "./shared" for Shared
+def B = "b %(Shared)"
+IO.println("b done")

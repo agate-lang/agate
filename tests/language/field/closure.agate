@@ -1,0 +1,16 @@
+class Foo {
+  construct new() { @field = "Foo field" }
+
+  close_over_get {
+    return Fn.new { @field }
+  }
+
+  close_over_set {
+    return Fn.new { @field = "new value" }
+  }
+}
+
+def foo = Foo.new()
+IO.println((foo.close_over_get)()) # expect: Foo field
+(foo.close_over_set)()
+IO.println((foo.close_over_get)()) # expect: new value

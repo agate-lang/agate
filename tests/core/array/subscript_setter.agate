@@ -1,0 +1,23 @@
+# Basic assignment.
+once {
+  def list = [1, 2, 3]
+  list[0] = 5
+  list[1] = 6
+  list[2] = 7
+  IO.println(list) # expect: [5, 6, 7]
+}
+
+# Returns right-hand side.
+once {
+  def list = [1, 2, 3]
+  IO.println(list[1] = 5) # expect: 5
+}
+
+# Negative indices.
+once {
+  def list = [1, 2, 3]
+  list[-1] = 5
+  list[-2] = 6
+  list[-3] = 7
+  IO.println(list) # expect: [7, 6, 5]
+}

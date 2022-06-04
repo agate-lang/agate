@@ -1,0 +1,3 @@
+# result: compile error
+class # expect: test:2: Error at newline: Expect variable name.
+Foo {}

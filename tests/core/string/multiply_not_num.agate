@@ -1,0 +1,2 @@
+# result: runtime error
+"abc" * "not num" # expect: Count must be a non-negative integer.

@@ -1,0 +1,2 @@
+# result: compile error
+def map = {1: 2 # expect: test:3: Error at end of file: Expect '}' after map members.

@@ -1,0 +1,4 @@
+# result: runtime error
+# Should execute the module:
+# expect: ran module
+import "module" for DoesNotExist # expect: Could not find an object named 'DoesNotExist' in module 'module'.

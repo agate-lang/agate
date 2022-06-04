@@ -1,0 +1,2 @@
+# result: compile error
+import for NoString # expect: test:2: Error at 'for': Expect a string after 'import'.

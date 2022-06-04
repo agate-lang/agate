@@ -1,0 +1,2 @@
+IO.println(!"s") # expect: false
+IO.println(!"") # expect: false

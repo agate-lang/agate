@@ -1,0 +1,39 @@
+# An empty string is anywhere you look for it.
+IO.println("abcd".find("", 0)) # expect: 0
+IO.println("abcd".find("", 1)) # expect: 1
+IO.println("abcd".find("", 2)) # expect: 2
+
+# Overlapping results.
+IO.println("aaaaa".find("aaaa", 0)) # expect: 0
+IO.println("aaaaa".find("aaaa", 1)) # expect: 1
+IO.println("aaaaa".find("aaaa", 2)) # expect: -1
+
+# It's OK if the needle extends past the end.
+IO.println("abcd".find("abcde", 0)) # expect: -1
+IO.println("abcd".find("cde", 3)) # expect: -1
+
+IO.println("abcd".find("cd", 0)) # expect: 2
+IO.println("abcd".find("cd", 1)) # expect: 2
+IO.println("abcd".find("cd", 2)) # expect: 2
+IO.println("abcd".find("cd", 3)) # expect: -1
+
+# Negative start.
+IO.println("abcd".find("cd", -4)) # expect: 2
+IO.println("abcd".find("cd", -3)) # expect: 2
+IO.println("abcd".find("cd", -2)) # expect: 2
+IO.println("abcd".find("cd", -1)) # expect: -1
+
+# Skips past earlier results.
+IO.println("here as well as here".find("here", 1)) # expect: 16
+
+# Non-ASCII. Note that it returns byte indices, not code points.
+IO.println("søméஃthîng".find("e", 2)) # expect: -1
+IO.println("søméஃthîng".find("m", 2)) # expect: 3
+IO.println("søméஃthîng".find("thî", 8)) # expect: 9
+
+# 8-bit clean.
+IO.println("a\0b\0c".find("\0", 0)) # expect: 1
+IO.println("a\0b\0c".find("a", 0)) # expect: 0
+IO.println("a\0b\0c".find("b\0c", 1)) # expect: 2
+IO.println("a\0b\0c".find("a\0b\0c\0d", 0)) # expect: -1
+IO.println("a\0b\0a\0b".find("a\0b", 0)) # expect: 0

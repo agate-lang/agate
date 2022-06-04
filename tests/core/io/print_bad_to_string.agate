@@ -1,0 +1,6 @@
+class BadToString {
+  construct new() {}
+  to_s { 3 }
+}
+
+IO.println(BadToString.new()) # expect: [invalid to_s]

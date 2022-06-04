@@ -1,0 +1,7 @@
+# nontest
+def Module = "from module"
+IO.println("ran module")
+
+def ValueA = "module A"
+def ValueB = "module B"
+def ValueC = "module C"

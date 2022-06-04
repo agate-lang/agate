@@ -1,0 +1,4 @@
+IO.println("a" + "b") # expect: ab
+
+# 8-bit clean.
+IO.println(("a\0b" + "\0c") == "a\0b\0c")  # expect: true

@@ -1,0 +1,17 @@
+def a = 2..5
+def b = 2..6
+def c = 2...5
+def d = 2...6
+
+IO.println(a == 2..5) # expect: true
+IO.println(a == 2..6) # expect: false
+IO.println(c == 2...5) # expect: true
+IO.println(c == 2...6) # expect: false
+
+IO.println(b != 2..5) # expect: true
+IO.println(b != 2..6) # expect: false
+IO.println(d != 2...5) # expect: true
+IO.println(d != 2...6) # expect: false
+
+IO.println(a != c) # expect: true
+IO.println(b != d) # expect: true

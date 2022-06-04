@@ -1,0 +1,2 @@
+# result: runtime error
+"abracadabra".rtrim(123) # expect: Characters must be a string.

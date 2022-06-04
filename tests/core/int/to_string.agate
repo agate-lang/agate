@@ -1,0 +1,3 @@
+IO.println(123.to_s == "123") # expect: true
+IO.println((-123).to_s == "-123") # expect: true
+IO.println((-0).to_s == "0") # expect: true

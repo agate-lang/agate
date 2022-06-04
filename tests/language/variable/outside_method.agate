@@ -1,0 +1,20 @@
+def foo = "variable"
+
+class Foo {
+  construct new() {}
+
+  foo { "method" }
+
+  method {
+    IO.println(.foo)
+  }
+
+  static foo { "class method" }
+
+  static class_method {
+    IO.println(.foo)
+  }
+}
+
+Foo.new().method # expect: method
+Foo.class_method  # expect: class method

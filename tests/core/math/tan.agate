@@ -1,0 +1,3 @@
+IO.println(Math.tan(0.0))             # expect: 0
+IO.println(Math.tan(Math.PI / 4.0))   # expect: 1
+IO.println(Math.tan(-Math.PI / 4.0))  # expect: -1

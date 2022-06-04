@@ -1,0 +1,5 @@
+# result: compile error
+once {
+  def a = a + 1 # expect: test:3: Error at 'a': Variable 'a' is used but not defined.
+  IO.println(a)
+}

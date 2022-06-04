@@ -1,0 +1,16 @@
+IO.println("something".split('t')) # expect: [some, hing]
+IO.println("something".split('s')) # expect: [, omething]
+IO.println("something".split('g'))  # expect: [somethin, ]
+IO.println("something".split('x')) # expect: [something]
+
+# Multiple.
+IO.println("somethingsomething".split('t')) # expect: [some, hingsome, hing]
+IO.println("abc abc abc".split(' ')) # expect: [abc, abc, abc]
+IO.println("aaa".split('a')) # expect: [, , , ]
+
+# Non-ASCII.
+IO.println("søméthîng".split('é'))  # expect: [søm, thîng]
+IO.println("søméthîng".split('e')) # expect: [søméthîng]
+
+# 8-bit clean.
+IO.println("a\0b\0c".split('\0')) # expect: [a, b, c]

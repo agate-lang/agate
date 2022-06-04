@@ -1,0 +1,3 @@
+# result: compile error
+Fn.new {
+  IO.println("ok") } # expect: test:3: Error at '}': Expect newline after declaration.

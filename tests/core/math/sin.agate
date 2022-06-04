@@ -1,0 +1,6 @@
+IO.println(Math.sin(0.0))           # expect: 0
+IO.println(Math.sin(Math.PI / 2.0)) # expect: 1
+
+# these should of course be 0, but it's not that precise
+IO.println(Math.abs(Math.sin(Math.PI)) < Float.EPSILON)        # expect: true
+IO.println(Math.abs(Math.sin(2.0 * Math.PI)) < 10.0 * Float.EPSILON)  # expect: true

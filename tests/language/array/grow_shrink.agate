@@ -1,0 +1,11 @@
+# This mostly tests that lists handle growing and shrinking their memory.
+def list = []
+for (i in 0..200) {
+  list.append(i)
+}
+
+for (i in 0..195) {
+  list.erase(-1)
+}
+
+IO.println(list) # expect: [0, 1, 2, 3, 4]

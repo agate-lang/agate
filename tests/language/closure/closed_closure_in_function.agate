@@ -1,0 +1,10 @@
+def f = nil
+
+once {
+  def local = "local"
+  f = Fn.new {
+    IO.println(local)
+  }
+}
+
+f() # expect: local

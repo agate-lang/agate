@@ -1,0 +1,2 @@
+# result: runtime error
+IO.println_all(123) # expect: Int does not implement 'iterate(_)'.

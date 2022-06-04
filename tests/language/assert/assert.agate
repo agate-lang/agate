@@ -1,0 +1,6 @@
+def f(a) {
+  assert(a is Int, "a should be an Int")
+  IO.println("a: %(a)")
+}
+
+f(3) # expect: a: 3

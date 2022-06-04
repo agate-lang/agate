@@ -1,0 +1,4 @@
+once {
+  def a
+  IO.println(a) # expect: nil
+}

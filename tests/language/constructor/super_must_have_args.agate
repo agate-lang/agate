@@ -1,0 +1,8 @@
+# result: compile error
+class A {}
+
+class B is A {
+  construct new() {
+    super # expect: test:6: Error at 'super': A superclass constructor must have an argument list.
+  }
+}

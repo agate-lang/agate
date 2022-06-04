@@ -1,0 +1,3 @@
+# result: compile error
+" %(
+# expect: test:2: Error at '" %(': Expected expression.

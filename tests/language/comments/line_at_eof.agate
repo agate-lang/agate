@@ -1,0 +1,2 @@
+IO.println("ok") # expect: ok
+# comment

@@ -1,0 +1,24 @@
+IO.println("abcd".find("")) # expect: 0
+IO.println("abcd".find("cd")) # expect: 2
+IO.println("abcd".find("a")) # expect: 0
+IO.println("abcd".find("abcd")) # expect: 0
+IO.println("abcd".find("abcde")) # expect: -1
+IO.println("abab".find("ab")) # expect: 0
+
+# More complex cases.
+IO.println("abcdefabcdefg".find("defg")) # expect: 9
+IO.println("abcdabcdabcd".find("dab")) # expect: 3
+IO.println("abcdabcdabcdabcd".find("dabcdabc")) # expect: 3
+IO.println("abcdefg".find("abcdef!")) # expect: -1
+
+# Non-ASCII. Note that it returns byte indices, not code points.
+IO.println("søméஃthîng".find("e")) # expect: -1
+IO.println("søméஃthîng".find("m")) # expect: 3
+IO.println("søméஃthîng".find("thî")) # expect: 9
+
+# 8-bit clean.
+IO.println("a\0b\0c".find("\0")) # expect: 1
+IO.println("a\0b\0c".find("a")) # expect: 0
+IO.println("a\0b\0c".find("b\0c")) # expect: 2
+IO.println("a\0b\0c".find("a\0b\0c\0d")) # expect: -1
+IO.println("a\0b\0a\0b".find("a\0b")) # expect: 0

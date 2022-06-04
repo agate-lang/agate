@@ -1,0 +1,3 @@
+# result: runtime error
+"abcd".find("bc", "not num") # expect: Start must be an integer.
+IO.println("after")

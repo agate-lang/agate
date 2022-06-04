@@ -1,0 +1,2 @@
+# result: runtime error
+def result = {}.erase([]) # expect: Array does not implement 'hash'.

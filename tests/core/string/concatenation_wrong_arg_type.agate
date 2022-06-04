@@ -1,0 +1,2 @@
+# result: runtime error
+IO.println("a" + 123) # expect: Right operand must be a string.

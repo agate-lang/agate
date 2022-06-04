@@ -1,0 +1,51 @@
+class Outer {
+  construct new() {}
+
+  getter {
+    IO.println("outer getter")
+  }
+
+  setter=(value) {
+    IO.println("outer setter")
+  }
+
+  method(a) {
+    IO.println("outer method")
+  }
+
+  test {
+    .getter            # expect: outer getter
+    .setter = "value"  # expect: outer setter
+    .method("arg")     # expect: outer method
+
+    class Inner {
+      construct new() {}
+
+      getter {
+        IO.println("inner getter")
+      }
+
+      setter=(value) {
+        IO.println("inner setter")
+      }
+
+      method(a) {
+        IO.println("inner method")
+      }
+
+      test {
+        .getter            # expect: inner getter
+        .setter = "value"  # expect: inner setter
+        .method("arg")     # expect: inner method
+      }
+    }
+
+    Inner.new().test
+
+    .getter            # expect: outer getter
+    .setter = "value"  # expect: outer setter
+    .method("arg")     # expect: outer method
+  }
+}
+
+Outer.new().test

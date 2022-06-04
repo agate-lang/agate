@@ -1,0 +1,5 @@
+IO.println(123.0.is_infinity)           # expect: false
+IO.println((0.0/0.0).is_infinity)       # expect: false
+IO.println((1.0/0.0).is_infinity)       # expect: true
+IO.println((-10.0/0.0).is_infinity)     # expect: true
+IO.println(Float.INFINITY.is_infinity)  # expect: true

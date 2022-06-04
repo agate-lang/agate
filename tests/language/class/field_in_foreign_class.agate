@@ -1,0 +1,10 @@
+# result: compile error
+foreign class Foo {
+  bar {
+    # Can't read a field.
+    IO.println(@bar) # expect: test:5: Error at '@bar': Cannot define fields in a foreign class.
+
+    # Or write one.
+    @bar = "value" # expect error
+  }
+}

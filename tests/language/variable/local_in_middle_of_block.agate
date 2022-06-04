@@ -1,0 +1,16 @@
+class Foo {
+  construct new() {}
+
+  bar {
+    def a = "a"
+    IO.println(a) # expect: a
+    def b = a + " b"
+    IO.println(b) # expect: a b
+    def c = a + " c"
+    IO.println(c) # expect: a c
+    def d = b + " d"
+    IO.println(d) # expect: a b d
+  }
+}
+
+Foo.new().bar

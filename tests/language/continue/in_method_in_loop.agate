@@ -1,0 +1,10 @@
+# result: compile error
+def done = false
+while (!done) {
+  class Foo {
+    method {
+      continue # expect: test:6: Error at 'continue': Cannot use 'continue' outside of a loop.
+    }
+  }
+  done = true
+}

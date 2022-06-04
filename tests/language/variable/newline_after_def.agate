@@ -1,0 +1,3 @@
+# result: compile error
+def # expect: test:2: Error at newline: Expect function or variable name.
+foo = 123

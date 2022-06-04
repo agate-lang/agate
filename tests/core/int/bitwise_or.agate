@@ -1,0 +1,10 @@
+IO.println(0 | 0) # expect: 0
+IO.println(0xAAAAAAAA | 0x55555555) # expect: 4294967295
+IO.println(0xCCCCCCCC | 0x66666666) # expect: 4008636142
+
+# Max u32 value.
+IO.println(0xFFFFFFFF | 0xFFFFFFFF) # expect: 4294967295
+
+# TODO: Negative numbers.
+# TODO: Floating-point numbers.
+# TODO: Numbers that don't fit in u32.

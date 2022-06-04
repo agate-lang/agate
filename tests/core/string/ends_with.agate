@@ -1,0 +1,15 @@
+IO.println("abcd".ends_with("cd")) # expect: true
+IO.println("abcd".ends_with("abcde")) # expect: false
+IO.println("abcd".ends_with("abcd")) # expect: true
+IO.println("abcd".ends_with("f")) # expect: false
+IO.println("abcd".ends_with("")) # expect: true
+
+# Non-ASCII.
+IO.println("søméthîng".ends_with("thîng"))  # expect: true
+IO.println("søméthîng".ends_with("thing")) # expect: false
+
+# 8-bit clean.
+IO.println("a\0b\0c".ends_with("\0"))  # expect: false
+IO.println("a\0b\0c".ends_with("c"))  # expect: true
+IO.println("a\0b\0c".ends_with("\0c"))  # expect: true
+IO.println("a\0b\0c".ends_with("\0b"))  # expect: false

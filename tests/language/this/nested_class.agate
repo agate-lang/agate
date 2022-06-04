@@ -1,0 +1,26 @@
+class Outer {
+  construct new() {}
+
+  method {
+    IO.println(this) # expect: Outer
+
+    Fn.new {
+      IO.println(this) # expect: Outer
+
+      class Inner {
+        construct new() {}
+
+        method {
+          IO.println(this) # expect: Inner
+        }
+        to_s { "Inner" }
+      }
+
+      Inner.new().method
+    }()
+  }
+
+  to_s { "Outer" }
+}
+
+Outer.new().method

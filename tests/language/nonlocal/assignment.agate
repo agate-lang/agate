@@ -1,0 +1,18 @@
+def Nonlocal = "before"
+IO.println(Nonlocal) # expect: before
+Nonlocal = "after"
+IO.println(Nonlocal) # expect: after
+
+class Foo {
+  static method {
+    Nonlocal = "method"
+  }
+}
+
+Foo.method
+IO.println(Nonlocal) # expect: method
+
+Fn.new {
+  Nonlocal = "fn"
+}()
+IO.println(Nonlocal) # expect: fn

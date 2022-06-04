@@ -1,0 +1,2 @@
+# result: runtime error
+[1, 2, 3].take(-1) # expect: Count must be a non-negative integer.

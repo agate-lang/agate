@@ -1,0 +1,11 @@
+def map = {
+  "one": 1,
+  "two": 2,
+  "three": 3
+}
+
+IO.println(map.contains("one")) # expect: true
+IO.println(map.contains("two")) # expect: true
+IO.println(map.contains("three")) # expect: true
+IO.println(map.contains("four")) # expect: false
+IO.println(map.contains("five")) # expect: false

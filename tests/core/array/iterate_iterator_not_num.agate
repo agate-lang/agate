@@ -1,0 +1,3 @@
+# result: runtime error
+def a = [1, 2, 3]
+a.iterate("2") # expect: Iterator must be an integer.

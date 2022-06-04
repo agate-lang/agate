@@ -1,0 +1,17 @@
+once {
+  def f = nil
+
+  once {
+    def a = "a"
+    f = Fn.new { IO.println(a) }
+  }
+
+  once {
+    # Since a is out of scope, the local slot will be reused by b. Make sure
+    # that f still closes over a.
+    def b = "b"
+    f() # expect: a
+  }
+}
+
+# TODO: Maximum number of closed-over variables (directly and/or indirect).

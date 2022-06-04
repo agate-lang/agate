@@ -1,0 +1,4 @@
+IO.println(Fn.new {}) # expect: <fn>
+
+def f() { }
+IO.println(f) # expect: <fn>

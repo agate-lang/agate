@@ -1,0 +1,22 @@
+class Outer {
+  construct new() {}
+
+  method {
+    @field = "outer"
+    IO.println(@field) # expect: outer
+
+    class Inner {
+      construct new() {}
+
+      method {
+        @field = "inner"
+        IO.println(@field) # expect: inner
+      }
+    }
+
+    Inner.new().method
+    IO.println(@field) # expect: outer
+  }
+}
+
+Outer.new().method

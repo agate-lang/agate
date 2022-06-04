@@ -1,0 +1,27 @@
+def name = "value"
+def array = [ 'a', 'a', 'b' ]
+
+def map = {
+  # Primary.
+  name: name,
+  1: true,
+
+  # Call.
+  name.count: name.count,
+  array[0]: array[1],
+
+  # Unary.
+  -1: -2,
+  ~3: !false,
+
+  # Allow any expression for a value.
+  "key": true ? 1 : 2
+}
+
+IO.println(map[name])       # expect: value
+IO.println(map[1])          # expect: true
+IO.println(map[name.count]) # expect: 5
+IO.println(map[array[0]])    # expect: a
+IO.println(map[-1])         # expect: -2
+IO.println(map[~3])         # expect: true
+IO.println(map["key"])      # expect: 1

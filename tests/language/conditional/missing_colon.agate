@@ -1,0 +1,3 @@
+# result: compile error
+true ? 1 # expect: test:2: Error at newline: Expect ':' in conditional expression.
+"next expression"

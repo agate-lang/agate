@@ -1,0 +1,14 @@
+class Foo {
+}
+
+IO.println(Foo.name) # expect: Foo
+IO.println(Foo.type.name) # expect: Foo metaclass
+
+# Make sure the built-in classes have proper names too.
+IO.println(Object.name) # expect: Object
+IO.println(Bool.name) # expect: Bool
+IO.println(Class.name) # expect: Class
+
+# And metaclass names.
+IO.println(Object.type.name) # expect: Object metaclass
+IO.println(Bool.type.name) # expect: Bool metaclass

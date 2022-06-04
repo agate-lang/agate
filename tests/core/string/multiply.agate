@@ -1,0 +1,3 @@
+IO.println("|" + "abc" * 0 + "|") # expect: ||
+IO.println("abc" * 1) # expect: abc
+IO.println("abc" * 4) # expect: abcabcabcabc

@@ -1,0 +1,4 @@
+def entry = MapEntry.new("key", "value")
+
+IO.println(entry.key)   # expect: key
+IO.println(entry.value) # expect: value

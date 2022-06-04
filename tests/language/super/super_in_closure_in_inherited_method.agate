@@ -1,0 +1,13 @@
+class A {
+  call_super_to_s {
+    return Fn.new { super.to_s }()
+  }
+
+  to_s { "A.to_s" }
+}
+
+class B is A {
+  construct new() {}
+}
+
+IO.println(B.new().call_super_to_s) # expect: instance of B

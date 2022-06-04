@@ -1,0 +1,2 @@
+# result: runtime error
+"abracadabra".trim(123) # expect: Characters must be a string.

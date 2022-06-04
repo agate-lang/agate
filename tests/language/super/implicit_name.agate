@@ -1,0 +1,18 @@
+class Base {
+  foo {
+    IO.println("Base.foo")
+  }
+}
+
+class Derived is Base {
+  construct new() {}
+
+  foo {
+    IO.println("Derived.foo")
+    super
+  }
+}
+
+Derived.new().foo
+# expect: Derived.foo
+# expect: Base.foo

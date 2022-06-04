@@ -1,0 +1,7 @@
+# result: compile error
+class Foo {
+  static # expect: test:3: Error at newline: Expect method definition.
+  method { }
+}
+
+# The second error is cascaded.

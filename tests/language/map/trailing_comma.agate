@@ -1,0 +1,7 @@
+def map = {
+  "a": 1,
+  "b": 2,
+}
+
+IO.println(map["a"]) # expect: 1
+IO.println(map["b"]) # expect: 2

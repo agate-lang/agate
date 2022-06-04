@@ -1,0 +1,6 @@
+class Foo {
+  construct new() {}
+  write { IO.println(@field) }
+}
+
+Foo.new().write # expect: nil

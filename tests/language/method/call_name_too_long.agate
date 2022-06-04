@@ -1,0 +1,5 @@
+# result: compile error
+# Don't want to actually execute it.
+if (false) {
+  0.thisIsAMethodNameThatExceedsTheMaximumNameLengthOf64CharactersBy1 # expect: test:4: Error at 'thisIsAMethodNameThatExceedsTheMaximumNameLengthOf64CharactersBy1': Method names cannot be longer than 64 characters.
+}

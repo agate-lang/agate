@@ -1,0 +1,2 @@
+true ? IO.println("ok") : IO.println("no") # expect: ok
+false ? IO.println("no") : IO.println("ok") # expect: ok

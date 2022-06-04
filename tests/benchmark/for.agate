@@ -1,0 +1,10 @@
+def list = []
+
+def start = System.clock
+for (i in 0...1000000) { list.append(i) }
+
+def sum = 0
+for (i in list) { sum = sum + i }
+
+IO.println(sum)
+IO.println("elapsed: %(System.clock - start)")

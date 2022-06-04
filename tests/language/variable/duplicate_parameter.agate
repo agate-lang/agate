@@ -1,0 +1,6 @@
+# result: compile error
+class Foo {
+  bar(arg, arg) { # expect: test:3: Error at 'arg': Variable is already declared in this scope.
+    "body"
+  }
+}

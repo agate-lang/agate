@@ -1,0 +1,14 @@
+def F = nil
+
+class Foo {
+  construct new() {}
+
+  method(param) {
+    F = Fn.new {
+      IO.println(param)
+    }
+  }
+}
+
+Foo.new().method("param")
+F() # expect: param

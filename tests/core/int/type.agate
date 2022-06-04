@@ -1,0 +1,4 @@
+IO.println(123 is Int)      # expect: true
+IO.println(123 is Object)   # expect: true
+IO.println(123 is String)   # expect: false
+IO.println(123.type == Int) # expect: true

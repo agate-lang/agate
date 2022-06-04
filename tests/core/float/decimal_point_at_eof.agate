@@ -1,0 +1,3 @@
+# result: compile error
+# expect: test:3: Error at newline: Expect method name after '.'.
+123.

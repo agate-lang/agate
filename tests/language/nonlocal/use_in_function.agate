@@ -1,0 +1,5 @@
+def Global = "global"
+
+Fn.new {
+  IO.println(Global) # expect: global
+}()

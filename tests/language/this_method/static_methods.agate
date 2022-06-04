@@ -1,0 +1,21 @@
+class Foo {
+  static getter {
+    IO.println("getter")
+  }
+
+  static setter=(value) {
+    IO.println("setter")
+  }
+
+  static method(a) {
+    IO.println("method")
+  }
+
+  static test {
+    .getter            # expect: getter
+    .setter = "value"  # expect: setter
+    .method("arg")     # expect: method
+  }
+}
+
+Foo.test

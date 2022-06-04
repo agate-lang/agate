@@ -1,0 +1,2 @@
+# result: runtime error
+Math.clamp(1, 0, false) # expect: Right operand must be an integer.

@@ -1,0 +1,14 @@
+# Evaluate the 'else' expression if the condition is false.
+if (true) {
+  IO.println("good")
+} else {
+  IO.println("bad") # expect: good
+}
+if (false) {
+  IO.println("bad")
+} else {
+  IO.println("good") # expect: good
+}
+
+# Allow block body.
+if (false) { nil } else { IO.println("block") } # expect: block

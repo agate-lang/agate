@@ -1,0 +1,13 @@
+def s = "abçd"
+IO.println(s.iterator_value(0)) # expect: a
+IO.println(s.iterator_value(1)) # expect: b
+IO.println(s.iterator_value(2)) # expect: ç
+IO.println(s.iterator_value(4)) # expect: d
+
+# 8-bit clean.
+def t = "a\0b\0c"
+IO.println(t.iterator_value(0) == 'a') # expect: true
+IO.println(t.iterator_value(1) == '\0') # expect: true
+IO.println(t.iterator_value(2) == 'b') # expect: true
+IO.println(t.iterator_value(3) == '\0') # expect: true
+IO.println(t.iterator_value(4) == 'c') # expect: true

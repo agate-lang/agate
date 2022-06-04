@@ -1,0 +1,6 @@
+def a = [1, 2, 3]
+
+IO.println(a.count {|x| x > 3 })      # expect: 0
+IO.println(a.count {|x| x > 1 })      # expect: 2
+
+IO.println([].count {|x| true })      # expect: 0

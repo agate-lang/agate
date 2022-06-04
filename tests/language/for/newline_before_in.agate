@@ -1,0 +1,3 @@
+# result: compile error
+for (i # expect: test:2: Error at newline: Expect 'in' after loop variable.
+  in [1]) IO.println(i)

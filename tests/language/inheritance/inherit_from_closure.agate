@@ -1,0 +1,9 @@
+# result: runtime error
+def ClosureType
+
+once {
+  def a = "a"
+  ClosureType = Fn.new { IO.println(a) }.type
+}
+
+class Subclass is ClosureType {} # expect: Class 'Subclass' cannot inherit from built-in class 'Fn'.

@@ -1,0 +1,7 @@
+once { } # By itself.
+
+# In a statement.
+if (true) { }
+if (false) { } else { }
+
+IO.println("ok") # expect: ok

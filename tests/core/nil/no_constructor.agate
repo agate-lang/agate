@@ -1,0 +1,2 @@
+# result: runtime error
+Nil.new() # expect: Nil metaclass does not implement 'new()'.

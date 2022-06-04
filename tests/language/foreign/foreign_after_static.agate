@@ -1,0 +1,4 @@
+# result: compile error
+class Foo {
+  static foreign method # expect: test:3: Error at 'foreign': Expect method definition.
+}

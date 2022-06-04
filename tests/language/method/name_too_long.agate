@@ -1,0 +1,6 @@
+# result: compile error
+class Foo {
+  thisIsAMethodNameThatExceedsTheMaximumNameLengthOf64CharactersBy1 { # expect: test:3: Error at 'thisIsAMethodNameThatExceedsTheMaximumNameLengthOf64CharactersBy1': Method names cannot be longer than 64 characters.
+    "body"
+  }
+}

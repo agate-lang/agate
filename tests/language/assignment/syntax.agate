@@ -1,0 +1,11 @@
+# Chained assignment.
+def a = "a"
+def b = "b"
+a = b = "chain"
+IO.println(a) # expect: chain
+IO.println(b) # expect: chain
+
+# Assignment on RHS of variable.
+def c = a = "var"
+IO.println(a) # expect: var
+IO.println(c) # expect: var

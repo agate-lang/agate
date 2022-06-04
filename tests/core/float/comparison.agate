@@ -1,0 +1,25 @@
+IO.println(1.0 < 2.0)    # expect: true
+IO.println(2.0 < 2.0)    # expect: false
+IO.println(2.0 < 1.0)    # expect: false
+
+IO.println(1.0 <= 2.0)    # expect: true
+IO.println(2.0 <= 2.0)    # expect: true
+IO.println(2.0 <= 1.0)    # expect: false
+
+IO.println(1.0 > 2.0)    # expect: false
+IO.println(2.0 > 2.0)    # expect: false
+IO.println(2.0 > 1.0)    # expect: true
+
+IO.println(1.0 >= 2.0)    # expect: false
+IO.println(2.0 >= 2.0)    # expect: true
+IO.println(2.0 >= 1.0)    # expect: true
+
+# Zero and negative zero compare the same.
+IO.println(0.0 < -0.0) # expect: false
+IO.println(-0.0 < 0.0) # expect: false
+IO.println(0.0 > -0.0) # expect: false
+IO.println(-0.0 > 0.0) # expect: false
+IO.println(0.0 <= -0.0) # expect: true
+IO.println(-0.0 <= 0.0) # expect: true
+IO.println(0.0 >= -0.0) # expect: true
+IO.println(-0.0 >= 0.0) # expect: true

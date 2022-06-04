@@ -1,0 +1,8 @@
+class Foo {
+  construct new() {}
+  thisHasAMethodNameThatIsExactly64CharactersLongWhichIsTheMaximum {
+    return "result"
+  }
+}
+
+IO.println(Foo.new().thisHasAMethodNameThatIsExactly64CharactersLongWhichIsTheMaximum) # expect: result

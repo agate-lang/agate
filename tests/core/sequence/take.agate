@@ -1,0 +1,29 @@
+class TestSequence is Sequence {
+  construct new() {}
+
+  iterate(iterator) {
+    if (iterator == nil) {
+      return 1
+    }
+    if (iterator == 3) {
+      return false
+    }
+    return iterator + 1
+  }
+
+  iterator_value(iterator) { iterator }
+}
+
+def test = TestSequence.new().take(3)
+
+IO.println(test is Sequence) # expect: true
+IO.println(test) # expect: instance of __TakeSequence
+
+# Taking 0 produces empty list.
+IO.println(test.take(0).empty) # expect: true
+
+# Taking 1 works.
+IO.println(test.take(1).to_a) # expect: [1]
+
+# Taking more than length of sequence produces whole sequence.
+IO.println(test.take(4).to_a) # expect: [1, 2, 3]

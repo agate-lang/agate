@@ -1,0 +1,101 @@
+def f0 = Fn.new { 0 }
+IO.println(f0()) # expect: 0
+
+def f1 = Fn.new {|a| a }
+IO.println(f1(1)) # expect: 1
+
+def f2 = Fn.new {|a, b| a + b }
+IO.println(f2(1, 2)) # expect: 3
+
+def f3 = Fn.new {|a, b, c| a + b + c }
+IO.println(f3(1, 2, 3)) # expect: 6
+
+def f4 = Fn.new {|a, b, c, d| a + b + c + d }
+IO.println(f4(1, 2, 3, 4)) # expect: 10
+
+def f5 = Fn.new {|a, b, c, d, e| a + b + c + d + e }
+IO.println(f5(1, 2, 3, 4, 5)) # expect: 15
+
+def f6 = Fn.new {|a, b, c, d, e, f| a + b + c + d + e + f }
+IO.println(f6(1, 2, 3, 4, 5, 6)) # expect: 21
+
+def f7 = Fn.new {|a, b, c, d, e, f, g| a + b + c + d + e + f + g }
+IO.println(f7(1, 2, 3, 4, 5, 6, 7)) # expect: 28
+
+def f8 = Fn.new {|a, b, c, d, e, f, g, h| a + b + c + d + e + f + g + h }
+IO.println(f8(1, 2, 3, 4, 5, 6, 7, 8)) # expect: 36
+
+def f9 = Fn.new {|a, b, c, d, e, f, g, h, i| a + b + c + d + e + f + g + h + i }
+IO.println(f9(1, 2, 3, 4, 5, 6, 7, 8, 9)) # expect: 45
+
+def f10 = Fn.new {|a, b, c, d, e, f, g, h, i, j| a + b + c + d + e + f + g + h + i + j }
+IO.println(f10(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)) # expect: 55
+
+def f11 = Fn.new {|a, b, c, d, e, f, g, h, i, j, k| a + b + c + d + e + f + g + h + i + j + k }
+IO.println(f11(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11)) # expect: 66
+
+def f12 = Fn.new {|a, b, c, d, e, f, g, h, i, j, k, l| a + b + c + d + e + f + g + h + i + j + k + l }
+IO.println(f12(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12)) # expect: 78
+
+def f13 = Fn.new {|a, b, c, d, e, f, g, h, i, j, k, l, m| a + b + c + d + e + f + g + h + i + j + k + l + m }
+IO.println(f13(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13)) # expect: 91
+
+def f14 = Fn.new {|a, b, c, d, e, f, g, h, i, j, k, l, m, n| a + b + c + d + e + f + g + h + i + j + k + l + m + n }
+IO.println(f14(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14)) # expect: 105
+
+def f15 = Fn.new {|a, b, c, d, e, f, g, h, i, j, k, l, m, n, o| a + b + c + d + e + f + g + h + i + j + k + l + m + n + o }
+IO.println(f15(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15)) # expect: 120
+
+def f16 = Fn.new {|a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p| a + b + c + d + e + f + g + h + i + j + k + l + m + n + o + p }
+IO.println(f16(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16)) # expect: 136
+
+
+def g0() { 0 }
+IO.println(g0()) # expect: 0
+def g1(a) { a }
+IO.println(g1(1)) # expect: 1
+
+def g2(a, b) { a + b }
+IO.println(g2(1, 2)) # expect: 3
+
+def g3(a, b, c) { a + b + c }
+IO.println(g3(1, 2, 3)) # expect: 6
+
+def g4 = Fn.new {|a, b, c, d| a + b + c + d }
+IO.println(g4(1, 2, 3, 4)) # expect: 10
+
+def g5(a, b, c, d, e) { a + b + c + d + e }
+IO.println(g5(1, 2, 3, 4, 5)) # expect: 15
+
+def g6(a, b, c, d, e, f) { a + b + c + d + e + f }
+IO.println(g6(1, 2, 3, 4, 5, 6)) # expect: 21
+
+def g7(a, b, c, d, e, f, g) { a + b + c + d + e + f + g }
+IO.println(g7(1, 2, 3, 4, 5, 6, 7)) # expect: 28
+
+def g8(a, b, c, d, e, f, g, h) { a + b + c + d + e + f + g + h }
+IO.println(g8(1, 2, 3, 4, 5, 6, 7, 8)) # expect: 36
+
+def g9(a, b, c, d, e, f, g, h, i) { a + b + c + d + e + f + g + h + i }
+IO.println(g9(1, 2, 3, 4, 5, 6, 7, 8, 9)) # expect: 45
+
+def g10(a, b, c, d, e, f, g, h, i, j) { a + b + c + d + e + f + g + h + i + j }
+IO.println(g10(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)) # expect: 55
+
+def g11(a, b, c, d, e, f, g, h, i, j, k) { a + b + c + d + e + f + g + h + i + j + k }
+IO.println(g11(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11)) # expect: 66
+
+def g12(a, b, c, d, e, f, g, h, i, j, k, l) { a + b + c + d + e + f + g + h + i + j + k + l }
+IO.println(g12(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12)) # expect: 78
+
+def g13(a, b, c, d, e, f, g, h, i, j, k, l, m) { a + b + c + d + e + f + g + h + i + j + k + l + m }
+IO.println(g13(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13)) # expect: 91
+
+def g14(a, b, c, d, e, f, g, h, i, j, k, l, m, n) { a + b + c + d + e + f + g + h + i + j + k + l + m + n }
+IO.println(g14(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14)) # expect: 105
+
+def g15(a, b, c, d, e, f, g, h, i, j, k, l, m, n, o) { a + b + c + d + e + f + g + h + i + j + k + l + m + n + o }
+IO.println(g15(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15)) # expect: 120
+
+def g16(a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p) { a + b + c + d + e + f + g + h + i + j + k + l + m + n + o + p }
+IO.println(g16(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16)) # expect: 136

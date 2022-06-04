@@ -1,0 +1,2 @@
+IO.println(5 * 3) # expect: 15
+IO.println(5 * 3 * 2) # expect: 30

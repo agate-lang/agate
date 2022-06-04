@@ -1,0 +1,5 @@
+# result: compile error
+class Foo {
+  # 17 parameters.
+  method(a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q) { "!" } # expect: test:4: Error at ',': Functions and methods can not have more than 16 parameters.
+}

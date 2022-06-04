@@ -1,0 +1,5 @@
+IO.println(123.0.to_s == "123") # expect: true
+IO.println((-123.0).to_s == "-123") # expect: true
+IO.println((-0.0).to_s == "-0") # expect: true
+IO.println(12.34.to_s == "12.34") # expect: true
+IO.println((-0.0001).to_s == "-0.0001") # expect: true

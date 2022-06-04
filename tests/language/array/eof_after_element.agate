@@ -1,0 +1,3 @@
+# result: compile error
+[1, 2
+# expect: test:4: Error at end of file: Expect ']' after array elements.

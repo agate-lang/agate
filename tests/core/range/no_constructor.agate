@@ -1,0 +1,2 @@
+# result: runtime error
+Range.new() # expect: Range metaclass does not implement 'new()'.

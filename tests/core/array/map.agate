@@ -1,0 +1,3 @@
+def a = [1, 2, 3]
+def b = a.map {|x| x + 1 }.to_a
+IO.println(b) # expect: [2, 3, 4]

@@ -1,0 +1,8 @@
+def a = "before"
+IO.println(a) # expect: before
+
+a = "after"
+IO.println(a) # expect: after
+
+IO.println(a = "arg") # expect: arg
+IO.println(a) # expect: arg

@@ -1,0 +1,3 @@
+# result: compile error
+def a = "a"
+(a) = "value" # expect: test:3: Error at '=': Unexpected assignment.

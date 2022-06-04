@@ -1,0 +1,5 @@
+# result: runtime error
+class Foo {}
+
+# Classes do not get a constructor by default.
+def foo = Foo.new() # expect: Foo metaclass does not implement 'new()'.

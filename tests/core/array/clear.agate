@@ -1,0 +1,7 @@
+def a = [1, 2, 3]
+a.clear()
+IO.println(a)       # expect: []
+IO.println(a.count) # expect: 0
+
+# Returns nil.
+IO.println([1, 2].clear()) # expect: nil

@@ -1,0 +1,2 @@
+# result: runtime error
+"foo".replace(1, "o") # expect: From must be a string.

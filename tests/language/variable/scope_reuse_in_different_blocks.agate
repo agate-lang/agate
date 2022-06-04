@@ -1,0 +1,9 @@
+once {
+  def a = "first"
+  IO.println(a) # expect: first
+}
+
+once {
+  def a = "second"
+  IO.println(a) # expect: second
+}

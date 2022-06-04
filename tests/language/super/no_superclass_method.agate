@@ -1,0 +1,9 @@
+# result: runtime error
+class Base {}
+
+class Derived is Base {
+  construct new() {}
+  foo { super.does_not_exist(1) } # expect: Base does not implement 'does_not_exist(_)'.
+}
+
+Derived.new().foo

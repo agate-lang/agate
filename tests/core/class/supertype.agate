@@ -1,0 +1,18 @@
+class Foo {
+}
+
+class Bar is Foo {
+}
+
+class Baz is Bar {
+}
+
+# A class with no explicit superclass inherits Object.
+IO.println(Foo.supertype == Object) # expect: true
+
+# Otherwise, it's the superclass.
+IO.println(Bar.supertype == Foo) # expect: true
+IO.println(Baz.supertype == Bar) # expect: true
+
+# Object has no supertype.
+IO.println(Object.supertype) # expect: nil

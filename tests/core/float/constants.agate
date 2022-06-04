@@ -1,0 +1,7 @@
+IO.println(Float.MIN)       # expect: 2.2250738585072e-308
+IO.println(Float.MAX)       # expect: 1.7976931348623e+308
+IO.println(Float.LOWEST)    # expect: -1.7976931348623e+308
+IO.println(Float.EPSILON)   # expect: 2.2204460492503e-16
+IO.println(Float.NAN)       # expect: nan
+IO.println(-Float.INFINITY) # expect: -inf
+IO.println(Float.INFINITY)  # expect: inf
