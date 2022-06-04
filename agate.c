@@ -1,9 +1,6 @@
-/* SPDX-License-Identifier: MIT
- *
- * Copyright (c) 2013-2021 Robert Nystrom and Wren Contributors
- * Copyright (c) 2022 Julien Bernard
- */
-
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2013-2021 Robert Nystrom and Wren Contributors
+// Copyright (c) 2022 Julien Bernard
 #include "agate.h"
 
 #include <assert.h>

@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2022 Julien Bernard
 #include <assert.h>
 #include <stdbool.h>
 #include <stddef.h>
