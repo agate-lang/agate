@@ -7931,9 +7931,12 @@ static void agateClassDeclaration(AgateCompiler *compiler, bool is_foreign) {
 static void agateVariableOrFunctionDeclaration(AgateCompiler *compiler) {
   agateCompilerConsume(compiler, AGATE_TOKEN_IDENTIFIER, "Expect function or variable name.");
   AgateToken name = compiler->parser->previous;
+  ptrdiff_t symbol = -1;
 
   if (agateCompilerMatch(compiler, AGATE_TOKEN_LEFT_PAREN)) {
     // function
+    symbol = agateCompilerDeclareVariable(compiler, &name);
+
     AgateCompiler function_compiler;
     agateCompilerCreate(&function_compiler, compiler->parser, compiler, false);
     int argc = 0;
@@ -7955,9 +7958,10 @@ static void agateVariableOrFunctionDeclaration(AgateCompiler *compiler) {
     } else {
       agateEmitOpcode(compiler, AGATE_OP_NIL);
     }
+
+    symbol = agateCompilerDeclareVariable(compiler, &name);
   }
 
-  ptrdiff_t symbol = agateCompilerDeclareVariable(compiler, &name);
   agateCompilerDefineVariable(compiler, symbol);
 }
 

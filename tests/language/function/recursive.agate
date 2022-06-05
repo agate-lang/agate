@@ -1,0 +1,19 @@
+def global_factorial(n) {
+  if (n <= 1) {
+    return 1
+  }
+  return n * global_factorial(n - 1)
+}
+
+IO.println(global_factorial(10)) # expect: 3628800
+
+once {
+  def local_factorial(n) {
+    if (n <= 1) {
+      return 1
+    }
+    return n * local_factorial(n - 1)
+  }
+
+  IO.println(local_factorial(10)) # expect: 3628800
+}

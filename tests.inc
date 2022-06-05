@@ -418,6 +418,7 @@ static const char *AgateTestFiles[] = {
   "tests/language/function/no_newline_before_close.agate",
   "tests/language/function/no_parameters.agate",
   "tests/language/function/parameters.agate",
+  "tests/language/function/recursive.agate",
   "tests/language/function/syntax.agate",
   "tests/language/if/dangling_else.agate",
   "tests/language/if/else.agate",
