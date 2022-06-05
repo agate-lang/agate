@@ -39,6 +39,7 @@ static const char *AgateTestFiles[] = {
   "tests/core/array/multiply_not_num.agate",
   "tests/core/array/new.agate",
   "tests/core/array/not.agate",
+  "tests/core/array/partition.agate",
   "tests/core/array/plus.agate",
   "tests/core/array/plus_not_iterable.agate",
   "tests/core/array/reduce.agate",

@@ -215,30 +215,29 @@ class Array is Sequence {
     return this
   }
 
-  partition() { .partition() {|lhs,rhs| lhs < rhs } }
-  partition(comp) { .__partition(0, .count - 1, comp) }
+  partition(pred) { .__partition(0, .count - 1, pred) }
 
   to_s { "[%(.join(", "))]" }
 
   __quicksort(lo, hi, comp) {
     if (lo < hi) {
-      def p = .__partition(lo, hi, comp)
+      def pivot = this[hi]
+      def p = .__partition(lo, hi - 1) {|item| comp(item, pivot) }
+      .swap(p, hi)
       .__quicksort(lo, p - 1, comp)
       .__quicksort(p + 1, hi, comp)
     }
   }
 
-  __partition(lo, hi, comp) {
-    def p = this[hi]
-    def l = lo
-    for (i in lo...hi) {
-      if (comp(this[i], p)) {
-        .swap(i, l)
-        l = l + 1
+  __partition(lo, hi, pred) {
+    def mid = lo
+    for (i in lo..hi) {
+      if (pred(this[i])) {
+        .swap(i, mid)
+        mid = mid + 1
       }
     }
-    .swap(l, hi)
-    return l
+    return mid
   }
 
   to_a { this[0..-1] }
