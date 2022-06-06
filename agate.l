@@ -106,12 +106,11 @@ ESC   (\\([0'"\\abfnrtv%]|x[a-fA-F0-9]{2}|u[a-fA-F0-9]{4}|U[a-fA-F0-9]{8}))
 "<<"          { return OP_LSHIFT; }
 "!="          { return OP_NE; }
 ">>"          { return OP_RSHIFT; }
-"::"          { return OP_SCOPE; }
 
 
 {ID}                    { return IDENTIFIER; }
-"@"{ID}                 { return FIELD_INSTANCE; }
 "@@"{ID}                { return FIELD_CLASS; }
+"@"{ID}                 { return FIELD_INSTANCE; }
 
 "0"                     { return INT_LITERAL; }
 {DECNZ}{DEC}*           { return INT_LITERAL; }

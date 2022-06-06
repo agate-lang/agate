@@ -64,9 +64,6 @@ static int yyerror(const char *message) {
 %token          OP_LSHIFT         "<<"
 %token          OP_NE             "!="
 %token          OP_RSHIFT         ">>"
-%token          OP_SCOPE          "::"
-
-%token          ATAT              "@@"
 
 %start unit
 
