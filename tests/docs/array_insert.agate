@@ -1,0 +1,7 @@
+def a = [ 1, 3.14 ]
+a.insert(1, 'a')
+IO.println(a) # expect: [1, a, 3.14]
+a.insert(3, "good")
+IO.println(a) # expect: [1, a, 3.14, good]
+a.insert(-1, true)
+IO.println(a) # expect: [1, a, 3.14, good, true]

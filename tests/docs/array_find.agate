@@ -1,0 +1,3 @@
+def a = [ 1, 'a', 3.14, "good", true ]
+IO.println(a.find("good")) # expect: 3
+IO.println(a.find(nil)) # expect: -1

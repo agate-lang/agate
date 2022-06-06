@@ -1,0 +1,2 @@
+IO.println(true.to_i)  # expect: 1
+IO.println(false.to_i) # expect: 0

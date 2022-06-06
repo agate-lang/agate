@@ -1,0 +1,3 @@
+def a = [ 1, 'a', 3.14, "good", true ]
+a.swap(0, 3)
+IO.println(a) # expect: [good, a, 3.14, 1, true]

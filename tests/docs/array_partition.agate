@@ -1,0 +1,2 @@
+def a = [ 5, 10, 3, 6, 9, 2, 7 ]
+IO.println(a.partition() {|item| item % 2 == 0 }) # expect: 3

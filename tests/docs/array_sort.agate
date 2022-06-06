@@ -1,0 +1,5 @@
+def a = [ 5, 10, 3, 6, 9, 2, 7 ]
+a.sort()
+IO.println(a) # expect: [2, 3, 5, 6, 7, 9, 10]
+a.sort {|lhs,rhs| lhs > rhs }
+IO.println(a) # expect: [10, 9, 7, 6, 5, 3, 2]

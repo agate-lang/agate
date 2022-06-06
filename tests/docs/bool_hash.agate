@@ -1,0 +1,2 @@
+IO.println(true.hash)  # expect: 1
+IO.println(false.hash) # expect: 2

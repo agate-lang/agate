@@ -1,0 +1,4 @@
+def a = []
+a.append(1)
+a.append('a')
+IO.println(a) # expect: [1, a]
