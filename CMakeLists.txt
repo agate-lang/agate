@@ -1,10 +1,16 @@
-cmake_minimum_required(VERSION 3.10)
+cmake_minimum_required(VERSION 3.18)
 
-project(AGATE C)
+project(AGATE
+  VERSION 0.1.0
+  LANGUAGES C
+  HOMEPAGE_URL "https://agate-lang.github.io/"
+)
 
 option(AGATE_DEV "Developper mode" ON)
 
-set(CMAKE_C_FLAGS "-Wall -pedantic -std=c99 -O1 -g")
+if(UNIX)
+  set(CMAKE_C_FLAGS "-Wall -pedantic")
+endif()
 
 include(GNUInstallDirs)
 
@@ -17,6 +23,19 @@ target_link_libraries(agate0
     m
 )
 
+target_compile_features(agate0
+  PUBLIC
+    c_std_99
+)
+
+set_target_properties(agate0
+  PROPERTIES
+    C_STANDARD 99
+    C_EXTENSIONS OFF
+    VERSION ${PROJECT_VERSION}
+    SOVERSION ${PROJECT_VERSION_MAJOR}
+)
+
 add_executable(agate-cli
   agate-cli.c
 )
@@ -26,7 +45,7 @@ target_link_libraries(agate-cli
     agate0
 )
 
-if(AGATE_DEV)
+if(UNIX AND AGATE_DEV)
   find_package(BISON REQUIRED)
   find_package(FLEX REQUIRED)
 
