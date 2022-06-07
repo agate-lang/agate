@@ -3769,6 +3769,22 @@ static bool agateCoreFloatHash(AgateVM *vm, int argc, AgateValue *args) {
 
 // Char
 
+#define AGATE_CHAR_CMP(name, op)                                              \
+static bool agateCoreChar ## name(AgateVM *vm, int argc, AgateValue *args) {  \
+  if (!agateValidateChar(vm, args[1], "Right operand")) {                     \
+    return false;                                                             \
+  }                                                                           \
+  args[0] = agateBoolValue(agateAsChar(args[0]) op agateAsChar(args[1]));     \
+  return true;                                                                \
+}
+
+AGATE_CHAR_CMP(Lt,  <)
+AGATE_CHAR_CMP(LEq, <=)
+AGATE_CHAR_CMP(Gt,  >)
+AGATE_CHAR_CMP(GEq, >=)
+
+#undef AGATE_CHAR_CMP
+
 static bool agateCoreCharToI(AgateVM *vm, int argc, AgateValue *args) {
   args[0] = agateIntValue(agateAsChar(args[0]));
   return true;
@@ -4915,6 +4931,10 @@ static void agateLoadCoreModule(AgateVM *vm) {
   agateClassBindPrimitive(vm, vm->buffer_class, "to_s", agateCoreBufferToS);
 
   vm->char_class = agateAsClass(agateFindModuleVariable(vm, core, "Char"));
+  agateClassBindPrimitive(vm, vm->char_class, "<(_)", agateCoreCharLt);
+  agateClassBindPrimitive(vm, vm->char_class, "<=(_)", agateCoreCharLEq);
+  agateClassBindPrimitive(vm, vm->char_class, ">(_)", agateCoreCharGt);
+  agateClassBindPrimitive(vm, vm->char_class, ">=(_)", agateCoreCharGEq);
   agateClassBindPrimitive(vm, vm->char_class, "hash", agateCoreCharHash);
   agateClassBindPrimitive(vm, vm->char_class, "to_i", agateCoreCharToI);
   agateClassBindPrimitive(vm, vm->char_class, "to_s", agateCoreCharToS);
