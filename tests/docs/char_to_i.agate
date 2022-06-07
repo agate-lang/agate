@@ -1,0 +1,2 @@
+def c = '木'
+IO.println(c.to_i) # expect: 26408

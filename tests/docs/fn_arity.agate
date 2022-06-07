@@ -1,0 +1,6 @@
+def f0() { }
+IO.println(f0.arity) # expect: 0
+def f1(a) { }
+IO.println(f1.arity) # expect: 1
+def f2(a, b) { }
+IO.println(f2.arity) # expect: 2

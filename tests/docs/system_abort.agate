@@ -1,0 +1,5 @@
+if (0 == 1) {
+  System.abort("Weird!")
+} else {
+  IO.println("OK") # expect: OK
+}

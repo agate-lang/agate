@@ -1,0 +1,2 @@
+def now = System.clock
+IO.println(now is Float) # expect: true

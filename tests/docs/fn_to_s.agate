@@ -1,0 +1,2 @@
+def f() { }
+IO.println(f.to_s) # expect: <fn>

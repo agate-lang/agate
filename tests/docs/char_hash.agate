@@ -1,0 +1,2 @@
+def c = '木'
+IO.println(c.hash) # expect: 7520348167691861062

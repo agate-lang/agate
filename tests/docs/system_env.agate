@@ -1,0 +1,1 @@
+IO.println(System.env("NOT_A_VALID_NAME")) # expect: nil

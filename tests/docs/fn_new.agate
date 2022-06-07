@@ -1,0 +1,2 @@
+def identity = Fn.new {|a| a }
+IO.println(identity(42)) # expect: 42
