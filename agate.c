@@ -3615,6 +3615,18 @@ static bool agateCoreIntToF(AgateVM *vm, int argc, AgateValue *args) {
   return true;
 }
 
+static bool agateCoreIntToC(AgateVM *vm, int argc, AgateValue *args) {
+  int64_t value = agateAsInt(args[0]);
+
+  if (value < 0 || value > 0x10FFFF) {
+    vm->error = AGATE_CONST_STRING(vm, "Integer value is not a valid character.");
+    return false;
+  }
+
+  args[0] = agateCharValue((uint32_t) value);
+  return true;
+}
+
 static bool agateCoreIntToS(AgateVM *vm, int argc, AgateValue *args) {
 #define AGATE_INT_BUFFER_LENGTH 32
   char buffer[AGATE_INT_BUFFER_LENGTH];
@@ -4995,6 +5007,7 @@ static void agateLoadCoreModule(AgateVM *vm) {
   agateClassBindPrimitive(vm, vm->int_class, "..(_)", agateCoreIntDotDot);
   agateClassBindPrimitive(vm, vm->int_class, "...(_)", agateCoreIntDotDotDot);
   agateClassBindPrimitive(vm, vm->int_class, "hash", agateCoreIntHash);
+  agateClassBindPrimitive(vm, vm->int_class, "to_c", agateCoreIntToC);
   agateClassBindPrimitive(vm, vm->int_class, "to_f", agateCoreIntToF);
   agateClassBindPrimitive(vm, vm->int_class, "to_s", agateCoreIntToS);
 
