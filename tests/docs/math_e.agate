@@ -1,0 +1,1 @@
+IO.println(Math.E) # expect: 2.718281828459

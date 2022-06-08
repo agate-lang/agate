@@ -1,0 +1,6 @@
+IO.println(Math.round(4.2)) # expect: 4
+IO.println(Math.round(4.5)) # expect: 5
+IO.println(Math.round(4.8)) # expect: 5
+IO.println(Math.round(-4.2)) # expect: -4
+IO.println(Math.round(-4.5)) # expect: -5
+IO.println(Math.round(-4.8)) # expect: -5

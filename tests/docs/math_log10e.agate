@@ -1,0 +1,1 @@
+IO.println(Math.LOG10E) # expect: 0.43429448190325

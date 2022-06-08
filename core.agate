@@ -365,11 +365,5 @@ class IO {
   }
 }
 
-class Math {
-  static PI { 3.141592653589793 }
-  static min(a, b) { a < b ? a : b }
-  static max(a, b) { a < b ? b : a }
-  static clamp(v, lo, hi) { v < lo ? lo : (v < hi ? v : hi) }
-}
-
+class Math { }
 class System { }

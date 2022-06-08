@@ -1,0 +1,4 @@
+IO.println(Math.abs(42))    # expect: 42
+IO.println(Math.abs(-42))   # expect: 42
+IO.println(Math.abs(42.0))  # expect: 42
+IO.println(Math.abs(-42.0)) # expect: 42

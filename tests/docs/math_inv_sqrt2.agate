@@ -1,0 +1,1 @@
+IO.println(Math.INV_SQRT2) # expect: 0.70710678118655

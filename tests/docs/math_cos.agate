@@ -1,0 +1,4 @@
+IO.println(Math.cos(0.0))     # expect: 1
+IO.println(Math.cos(Math.PI)) # expect: -1
+IO.println(Float.almost_equals(Math.cos(-Math.PI2), 0.0)) # expect: true
+IO.println(Float.almost_equals(Math.cos( Math.PI2), 0.0)) # expect: true

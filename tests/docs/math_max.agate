@@ -1,0 +1,4 @@
+IO.println(Math.max(1, 2))        # expect: 2
+IO.println(Math.max(-1, -2))      # expect: -1
+IO.println(Math.max(1.0, 2.0))    # expect: 2
+IO.println(Math.max(-1.0, -2.0))  # expect: -1

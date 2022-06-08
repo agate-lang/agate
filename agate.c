@@ -3654,6 +3654,7 @@ AGATE_FLOAT_CONSTANT(Infinity, INFINITY)
 AGATE_FLOAT_CONSTANT(Max, DBL_MAX)
 AGATE_FLOAT_CONSTANT(Min, DBL_MIN)
 AGATE_FLOAT_CONSTANT(Nan, NAN)
+AGATE_FLOAT_CONSTANT(TrueMin, 0x1P-1074)
 
 #undef AGATE_FLOAT_CONSTANT
 
@@ -3715,6 +3716,55 @@ static bool agateCoreFloatPrefixPlus(AgateVM *vm, int argc, AgateValue *args) {
 
 static bool agateCoreFloatPrefixMinus(AgateVM *vm, int argc, AgateValue *args) {
   args[0] = agateFloatValue(-agateAsFloat(args[0]));
+  return true;
+}
+
+static inline bool agateAlmostEquals(double a, double b, double abs_error, double rel_error) {
+  if (a == b) {
+    return true;
+  }
+
+  double diff = fabs(a - b);
+
+  if (diff <= abs_error) {
+    return true;
+  }
+
+  double max = fmin(fmax(fabs(a), fabs(b)), DBL_MAX);
+  return diff <= max * rel_error;
+}
+
+static bool agateCoreFloatAlmostEquals2(AgateVM *vm, int argc, AgateValue *args) {
+  if (!agateValidateFloat(vm, args[1], "First argument")) {
+    return false;
+  }
+
+  if (!agateValidateFloat(vm, args[2], "Second argument")) {
+    return false;
+  }
+
+  args[0] = agateBoolValue(agateAlmostEquals(agateAsFloat(args[1]), agateAsFloat(args[2]), DBL_EPSILON, DBL_EPSILON));
+  return true;
+}
+
+static bool agateCoreFloatAlmostEquals4(AgateVM *vm, int argc, AgateValue *args) {
+  if (!agateValidateFloat(vm, args[1], "First argument")) {
+    return false;
+  }
+
+  if (!agateValidateFloat(vm, args[2], "Second argument")) {
+    return false;
+  }
+
+  if (!agateValidateFloat(vm, args[3], "Absolute error")) {
+    return false;
+  }
+
+  if (!agateValidateFloat(vm, args[4], "Relative error")) {
+    return false;
+  }
+
+  args[0] = agateBoolValue(agateAlmostEquals(agateAsFloat(args[1]), agateAsFloat(args[2]), agateAsFloat(args[3]), agateAsFloat(args[4])));
   return true;
 }
 
@@ -4744,6 +4794,25 @@ static bool agateCoreRangeHash(AgateVM *vm, int argc, AgateValue *args) {
 
 // Math
 
+#define AGATE_MATH_CONSTANT(name, value)                                     \
+static bool agateCoreMath ## name(AgateVM *vm, int argc, AgateValue *args) { \
+  args[0] = agateFloatValue(value);                                          \
+  return true;                                                               \
+}
+
+AGATE_MATH_CONSTANT(E,        2.718281828459045235360287471352662498)
+AGATE_MATH_CONSTANT(InvPi,    0.318309886183790671537767526745028724)
+AGATE_MATH_CONSTANT(InvPi2,   0.636619772367581343075535053490057448)
+AGATE_MATH_CONSTANT(InvSqrt2, 0.707106781186547524400844362104849039)
+AGATE_MATH_CONSTANT(Ln2,      0.693147180559945309417232121458176568)
+AGATE_MATH_CONSTANT(Ln10,     2.302585092994045684017991454684364208)
+AGATE_MATH_CONSTANT(Log2E,    1.442695040888963407359924681001892137)
+AGATE_MATH_CONSTANT(Log10E,   0.434294481903251827651128918916605082)
+AGATE_MATH_CONSTANT(Pi,       3.141592653589793238462643383279502884)
+AGATE_MATH_CONSTANT(Pi2,      1.570796326794896619231321691639751442)
+AGATE_MATH_CONSTANT(Pi4,      0.785398163397448309615660845819875721)
+AGATE_MATH_CONSTANT(Sqrt2,    1.414213562373095048801688724209698079)
+
 #define AGATE_MATH_FLOAT_1(name, fn)                                          \
 static bool agateCoreMath ## name(AgateVM *vm, int argc, AgateValue *args) {  \
   if (!agateValidateFloat(vm, args[1], "Value")) {                            \
@@ -4786,7 +4855,6 @@ static bool agateCoreMath ## name(AgateVM *vm, int argc, AgateValue *args) {  \
 }
 
 AGATE_MATH_FLOAT_2(ATan2, atan2)
-AGATE_MATH_FLOAT_2(Pow,   pow)
 AGATE_MATH_FLOAT_2(Hypot, hypot)
 
 static bool agateCoreMathAbs(AgateVM *vm, int argc, AgateValue *args) {
@@ -4801,6 +4869,119 @@ static bool agateCoreMathAbs(AgateVM *vm, int argc, AgateValue *args) {
   }
 
   vm->error = AGATE_CONST_STRING(vm, "Argument must be an integer or a float.");
+  return false;
+}
+
+static bool agateCoreMathSign(AgateVM *vm, int argc, AgateValue *args) {
+  if (agateIsFloat(args[1])) {
+    double val = agateAsFloat(args[1]);
+    args[0] = agateFloatValue((val > 0.0) - (val < 0.0));
+    return true;
+  }
+
+  if (agateIsInt(args[1])) {
+    int64_t val = agateAsInt(args[1]);
+    args[0] = agateIntValue((val > 0) - (val < 0));
+    return true;
+  }
+
+  vm->error = AGATE_CONST_STRING(vm, "Argument must be an integer or a float.");
+  return false;
+}
+
+static bool agateCoreMathMax(AgateVM *vm, int argc, AgateValue *args) {
+  if (agateIsFloat(args[1]) && agateIsFloat(args[2])) {
+    double lhs = agateAsFloat(args[1]);
+    double rhs = agateAsFloat(args[2]);
+    args[0] = agateFloatValue(fmax(lhs, rhs));
+    return true;
+  }
+
+  if (agateIsInt(args[1]) && agateIsInt(args[2])) {
+    int64_t lhs = agateAsInt(args[1]);
+    int64_t rhs = agateAsInt(args[2]);
+    args[0] = agateIntValue(lhs < rhs ? rhs : lhs);
+    return true;
+  }
+
+  vm->error = AGATE_CONST_STRING(vm, "Arguments must both be integers or floats.");
+  return false;
+}
+
+static bool agateCoreMathMin(AgateVM *vm, int argc, AgateValue *args) {
+  if (agateIsFloat(args[1]) && agateIsFloat(args[2])) {
+    double lhs = agateAsFloat(args[1]);
+    double rhs = agateAsFloat(args[2]);
+    args[0] = agateFloatValue(fmin(lhs, rhs));
+    return true;
+  }
+
+  if (agateIsInt(args[1]) && agateIsInt(args[2])) {
+    int64_t lhs = agateAsInt(args[1]);
+    int64_t rhs = agateAsInt(args[2]);
+    args[0] = agateIntValue(lhs < rhs ? lhs : rhs);
+    return true;
+  }
+
+  vm->error = AGATE_CONST_STRING(vm, "Arguments must both be integers or floats.");
+  return false;
+}
+
+static bool agateCoreMathClamp(AgateVM *vm, int argc, AgateValue *args) {
+  if (agateIsFloat(args[1]) && agateIsFloat(args[2]) && agateIsFloat(args[3])) {
+    double v = agateAsFloat(args[1]);
+    double lo = agateAsFloat(args[2]);
+    double hi = agateAsFloat(args[3]);
+    args[0] = agateFloatValue(fmax(lo, fmin(hi, v)));
+    return true;
+  }
+
+  if (agateIsInt(args[1]) && agateIsInt(args[2]) && agateIsInt(args[3])) {
+    int64_t v = agateAsInt(args[1]);
+    int64_t lo = agateAsInt(args[2]);
+    int64_t hi = agateAsInt(args[3]);
+    args[0] = agateIntValue( v < lo ? lo : v < hi ? v : hi);
+    return true;
+  }
+
+  vm->error = AGATE_CONST_STRING(vm, "Arguments must all be integers or floats.");
+  return false;
+}
+
+static int64_t agateExpBySquaring(int64_t x, int64_t n) {
+  if (n < 0) {
+    return x == 1 ? 1 : 0;
+  }
+  if (n == 0) {
+    return 1;
+  }
+  int64_t y = 1;
+  while (n > 1) {
+    if (n % 2 == 1) {
+      y = x * y;
+    }
+    x = x * x;
+    n /= 2;
+  }
+  return x * y;
+}
+
+static bool agateCoreMathPow(AgateVM *vm, int argc, AgateValue *args) {
+  if (agateIsFloat(args[1]) && agateIsFloat(args[2])) {
+    double x = agateAsFloat(args[1]);
+    double y = agateAsFloat(args[2]);
+    args[0] = agateFloatValue(pow(x, y));
+    return true;
+  }
+
+  if (agateIsInt(args[1]) && agateIsInt(args[2])) {
+    int64_t x = agateAsInt(args[1]);
+    int64_t y = agateAsInt(args[2]);
+    args[0] = agateIntValue(agateExpBySquaring(x, y));
+    return true;
+  }
+
+  vm->error = AGATE_CONST_STRING(vm, "Arguments must both be integers or floats.");
   return false;
 }
 
@@ -4958,6 +5139,9 @@ static void agateLoadCoreModule(AgateVM *vm) {
   agateClassBindPrimitive(vm, vm->float_class->base.type, "MAX", agateCoreFloatMax);
   agateClassBindPrimitive(vm, vm->float_class->base.type, "MIN", agateCoreFloatMin);
   agateClassBindPrimitive(vm, vm->float_class->base.type, "NAN", agateCoreFloatNan);
+  agateClassBindPrimitive(vm, vm->float_class->base.type, "TRUE_MIN", agateCoreFloatTrueMin);
+  agateClassBindPrimitive(vm, vm->float_class->base.type, "almost_equals(_,_)", agateCoreFloatAlmostEquals2);
+  agateClassBindPrimitive(vm, vm->float_class->base.type, "almost_equals(_,_,_,_)", agateCoreFloatAlmostEquals4);
   agateClassBindPrimitive(vm, vm->float_class, "+", agateCoreFloatPrefixPlus);
   agateClassBindPrimitive(vm, vm->float_class, "-", agateCoreFloatPrefixMinus);
   agateClassBindPrimitive(vm, vm->float_class, "+(_)", agateCoreFloatPlus);
@@ -5029,6 +5213,18 @@ static void agateLoadCoreModule(AgateVM *vm) {
   agateClassBindPrimitive(vm, vm->map_class, "value_from_iterator(_)", agateCoreMapValueFromIterator);
 
   AgateClass *math_class = agateAsClass(agateFindModuleVariable(vm, core, "Math"));
+  agateClassBindPrimitive(vm, math_class->base.type, "E", agateCoreMathE);
+  agateClassBindPrimitive(vm, math_class->base.type, "INV_PI", agateCoreMathInvPi);
+  agateClassBindPrimitive(vm, math_class->base.type, "INV_PI2", agateCoreMathInvPi2);
+  agateClassBindPrimitive(vm, math_class->base.type, "INV_SQRT2", agateCoreMathInvSqrt2);
+  agateClassBindPrimitive(vm, math_class->base.type, "LN2", agateCoreMathLn2);
+  agateClassBindPrimitive(vm, math_class->base.type, "LN10", agateCoreMathLn10);
+  agateClassBindPrimitive(vm, math_class->base.type, "LOG2E", agateCoreMathLog2E);
+  agateClassBindPrimitive(vm, math_class->base.type, "LOG10E", agateCoreMathLog10E);
+  agateClassBindPrimitive(vm, math_class->base.type, "PI", agateCoreMathPi);
+  agateClassBindPrimitive(vm, math_class->base.type, "PI2", agateCoreMathPi2);
+  agateClassBindPrimitive(vm, math_class->base.type, "PI4", agateCoreMathPi4);
+  agateClassBindPrimitive(vm, math_class->base.type, "SQRT2", agateCoreMathSqrt2);
   agateClassBindPrimitive(vm, math_class->base.type, "abs(_)", agateCoreMathAbs);
   agateClassBindPrimitive(vm, math_class->base.type, "acos(_)", agateCoreMathACos);
   agateClassBindPrimitive(vm, math_class->base.type, "asin(_)", agateCoreMathASin);
@@ -5036,6 +5232,7 @@ static void agateLoadCoreModule(AgateVM *vm) {
   agateClassBindPrimitive(vm, math_class->base.type, "atan2(_,_)", agateCoreMathATan2);
   agateClassBindPrimitive(vm, math_class->base.type, "cbrt(_)", agateCoreMathCbrt);
   agateClassBindPrimitive(vm, math_class->base.type, "ceil(_)", agateCoreMathCeil);
+  agateClassBindPrimitive(vm, math_class->base.type, "clamp(_,_,_)", agateCoreMathClamp);
   agateClassBindPrimitive(vm, math_class->base.type, "cos(_)", agateCoreMathCos);
   agateClassBindPrimitive(vm, math_class->base.type, "exp(_)", agateCoreMathExp);
   agateClassBindPrimitive(vm, math_class->base.type, "exp2(_)", agateCoreMathExp2);
@@ -5044,8 +5241,11 @@ static void agateLoadCoreModule(AgateVM *vm) {
   agateClassBindPrimitive(vm, math_class->base.type, "log(_)", agateCoreMathLog);
   agateClassBindPrimitive(vm, math_class->base.type, "log10(_)", agateCoreMathLog10);
   agateClassBindPrimitive(vm, math_class->base.type, "log2(_)", agateCoreMathLog2);
+  agateClassBindPrimitive(vm, math_class->base.type, "max(_,_)", agateCoreMathMax);
+  agateClassBindPrimitive(vm, math_class->base.type, "min(_,_)", agateCoreMathMin);
   agateClassBindPrimitive(vm, math_class->base.type, "pow(_,_)", agateCoreMathPow);
   agateClassBindPrimitive(vm, math_class->base.type, "round(_)", agateCoreMathRound);
+  agateClassBindPrimitive(vm, math_class->base.type, "sign(_)", agateCoreMathSign);
   agateClassBindPrimitive(vm, math_class->base.type, "sin(_)", agateCoreMathSin);
   agateClassBindPrimitive(vm, math_class->base.type, "sqrt(_)", agateCoreMathSqrt);
   agateClassBindPrimitive(vm, math_class->base.type, "tan(_)", agateCoreMathTan);

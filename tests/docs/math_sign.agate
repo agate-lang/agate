@@ -1,0 +1,7 @@
+IO.println(Math.sign(-4.2)) # expect: -1
+IO.println(Math.sign(0.0))  # expect: 0
+IO.println(Math.sign(4.2))  # expect: 1
+
+IO.println(Math.sign(-42))  # expect: -1
+IO.println(Math.sign(0))    # expect: 0
+IO.println(Math.sign(42))   # expect: 1

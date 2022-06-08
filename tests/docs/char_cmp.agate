@@ -1,0 +1,4 @@
+def c = 'h'
+IO.println('a' <= c && c <= 'z') # expect: true
+IO.println('x' < 'X') # expect: false
+IO.println('森' >= '木') # expect: true

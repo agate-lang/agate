@@ -1,2 +1,2 @@
 # result: runtime error
-Math.clamp(1, false, 2) # expect: Right operand must be an integer.
+Math.clamp(1, false, 2) # expect: Arguments must all be integers or floats.

@@ -1,0 +1,1 @@
+IO.println(Math.INV_PI2) # expect: 0.63661977236758

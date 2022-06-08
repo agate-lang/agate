@@ -1,0 +1,5 @@
+IO.println(Math.pow(3.0, 2.0))  # expect: 9
+IO.println(Math.pow(4.0, -1.0)) # expect: 0.25
+
+IO.println(Math.pow(3, 2))  # expect: 9
+IO.println(Math.pow(4, -1)) # expect: 0

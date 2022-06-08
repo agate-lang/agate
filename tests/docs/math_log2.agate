@@ -1,0 +1,5 @@
+IO.println(Math.log2(0.0))    # expect: -inf
+IO.println(Math.log2(1.0))    # expect: 0
+IO.println(Math.log2(2.0))    # expect: 1
+IO.println(Math.log2(1024.0)) # expect: 10
+IO.println(Math.log2(Float.INFINITY)) # expect: inf

@@ -1,0 +1,3 @@
+IO.println(Math.hypot(0.0, 0.0))  # expect: 0
+IO.println(Math.hypot(1.0, 1.0))  # expect: 1.4142135623731
+IO.println(Math.hypot(4.0, -3.0)) # expect: 5

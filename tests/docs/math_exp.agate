@@ -1,0 +1,5 @@
+IO.println(Math.exp(0.0))       # expect: 1
+IO.println(Math.exp(1.0))       # expect: 2.718281828459
+IO.println(Math.exp(Math.LN2))  # expect: 2
+IO.println(Math.exp(Math.LN10)) # expect: 10
+IO.println(Math.exp(-Float.INFINITY)) # expect: 0

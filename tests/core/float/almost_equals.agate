@@ -1,0 +1,111 @@
+def ABS_ERROR = Float.EPSILON
+def REL_ERROR = 1e-6
+
+# regular large numbers
+IO.println(Float.almost_equals(1000000.0, 1000001.0, ABS_ERROR, REL_ERROR)) # expect: true
+IO.println(Float.almost_equals(1000001.0, 1000000.0, ABS_ERROR, REL_ERROR)) # expect: true
+IO.println(Float.almost_equals(10000.0, 10001.0, ABS_ERROR, REL_ERROR)) # expect: false
+IO.println(Float.almost_equals(10001.0, 10000.0, ABS_ERROR, REL_ERROR)) # expect: false
+
+# negative large numbers
+IO.println(Float.almost_equals(-1000000.0, -1000001.0, ABS_ERROR, REL_ERROR)) # expect: true
+IO.println(Float.almost_equals(-1000001.0, -1000000.0, ABS_ERROR, REL_ERROR)) # expect: true
+IO.println(Float.almost_equals(-10000.0, -10001.0, ABS_ERROR, REL_ERROR)) # expect: false
+IO.println(Float.almost_equals(-10001.0, -10000.0, ABS_ERROR, REL_ERROR)) # expect: false
+
+# numbers around 1
+IO.println(Float.almost_equals(1.0000001, 1.0000002, ABS_ERROR, REL_ERROR)) # expect: true
+IO.println(Float.almost_equals(1.0000002, 1.0000001, ABS_ERROR, REL_ERROR)) # expect: true
+IO.println(Float.almost_equals(1.0001, 1.0002, ABS_ERROR, REL_ERROR)) # expect: false
+IO.println(Float.almost_equals(1.0002, 1.0001, ABS_ERROR, REL_ERROR)) # expect: false
+
+# numbers around -1
+IO.println(Float.almost_equals(-1.000001, -1.000002, ABS_ERROR, REL_ERROR)) # expect: true
+IO.println(Float.almost_equals(-1.000002, -1.000001, ABS_ERROR, REL_ERROR)) # expect: true
+IO.println(Float.almost_equals(-1.0001, -1.0002, ABS_ERROR, REL_ERROR)) # expect: false
+IO.println(Float.almost_equals(-1.0002, -1.0001, ABS_ERROR, REL_ERROR)) # expect: false
+
+# numbers between 0 and 1
+IO.println(Float.almost_equals(0.000000001000001, 0.000000001000002, ABS_ERROR, REL_ERROR)) # expect: true
+IO.println(Float.almost_equals(0.000000001000002, 0.000000001000001, ABS_ERROR, REL_ERROR)) # expect: true
+IO.println(Float.almost_equals(0.000000000001001, 0.000000000001002, ABS_ERROR, REL_ERROR)) # expect: false
+IO.println(Float.almost_equals(0.000000000001002, 0.000000000001001, ABS_ERROR, REL_ERROR)) # expect: false
+
+# numbers between -1 and 0
+IO.println(Float.almost_equals(-0.000000001000001, -0.000000001000002, ABS_ERROR, REL_ERROR)) # expect: true
+IO.println(Float.almost_equals(-0.000000001000002, -0.000000001000001, ABS_ERROR, REL_ERROR)) # expect: true
+IO.println(Float.almost_equals(-0.000000000001001, -0.000000000001002, ABS_ERROR, REL_ERROR)) # expect: false
+IO.println(Float.almost_equals(-0.000000000001002, -0.000000000001001, ABS_ERROR, REL_ERROR)) # expect: false
+
+# small differences away from zero
+IO.println(Float.almost_equals( 0.3,  0.30000003, ABS_ERROR, REL_ERROR)) # expect: true
+IO.println(Float.almost_equals(-0.3, -0.30000003, ABS_ERROR, REL_ERROR)) # expect: true
+
+# comparisons involving zero
+IO.println(Float.almost_equals( 0.0,  0.0, ABS_ERROR, REL_ERROR)) # expect: true
+IO.println(Float.almost_equals( 0.0, -0.0, ABS_ERROR, REL_ERROR)) # expect: true
+IO.println(Float.almost_equals(-0.0,  0.0, ABS_ERROR, REL_ERROR)) # expect: true
+IO.println(Float.almost_equals(-0.0, -0.0, ABS_ERROR, REL_ERROR)) # expect: true
+IO.println(Float.almost_equals(0.00000001, 0.0, ABS_ERROR, REL_ERROR)) # expect: false
+IO.println(Float.almost_equals(0.0, 0.00000001, ABS_ERROR, REL_ERROR)) # expect: false
+IO.println(Float.almost_equals(-0.00000001, 0.0, ABS_ERROR, REL_ERROR)) # expect: false
+IO.println(Float.almost_equals(0.0, -0.00000001, ABS_ERROR, REL_ERROR)) # expect: false
+
+IO.println(Float.almost_equals(0.0, 1e-20, ABS_ERROR, REL_ERROR)) # expect: true
+IO.println(Float.almost_equals(1e-20, 0.0, ABS_ERROR, REL_ERROR)) # expect: true
+
+IO.println(Float.almost_equals(0.0, -1e-20, ABS_ERROR, REL_ERROR)) # expect: true
+IO.println(Float.almost_equals(-1e-20, 0.0, ABS_ERROR, REL_ERROR)) # expect: true
+
+# comparisons involving extreme values (overflow potential)
+IO.println(Float.almost_equals( Float.MAX,  Float.MAX, ABS_ERROR, REL_ERROR)) # expect: true
+IO.println(Float.almost_equals( Float.MAX, -Float.MAX, ABS_ERROR, REL_ERROR)) # expect: false
+IO.println(Float.almost_equals(-Float.MAX,  Float.MAX, ABS_ERROR, REL_ERROR)) # expect: false
+IO.println(Float.almost_equals( Float.MAX,  Float.MAX / 2.0, ABS_ERROR, REL_ERROR)) # expect: false
+IO.println(Float.almost_equals( Float.MAX, -Float.MAX / 2.0, ABS_ERROR, REL_ERROR)) # expect: false
+IO.println(Float.almost_equals(-Float.MAX,  Float.MAX / 2.0, ABS_ERROR, REL_ERROR)) # expect: false
+
+# comparisons involving infinities
+IO.println(Float.almost_equals( Float.INFINITY,  Float.INFINITY, ABS_ERROR, REL_ERROR)) # expect: true
+IO.println(Float.almost_equals(-Float.INFINITY, -Float.INFINITY, ABS_ERROR, REL_ERROR)) # expect: true
+IO.println(Float.almost_equals(-Float.INFINITY,  Float.INFINITY, ABS_ERROR, REL_ERROR)) # expect: false
+IO.println(Float.almost_equals( Float.INFINITY,  Float.MAX, ABS_ERROR, REL_ERROR)) # expect: false
+IO.println(Float.almost_equals(-Float.INFINITY, -Float.MAX, ABS_ERROR, REL_ERROR)) # expect: false
+
+# comparisons involving NaN values
+IO.println(Float.almost_equals(Float.NAN, Float.NAN, ABS_ERROR, REL_ERROR)) # expect: false
+IO.println(Float.almost_equals(Float.NAN, 0.0, ABS_ERROR, REL_ERROR)) # expect: false
+IO.println(Float.almost_equals(0.0, Float.NAN, ABS_ERROR, REL_ERROR)) # expect: false
+IO.println(Float.almost_equals(Float.NAN, -0.0, ABS_ERROR, REL_ERROR)) # expect: false
+IO.println(Float.almost_equals(-0.0, Float.NAN, ABS_ERROR, REL_ERROR)) # expect: false
+IO.println(Float.almost_equals(Float.NAN, Float.INFINITY, ABS_ERROR, REL_ERROR)) # expect: false
+IO.println(Float.almost_equals(Float.INFINITY, Float.NAN, ABS_ERROR, REL_ERROR)) # expect: false
+IO.println(Float.almost_equals(Float.NAN, -Float.INFINITY, ABS_ERROR, REL_ERROR)) # expect: false
+IO.println(Float.almost_equals(-Float.INFINITY, Float.NAN, ABS_ERROR, REL_ERROR)) # expect: false
+IO.println(Float.almost_equals(Float.NAN, Float.MAX, ABS_ERROR, REL_ERROR)) # expect: false
+IO.println(Float.almost_equals(Float.MAX, Float.NAN, ABS_ERROR, REL_ERROR)) # expect: false
+IO.println(Float.almost_equals(Float.NAN, -Float.MAX, ABS_ERROR, REL_ERROR)) # expect: false
+IO.println(Float.almost_equals(-Float.MAX, Float.NAN, ABS_ERROR, REL_ERROR)) # expect: false
+IO.println(Float.almost_equals(Float.NAN, Float.MIN, ABS_ERROR, REL_ERROR)) # expect: false
+IO.println(Float.almost_equals(Float.MIN, Float.NAN, ABS_ERROR, REL_ERROR)) # expect: false
+IO.println(Float.almost_equals(Float.NAN, -Float.MIN, ABS_ERROR, REL_ERROR)) # expect: false
+IO.println(Float.almost_equals(-Float.MIN, Float.NAN, ABS_ERROR, REL_ERROR)) # expect: false
+
+# comparisons of numbers of opposite sides of 0
+IO.println(Float.almost_equals(1.000000001, -1.0, ABS_ERROR, REL_ERROR)) # expect: false
+IO.println(Float.almost_equals(-1.0, 1.000000001, ABS_ERROR, REL_ERROR)) # expect: false
+IO.println(Float.almost_equals(-1.000000001, 1.0, ABS_ERROR, REL_ERROR)) # expect: false
+IO.println(Float.almost_equals(1.0, -1.000000001, ABS_ERROR, REL_ERROR)) # expect: false
+IO.println(Float.almost_equals(10.0 * Float.TRUE_MIN, 10.0 * -Float.TRUE_MIN, ABS_ERROR, REL_ERROR)) # expect: true
+
+# Number very close to zero
+IO.println(Float.almost_equals( Float.MIN,  Float.MIN, ABS_ERROR, REL_ERROR)) # expect: true
+IO.println(Float.almost_equals( Float.MIN, -Float.MIN, ABS_ERROR, REL_ERROR)) # expect: true
+IO.println(Float.almost_equals(-Float.MIN,  Float.MIN, ABS_ERROR, REL_ERROR)) # expect: true
+IO.println(Float.almost_equals(0.0,  Float.MIN, ABS_ERROR, REL_ERROR)) # expect: true
+IO.println(Float.almost_equals(0.0, -Float.MIN, ABS_ERROR, REL_ERROR)) # expect: true
+IO.println(Float.almost_equals( Float.MIN, 0.0, ABS_ERROR, REL_ERROR)) # expect: true
+IO.println(Float.almost_equals(-Float.MIN, 0.0, ABS_ERROR, REL_ERROR)) # expect: true
+IO.println(Float.almost_equals(-Float.MIN, 0.0, ABS_ERROR, REL_ERROR)) # expect: true
+IO.println(Float.almost_equals(0.000000001, Float.MIN, ABS_ERROR, REL_ERROR)) # expect: false
+IO.println(Float.almost_equals(Float.MIN, 0.000000001, ABS_ERROR, REL_ERROR)) # expect: false

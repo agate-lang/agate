@@ -1,0 +1,2 @@
+IO.println(Math.ceil(4.2))  # expect: 5
+IO.println(Math.ceil(-4.2)) # expect: -4

@@ -1,0 +1,5 @@
+IO.println(Math.atan(-Float.INFINITY) == -Math.PI2) # expect: true
+IO.println(Math.atan(-1.0) == -Math.PI4)            # expect: true
+IO.println(Math.atan(0.0) == 0.0)                   # expect: true
+IO.println(Math.atan(1.0) == Math.PI4)              # expect: true
+IO.println(Math.atan(Float.INFINITY) == Math.PI2)   # expect: true

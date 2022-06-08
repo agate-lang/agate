@@ -1,0 +1,4 @@
+IO.println(Math.sqrt(1.0)) # expect: 1
+IO.println(Math.sqrt(2.0)) # expect: 1.4142135623731
+IO.println(Math.sqrt(4.0)) # expect: 2
+IO.println(Math.sqrt(9.0)) # expect: 3

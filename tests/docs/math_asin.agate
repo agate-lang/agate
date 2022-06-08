@@ -1,0 +1,3 @@
+IO.println(Math.asin(-1.0) == -Math.PI2)  # expect: true
+IO.println(Math.asin(0.0) == 0.0)         # expect: true
+IO.println(Math.asin(1.0) == Math.PI2)    # expect: true

@@ -1,0 +1,4 @@
+IO.println(Math.trunc(4.2))  # expect: 4
+IO.println(Math.trunc(4.8))  # expect: 4
+IO.println(Math.trunc(-4.2)) # expect: -4
+IO.println(Math.trunc(-4.8)) # expect: -4

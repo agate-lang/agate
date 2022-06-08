@@ -1,0 +1,2 @@
+IO.println(Math.floor(4.2))  # expect: 4
+IO.println(Math.floor(-4.2)) # expect: -5

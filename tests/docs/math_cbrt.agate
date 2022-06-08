@@ -1,0 +1,4 @@
+IO.println(Math.cbrt(1.0))  # expect: 1
+IO.println(Math.cbrt(2.0))  # expect: 1.2599210498949
+IO.println(Math.cbrt(8.0))  # expect: 2
+IO.println(Math.cbrt(27.0)) # expect: 3

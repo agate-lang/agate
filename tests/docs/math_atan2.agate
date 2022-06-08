@@ -1,0 +1,25 @@
+IO.println(Math.atan2(+0.0, +1.0) == +0.0)      # expect: true
+IO.println(Math.atan2(-0.0, +1.0) == -0.0)      # expect: true
+IO.println(Math.atan2(+0.0, -1.0) == Math.PI)   # expect: true
+IO.println(Math.atan2(-0.0, -1.0) == -Math.PI)  # expect: true
+
+IO.println(Math.atan2(+1.0, 0.0) == Math.PI2)   # expect: true
+IO.println(Math.atan2(-1.0, 0.0) == -Math.PI2)  # expect: true
+
+IO.println(Math.atan2(+0.0, +0.0) == +0.0)      # expect: true
+IO.println(Math.atan2(-0.0, +0.0) == -0.0)      # expect: true
+IO.println(Math.atan2(+0.0, -0.0) == Math.PI)   # expect: true
+IO.println(Math.atan2(-0.0, -0.0) == -Math.PI)  # expect: true
+
+IO.println(Math.atan2(+1.0, Float.INFINITY) == +0.0)      # expect: true
+IO.println(Math.atan2(-1.0, Float.INFINITY) == -0.0)      # expect: true
+IO.println(Math.atan2(+1.0, -Float.INFINITY) == Math.PI)  # expect: true
+IO.println(Math.atan2(-1.0, -Float.INFINITY) == -Math.PI) # expect: true
+
+IO.println(Math.atan2(Float.INFINITY, 0.0) == Math.PI2)   # expect: true
+IO.println(Math.atan2(-Float.INFINITY, 0.0) == -Math.PI2) # expect: true
+
+IO.println(Math.atan2(Float.INFINITY, Float.INFINITY) == Math.PI4)          # expect: true
+IO.println(Math.atan2(-Float.INFINITY, Float.INFINITY) == -Math.PI4)        # expect: true
+IO.println(Math.atan2(Float.INFINITY, -Float.INFINITY) == 3.0 * Math.PI4)   # expect: true
+IO.println(Math.atan2(-Float.INFINITY, -Float.INFINITY) == -3.0 * Math.PI4) # expect: true
