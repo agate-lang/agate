@@ -1,0 +1,4 @@
+IO.println(4.2 < 6.9)  # expect: true
+IO.println(4.2 <= 6.9) # expect: true
+IO.println(4.2 > 6.9)  # expect: false
+IO.println(4.2 >= 6.9) # expect: false

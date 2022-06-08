@@ -1,0 +1,4 @@
+class Cancoillote { }
+
+IO.println(Cancoillote.hash == "Cancoillote".hash) # expect: true
+IO.println(Object.hash == "Object".hash)           # expect: true

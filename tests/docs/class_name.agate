@@ -1,0 +1,4 @@
+class Cancoillote { }
+
+IO.println(Cancoillote.name) # expect: Cancoillote
+IO.println(Object.name)      # expect: Object

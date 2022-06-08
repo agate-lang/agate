@@ -1,0 +1,3 @@
+IO.println(Float.almost_equals(42.0, 42.00000000000001)) # expect: true
+IO.println(Float.almost_equals(0.0, Float.MIN))          # expect: true
+IO.println(Float.almost_equals(0.0, Float.EPSILON))      # expect: true

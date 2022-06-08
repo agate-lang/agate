@@ -1,0 +1,2 @@
+IO.println(4.2.to_i == 4)     # expect: true
+IO.println((-6.9).to_i == -6) # expect: true

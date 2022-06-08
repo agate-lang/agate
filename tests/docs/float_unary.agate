@@ -1,0 +1,2 @@
+IO.println(+4.2) # expect: 4.2
+IO.println(-4.2) # expect: -4.2

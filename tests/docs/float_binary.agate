@@ -1,0 +1,4 @@
+IO.println(4.2 + 6.9) # expect: 11.1
+IO.println(4.2 - 6.9) # expect: -2.7
+IO.println(4.2 * 6.9) # expect: 28.98
+IO.println(4.2 / 6.9) # expect: 0.60869565217391

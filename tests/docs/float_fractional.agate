@@ -1,0 +1,2 @@
+IO.println(4.2.fractional)    # expect: 0.2
+IO.println((-6.9).fractional) # expect: -0.9

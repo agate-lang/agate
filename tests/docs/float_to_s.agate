@@ -1,0 +1,2 @@
+IO.println(4.2.to_s == "4.2")     # expect: true
+IO.println((-6.9).to_s == "-6.9") # expect: true

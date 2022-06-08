@@ -1,0 +1,2 @@
+IO.println(4.2.integral)    # expect: 4
+IO.println((-6.9).integral) # expect: -6
