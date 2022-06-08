@@ -30,7 +30,7 @@
  *     - module
  *     - function, native, upvalue and closure
  *     - class, instance and foreign
- *     - buffer, array, map and range
+ *     - array, map and range
  *   - opcodes
  *   - vm
  *   - misc
@@ -206,7 +206,6 @@ typedef struct {
 
 typedef enum {
   AGATE_ENTITY_ARRAY,
-  AGATE_ENTITY_BUFFER,
   AGATE_ENTITY_CLASS,
   AGATE_ENTITY_CLOSURE,
   AGATE_ENTITY_FOREIGN,
@@ -338,15 +337,8 @@ typedef struct {
 } AgateForeign;
 
 /*
- * types - entities - buffer, array, map and range
+ * types - entities - array, map and range
  */
-
-AGATE_ARRAY_DECLARE(CodepointArray, uint32_t)
-
-typedef struct {
-  AgateEntity base;
-  AgateCodepointArray elements;
-} AgateBuffer;
 
 typedef struct {
   AgateEntity base;
@@ -454,7 +446,6 @@ struct AgateVM {
 
   AgateClass *array_class;
   AgateClass *bool_class;
-  AgateClass *buffer_class;
   AgateClass *char_class;
   AgateClass *class_class;
   AgateClass *float_class;
@@ -614,9 +605,6 @@ AGATE_ARRAY_DEFINE(LineInfoArray, AgateLineInfo)
 
 AGATE_ARRAY_DEFINE(MethodArray, AgateMethod)
 AGATE_ARRAY_DEFINE_RESIZE(MethodArray, AgateMethod)
-
-AGATE_ARRAY_DEFINE(CodepointArray, uint32_t)
-AGATE_ARRAY_DEFINE_APPEND_MULTIPLE(CodepointArray, uint32_t)
 
 /*
  * utf8
@@ -813,7 +801,6 @@ static inline AgateEntityKind agateEntityKind(AgateValue value) { return agateAs
 static inline bool agateIsEntityKind(AgateValue value, AgateEntityKind kind) { return agateIsEntity(value) && agateAsEntity(value)->kind == kind; }
 
 static inline bool agateIsArray(AgateValue value) { return agateIsEntityKind(value, AGATE_ENTITY_ARRAY); }
-static inline bool agateIsBuffer(AgateValue value) { return agateIsEntityKind(value, AGATE_ENTITY_BUFFER); }
 static inline bool agateIsClass(AgateValue value) { return agateIsEntityKind(value, AGATE_ENTITY_CLASS); }
 static inline bool agateIsClosure(AgateValue value) { return agateIsEntityKind(value, AGATE_ENTITY_CLOSURE); }
 static inline bool agateIsForeign(AgateValue value) { return agateIsEntityKind(value, AGATE_ENTITY_FOREIGN); }
@@ -826,7 +813,6 @@ static inline bool agateIsString(AgateValue value) { return agateIsEntityKind(va
 static inline bool agateIsUpvalue(AgateValue value) { return agateIsEntityKind(value, AGATE_ENTITY_UPVALUE); }
 
 static inline AgateArray *agateAsArray(AgateValue value) { return (AgateArray *) agateAsEntity(value); }
-static inline AgateBuffer *agateAsBuffer(AgateValue value) { return (AgateBuffer *) agateAsEntity(value); }
 static inline AgateClass *agateAsClass(AgateValue value) { return (AgateClass *) agateAsEntity(value); }
 static inline AgateClosure *agateAsClosure(AgateValue value) { return (AgateClosure *) agateAsEntity(value); }
 static inline AgateForeign *agateAsForeign(AgateValue value) { return (AgateForeign *) agateAsEntity(value); }
@@ -987,7 +973,6 @@ static inline uint64_t agateRangeHash(const AgateRange *range) {
 static uint64_t agateEntityHash(const AgateEntity *entity) {
   switch (entity->kind) {
     case AGATE_ENTITY_ARRAY:
-    case AGATE_ENTITY_BUFFER:
     case AGATE_ENTITY_CLOSURE:
     case AGATE_ENTITY_FOREIGN:
     case AGATE_ENTITY_INSTANCE:
@@ -1592,14 +1577,6 @@ static AgateArray *agateArrayNew(AgateVM *vm) {
   return array;
 }
 
-// Buffer
-
-static AgateBuffer *agateBufferNew(AgateVM *vm) {
-  AgateBuffer *buffer = agateAllocateEntity(vm, AgateBuffer, AGATE_ENTITY_BUFFER, vm->buffer_class);
-  agateCodepointArrayCreate(&buffer->elements);
-  return buffer;
-}
-
 // Class
 
 static AgateClass *agateClassNewBare(AgateVM *vm, AgateModule *module, int field_count, AgateString *name) {
@@ -1806,13 +1783,6 @@ static void agateEntityDelete(AgateEntity *entity, AgateVM *vm) {
       AgateArray *array = (AgateArray *) entity;
       agateValueArrayDestroy(&array->elements, vm);
       agateFree(vm, AgateArray, array);
-      break;
-    }
-
-    case AGATE_ENTITY_BUFFER: {
-      AgateBuffer *buffer = (AgateBuffer *) entity;
-      agateCodepointArrayDestroy(&buffer->elements, vm);
-      agateFree(vm, AgateBuffer, buffer);
       break;
     }
 
@@ -2139,10 +2109,6 @@ static void agateBlackenObject(AgateVM *vm, AgateEntity *entity) {
     case AGATE_ENTITY_ARRAY: {
       AgateArray *array = (AgateArray *) entity;
       agateMarkArray(vm, &array->elements);
-      break;
-    }
-
-    case AGATE_ENTITY_BUFFER: {
       break;
     }
 
@@ -2685,7 +2651,7 @@ static AgateValue agateValidateSuperclass(AgateVM *vm, AgateValue name, AgateVal
 
   AgateClass *superclass = agateAsClass(superclass_value);
 
-  if (superclass == vm->array_class || superclass == vm->bool_class || superclass == vm->buffer_class || superclass == vm->char_class || superclass == vm->class_class || superclass == vm->float_class || superclass == vm->fn_class || superclass == vm->int_class || superclass == vm->map_class || superclass == vm->nil_class || superclass == vm->range_class || superclass == vm->string_class) {
+  if (superclass == vm->array_class || superclass == vm->bool_class || superclass == vm->char_class || superclass == vm->class_class || superclass == vm->float_class || superclass == vm->fn_class || superclass == vm->int_class || superclass == vm->map_class || superclass == vm->nil_class || superclass == vm->range_class || superclass == vm->string_class) {
     return agateEntityValue(agateStringNewFormat(vm, "Class '@' cannot inherit from built-in class '@'.", agateAsString(name), superclass->name));
   }
 
@@ -4084,151 +4050,6 @@ static bool agateCoreArraySubscriptSetter(AgateVM *vm, int argc, AgateValue *arg
   return true;
 }
 
-// Buffer
-
-static bool agateCoreBufferNew(AgateVM *vm, int argc, AgateValue *args) {
-  args[0] = agateEntityValue(agateBufferNew(vm));
-  return true;
-}
-
-static bool agateCoreBufferClear(AgateVM *vm, int argc, AgateValue *args) {
-  agateAsBuffer(args[0])->elements.size = 0;
-  args[0] = agateNilValue();
-  return true;
-}
-
-static bool agateCoreBufferCount(AgateVM *vm, int argc, AgateValue *args) {
-  args[0] = agateIntValue(agateAsBuffer(args[0])->elements.size);
-  return true;
-}
-
-static bool agateCoreBufferAppend(AgateVM *vm, int argc, AgateValue *args) {
-  AgateBuffer *buffer = agateAsBuffer(args[0]);
-
-  if (agateIsChar(args[1])) {
-    agateCodepointArrayAppend(&buffer->elements, agateAsChar(args[1]), vm);
-    args[0] = args[1];
-    return true;
-  }
-
-  if (agateIsString(args[1])) {
-    AgateString *string = agateAsString(args[1]);
-    ptrdiff_t i = 0;
-
-    while (i < string->length) {
-      uint32_t c = agateUtf8Decode(string->data + i, string->length - i, NULL);
-      assert(c != AGATE_INVALID_CHAR);
-      agateCodepointArrayAppend(&buffer->elements, c, vm);
-      i += agateUtf8DecodeLength(string->data + i);
-    }
-
-    args[0] = args[1];
-    return true;
-  }
-
-  if (agateIsBuffer(args[1])) {
-    AgateBuffer *other = agateAsBuffer(args[1]);
-    agateCodepointArrayAppendMultiple(&buffer->elements, other->elements.data, other->elements.size, vm);
-    args[0] = args[1];
-    return true;
-  }
-
-  vm->error = AGATE_CONST_STRING(vm, "Argument must be a character or a string or a buffer.");
-  return false;
-}
-
-static bool agateCoreBufferIterate(AgateVM *vm, int argc, AgateValue *args) {
-  AgateBuffer *buffer = agateAsBuffer(args[0]);
-
-  if (agateIsNil(args[1])) {
-    if (buffer->elements.size == 0) {
-      args[0] = agateNilValue();
-    } else {
-      args[0] = agateIntValue(0);
-    }
-
-    return true;
-  }
-
-  if (!agateValidateInt(vm, args[1], "iterator")) {
-    return false;
-  }
-
-  int64_t index = agateAsInt(args[1]);
-
-  if (index < 0 || index >= buffer->elements.size - 1) {
-    args[0] = agateNilValue();
-  } else {
-    args[0] = agateIntValue(index + 1);
-  }
-
-  return true;
-}
-
-static bool agateCoreBufferIteratorValue(AgateVM *vm, int argc, AgateValue *args) {
-  AgateBuffer *buffer = agateAsBuffer(args[0]);
-  ptrdiff_t index = agateValidateIndex(vm, args[1], buffer->elements.size, "iterator");
-
-  if (index == AGATE_INDEX_ERROR) {
-    return false;
-  }
-
-  args[0] = agateCharValue(buffer->elements.data[index]);
-  return true;
-}
-
-static bool agateCoreBufferSubscriptGetter(AgateVM *vm, int argc, AgateValue *args) {
-  AgateBuffer *buffer = agateAsBuffer(args[0]);
-  ptrdiff_t index = agateValidateIndex(vm, args[1], buffer->elements.size, "index");
-
-  if (index == AGATE_INDEX_ERROR) {
-    return false;
-  }
-
-  args[0] = agateCharValue(buffer->elements.data[index]);
-  return true;
-}
-
-static bool agateCoreBufferSubscriptSetter(AgateVM *vm, int argc, AgateValue *args) {
-  AgateBuffer *buffer = agateAsBuffer(args[0]);
-  ptrdiff_t index = agateValidateIndex(vm, args[1], buffer->elements.size, "index");
-
-  if (index == AGATE_INDEX_ERROR) {
-    return false;
-  }
-
-  if (!agateValidateChar(vm, args[2], "value")) {
-    return false;
-  }
-
-  buffer->elements.data[index] = agateAsChar(args[2]);
-  args[0] = args[2];
-  return true;
-}
-
-static bool agateCoreBufferToS(AgateVM *vm, int argc, AgateValue *args) {
-  AgateBuffer *buffer = agateAsBuffer(args[0]);
-  ptrdiff_t length = 0;
-
-  for (ptrdiff_t i = 0; i < buffer->elements.size; ++i) {
-    length += agateUtf8EncodeLength(buffer->elements.data[i]);
-  }
-
-  AgateString *string = agateStringAllocate(vm, length, 0);
-  char *out = string->data;
-
-  for (ptrdiff_t i = 0; i < buffer->elements.size; ++i) {
-    out += agateUtf8Encode(buffer->elements.data[i], out);
-  }
-
-  assert(out == string->data + length);
-  string->data[length] = '\0';
-  string->hash = agateStringHash(string->data, string->length);
-  args[0] = agateEntityValue(string);
-  return true;
-}
-
-
 // String
 
 static bool agateCoreStringContains(AgateVM *vm, int argc, AgateValue *args) {
@@ -5112,17 +4933,6 @@ static void agateLoadCoreModule(AgateVM *vm) {
   agateClassBindPrimitive(vm, vm->bool_class, "to_i", agateCoreBoolToI);
   agateClassBindPrimitive(vm, vm->bool_class, "to_s", agateCoreBoolToS);
 
-  vm->buffer_class = agateAsClass(agateFindModuleVariable(vm, core, "Buffer"));
-  agateClassBindPrimitive(vm, vm->buffer_class->base.type, "new()", agateCoreBufferNew);
-  agateClassBindPrimitive(vm, vm->buffer_class, "[_]", agateCoreBufferSubscriptGetter);
-  agateClassBindPrimitive(vm, vm->buffer_class, "[_]=(_)", agateCoreBufferSubscriptSetter);
-  agateClassBindPrimitive(vm, vm->buffer_class, "append(_)", agateCoreBufferAppend);
-  agateClassBindPrimitive(vm, vm->buffer_class, "clear()", agateCoreBufferClear);
-  agateClassBindPrimitive(vm, vm->buffer_class, "count", agateCoreBufferCount);
-  agateClassBindPrimitive(vm, vm->buffer_class, "iterate(_)", agateCoreBufferIterate);
-  agateClassBindPrimitive(vm, vm->buffer_class, "iterator_value(_)", agateCoreBufferIteratorValue);
-  agateClassBindPrimitive(vm, vm->buffer_class, "to_s", agateCoreBufferToS);
-
   vm->char_class = agateAsClass(agateFindModuleVariable(vm, core, "Char"));
   agateClassBindPrimitive(vm, vm->char_class, "<(_)", agateCoreCharLt);
   agateClassBindPrimitive(vm, vm->char_class, "<=(_)", agateCoreCharLEq);
@@ -5432,7 +5242,6 @@ AgateVM *agateNewVM(const AgateConfig *config) {
 
   vm->array_class = NULL;
   vm->bool_class = NULL;
-  vm->buffer_class = NULL;
   vm->char_class = NULL;
   vm->class_class = NULL;
   vm->float_class = NULL;

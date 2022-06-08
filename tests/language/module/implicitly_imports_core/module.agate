@@ -1,6 +1,5 @@
 # nontest
 IO.println(Array)
-IO.println(Buffer)
 IO.println(Bool)
 IO.println(Char)
 IO.println(Class)

@@ -70,17 +70,20 @@ class Sequence {
   join() { .join("") }
 
   join(sep) {
-    def buf = Buffer.new()
+    if (!(sep is String) && !(sep is Char)) {
+      System.abort("Argument must be a character or a string.")
+    }
+    def res = ""
     def first = true
     for (element in this) {
       if (first) {
         first = false
       } else {
-        buf.append(sep)
+        res = res + sep.to_s
       }
-      buf.append(element.to_s)
+      res = res + element.to_s
     }
-    return buf.to_s
+    return res
   }
 
   map(fn) { __MapSequence.new(this, fn) }
@@ -258,9 +261,6 @@ class Array is Sequence {
     }
     return result
   }
-}
-
-class Buffer is Sequence {
 }
 
 class String is Sequence {

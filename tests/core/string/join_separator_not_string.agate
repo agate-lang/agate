@@ -1,2 +1,2 @@
 # result: runtime error
-"string".join(2) # expect: Argument must be a character or a string or a buffer.
+"string".join(2) # expect: Argument must be a character or a string.

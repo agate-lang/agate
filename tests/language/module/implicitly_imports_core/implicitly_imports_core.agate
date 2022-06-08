@@ -1,6 +1,5 @@
 import "./module"
 # expect: Array
-# expect: Buffer
 # expect: Bool
 # expect: Char
 # expect: Class
