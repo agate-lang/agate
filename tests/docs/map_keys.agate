@@ -1,0 +1,4 @@
+def m = { 1: 'a' }
+for (key in m.keys) {
+  IO.println(key) # expect: 1
+}

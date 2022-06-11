@@ -1,0 +1,3 @@
+def m = { 1: 'a', true: 3.14, "good": nil }
+IO.println(m.contains(1)) # expect: true
+IO.println(m.contains("bad")) # expect: false

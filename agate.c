@@ -5013,14 +5013,14 @@ static void agateLoadCoreModule(AgateVM *vm) {
   agateClassBindPrimitive(vm, vm->map_class, "__contains(_,_)", agateCoreMapContains);
   agateClassBindPrimitive(vm, vm->map_class, "__erase(_,_)", agateCoreMapErase);
   agateClassBindPrimitive(vm, vm->map_class, "__insert(_,_,_)", agateCoreMapInsert);
+  agateClassBindPrimitive(vm, vm->map_class, "__key_from_iterator(_)", agateCoreMapKeyFromIterator);
   agateClassBindPrimitive(vm, vm->map_class, "__put(_,_,_)", agateCoreMapPut);
   agateClassBindPrimitive(vm, vm->map_class, "__subscript_getter(_,_)", agateCoreMapSubscriptGetter);
   agateClassBindPrimitive(vm, vm->map_class, "__subscript_setter(_,_,_)", agateCoreMapSubscriptSetter);
+  agateClassBindPrimitive(vm, vm->map_class, "__value_from_iterator(_)", agateCoreMapValueFromIterator);
   agateClassBindPrimitive(vm, vm->map_class, "clear()", agateCoreMapClear);
   agateClassBindPrimitive(vm, vm->map_class, "count", agateCoreMapCount);
   agateClassBindPrimitive(vm, vm->map_class, "iterate(_)", agateCoreMapIterate);
-  agateClassBindPrimitive(vm, vm->map_class, "key_from_iterator(_)", agateCoreMapKeyFromIterator);
-  agateClassBindPrimitive(vm, vm->map_class, "value_from_iterator(_)", agateCoreMapValueFromIterator);
 
   AgateClass *math_class = agateAsClass(agateFindModuleVariable(vm, core, "Math"));
   agateClassBindPrimitive(vm, math_class->base.type, "E", agateCoreMathE);

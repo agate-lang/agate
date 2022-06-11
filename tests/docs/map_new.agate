@@ -1,0 +1,2 @@
+def m = Map.new()
+IO.println(m) # expect: {}

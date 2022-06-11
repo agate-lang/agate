@@ -1,6 +1,0 @@
-class Foo {
-  construct new() {}
-  to_s { "Foo" }
-}
-
-IO.println_all([1, true, Foo.new(), "s"]) # expect: 1trueFoos

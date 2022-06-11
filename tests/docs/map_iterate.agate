@@ -1,0 +1,7 @@
+def m = { 1: 'a' }
+for (entry in m) {
+  IO.println(entry.type) # expect: MapEntry
+  IO.println(entry.key) # expect: 1
+  IO.println(entry.value) # expect: a
+  IO.println(entry) # expect: 1: a
+}

@@ -1,0 +1,1 @@
+IO.println([ 1, 'a' ]) # expect: [1, a]

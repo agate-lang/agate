@@ -1,0 +1,4 @@
+def a = [ 1, 'a', 3.14, "good", true ]
+def b = a.to_a
+IO.println(b) # expect: [1, a, 3.14, good, true]
+IO.println(Object.same(a, b)) # expect: false

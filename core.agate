@@ -292,7 +292,7 @@ class __MapKeySequence is Sequence {
   }
 
   iterate(iterator) { @map.iterate(iterator) }
-  iterator_value(iterator) { @map.key_from_iterator(iterator) }
+  iterator_value(iterator) { @map.__key_from_iterator(iterator) }
 }
 
 class __MapValueSequence is Sequence {
@@ -301,14 +301,14 @@ class __MapValueSequence is Sequence {
   }
 
   iterate(iterator) { @map.iterate(iterator) }
-  iterator_value(iterator) { @map.value_from_iterator(iterator) }
+  iterator_value(iterator) { @map.__value_from_iterator(iterator) }
 }
 
 class Map is Sequence {
   keys { __MapKeySequence.new(this) }
   values { __MapValueSequence.new(this) }
 
-  iterator_value(iterator) { MapEntry.new(.key_from_iterator(iterator), .value_from_iterator(iterator)) }
+  iterator_value(iterator) { MapEntry.new(.__key_from_iterator(iterator), .__value_from_iterator(iterator)) }
 
   contains(key) { .__contains(key, key.hash) }
   insert(key, value) { .__insert(key, value, key.hash) }
@@ -332,12 +332,6 @@ class IO {
     return obj
   }
 
-  static print_all(seq) {
-    for (obj in seq) {
-      .__print_object(obj)
-    }
-  }
-
   static println() {
     .__print("\n")
   }
@@ -346,13 +340,6 @@ class IO {
     .__print_object(obj)
     .__print("\n")
     return obj
-  }
-
-  static println_all(seq) {
-    for (obj in seq) {
-      .__print_object(obj)
-    }
-    .__print("\n")
   }
 
   static __print_object(obj) {

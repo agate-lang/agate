@@ -1,4 +1,4 @@
-def a = [ 1, 'a', 3.14, "good", true ]
-a.remove(3.14)
-IO.println(a) # expect: [1, a, good, true]
+def a = [ 1, true, 'a', 3.14, "good", true ]
+a.remove(true)
+IO.println(a) # expect: [1, a, 3.14, good, true]
 IO.println(a.remove("bad")) # expect: nil

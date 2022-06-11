@@ -1,0 +1,2 @@
+IO.print(3 + 5) # expect: 8
+IO.println()
