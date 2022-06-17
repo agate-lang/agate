@@ -6163,7 +6163,7 @@ static inline bool agateIsDigit(char c) {
 }
 
 static inline bool agateIsBinDigit(char c) {
-  return c == '0' || c <= '1';
+  return c == '0' || c == '1';
 }
 
 static inline bool agateIsOctDigit(char c) {
@@ -6488,7 +6488,7 @@ static void agateParserReadNumberWithZero(AgateParser *parser) {
     }
     case 'b':
     {
-      agateParserAdvanceChar(parser); // eat 'x'
+      agateParserAdvanceChar(parser); // eat 'b'
 
       while (agateIsBinDigit(agateParserPeekChar(parser))) {
         agateParserAdvanceChar(parser);
