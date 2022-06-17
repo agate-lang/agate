@@ -3523,8 +3523,6 @@ AGATE_INT_INFIX(Modulo,     %)
 AGATE_INT_INFIX(And,        &)
 AGATE_INT_INFIX(Or,         |)
 AGATE_INT_INFIX(Xor,        ^)
-AGATE_INT_INFIX(LeftShift,  <<)
-AGATE_INT_INFIX(RightShift, >>)
 
 #undef AGATE_INT_INFIX
 
@@ -3555,6 +3553,51 @@ static bool agateCoreIntPrefixMinus(AgateVM *vm, int argc, AgateValue *args) {
 
 static bool agateCoreIntInvert(AgateVM *vm, int argc, AgateValue *args) {
   args[0] = agateIntValue(~agateAsInt(args[0]));
+  return true;
+}
+
+static bool agateCoreIntLeftShift(AgateVM *vm, int argc, AgateValue *args) {
+  if (!agateValidateInt(vm, args[1], "Right operand")) {
+    return false;
+  }
+
+  int64_t shift = agateAsInt(args[1]);
+
+  if (shift < 0) {
+    vm->error = AGATE_CONST_STRING(vm, "Can not shift from a negative value.");
+  }
+
+  args[0] = agateIntValue(agateAsInt(args[0]) << (shift & 0x3F));
+  return true;
+}
+
+static bool agateCoreIntRightShift(AgateVM *vm, int argc, AgateValue *args) {
+  if (!agateValidateInt(vm, args[1], "Right operand")) {
+    return false;
+  }
+
+  int64_t shift = agateAsInt(args[1]);
+
+  if (shift < 0) {
+    vm->error = AGATE_CONST_STRING(vm, "Can not shift from a negative value.");
+  }
+
+  args[0] = agateIntValue(agateAsInt(args[0]) >> (shift & 0x3F));
+  return true;
+}
+
+static bool agateCoreIntLogicalRightShift(AgateVM *vm, int argc, AgateValue *args) {
+  if (!agateValidateInt(vm, args[1], "Right operand")) {
+    return false;
+  }
+
+  int64_t shift = agateAsInt(args[1]);
+
+  if (shift < 0) {
+    vm->error = AGATE_CONST_STRING(vm, "Can not shift from a negative value.");
+  }
+
+  args[0] = agateIntValue(((uint64_t) agateAsInt(args[0])) >> (shift & 0x3F));
   return true;
 }
 
@@ -4994,6 +5037,7 @@ static void agateLoadCoreModule(AgateVM *vm) {
   agateClassBindPrimitive(vm, vm->int_class, "^(_)", agateCoreIntXor);
   agateClassBindPrimitive(vm, vm->int_class, "<<(_)", agateCoreIntLeftShift);
   agateClassBindPrimitive(vm, vm->int_class, ">>(_)", agateCoreIntRightShift);
+  agateClassBindPrimitive(vm, vm->int_class, ">>>(_)", agateCoreIntLogicalRightShift);
   agateClassBindPrimitive(vm, vm->int_class, "<(_)", agateCoreIntLt);
   agateClassBindPrimitive(vm, vm->int_class, "<=(_)", agateCoreIntLEq);
   agateClassBindPrimitive(vm, vm->int_class, ">(_)", agateCoreIntGt);
@@ -5750,6 +5794,7 @@ typedef enum {
   AGATE_TOKEN_GREATER,
   AGATE_TOKEN_GREATER_EQUAL,
   AGATE_TOKEN_GREATER_GREATER,
+  AGATE_TOKEN_GREATER_GREATER_GREATER,
   AGATE_TOKEN_IDENTIFIER,
   AGATE_TOKEN_IF,
   AGATE_TOKEN_IMPORT,
@@ -6623,9 +6668,22 @@ static void agateParserAdvance(AgateParser *parser) {
     case '|': agateParserTwoCharToken(parser, AGATE_TOKEN_BAR, '|', AGATE_TOKEN_BAR_BAR); return;
     case '!': agateParserTwoCharToken(parser, AGATE_TOKEN_BANG, '=', AGATE_TOKEN_BANG_EQUAL); return;
     case '=': agateParserTwoCharToken(parser, AGATE_TOKEN_EQUAL, '=', AGATE_TOKEN_EQUAL_EQUAL); return;
-    case '<': agateParserTwoCharTokenAlt(parser, AGATE_TOKEN_LESS, '=', AGATE_TOKEN_LESS_EQUAL, '<', AGATE_TOKEN_LESS_LESS); return;
-    case '>': agateParserTwoCharTokenAlt(parser, AGATE_TOKEN_GREATER, '=', AGATE_TOKEN_GREATER_EQUAL, '>', AGATE_TOKEN_GREATER_GREATER); return;
-
+    case '<':
+      if (agateCompilerMatchChar(parser, '=')) {
+        agateParserMakeToken(parser, AGATE_TOKEN_LESS_EQUAL);
+      } else {
+        agateParserTwoCharToken(parser, AGATE_TOKEN_LESS, '<', AGATE_TOKEN_LESS_LESS);
+      }
+      return;
+    case '>':
+      if (agateCompilerMatchChar(parser, '=')) {
+        agateParserMakeToken(parser, AGATE_TOKEN_GREATER_EQUAL);
+      } else if (agateCompilerMatchChar(parser, '>')) {
+        agateParserTwoCharToken(parser, AGATE_TOKEN_GREATER_GREATER, '>', AGATE_TOKEN_GREATER_GREATER_GREATER);
+      } else {
+        agateParserMakeToken(parser, AGATE_TOKEN_GREATER);
+      }
+      return;
     case '@':
       if (agateCompilerMatchChar(parser, '@')) {
         agateParserReadIdentifier(parser, AGATE_TOKEN_FIELD_CLASS);
@@ -7866,7 +7924,7 @@ static void agateRangeExpression(AgateCompiler *compiler, bool can_assign) {
 }
 
 static void agateShiftExpression(AgateCompiler *compiler, bool can_assign) {
-  static const AgateTokenKind ShiftTokens[] = { AGATE_TOKEN_LESS_LESS, AGATE_TOKEN_GREATER_GREATER };
+  static const AgateTokenKind ShiftTokens[] = { AGATE_TOKEN_LESS_LESS, AGATE_TOKEN_GREATER_GREATER, AGATE_TOKEN_GREATER_GREATER_GREATER };
 
   agateRangeExpression(compiler, can_assign);
 
@@ -7880,6 +7938,9 @@ static void agateShiftExpression(AgateCompiler *compiler, bool can_assign) {
         break;
       case AGATE_TOKEN_GREATER_GREATER:
         agateEmitInvoke(compiler, 1, ">>(_)", 5);
+        break;
+      case AGATE_TOKEN_GREATER_GREATER_GREATER:
+        agateEmitInvoke(compiler, 1, ">>>(_)", 6);
         break;
       default:
         assert(false);
@@ -8322,6 +8383,7 @@ static bool agateMethod(AgateCompiler *compiler, AgateVariable class_variable) {
     case AGATE_TOKEN_GREATER:
     case AGATE_TOKEN_GREATER_EQUAL:
     case AGATE_TOKEN_GREATER_GREATER:
+    case AGATE_TOKEN_GREATER_GREATER_GREATER:
     case AGATE_TOKEN_IS:
     case AGATE_TOKEN_LESS:
     case AGATE_TOKEN_LESS_EQUAL:

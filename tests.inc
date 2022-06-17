@@ -117,6 +117,7 @@ static const char *AgateTestFiles[] = {
   "tests/core/function/type.agate",
   "tests/core/int/bitwise_and.agate",
   "tests/core/int/bitwise_and_operand_not_num.agate",
+  "tests/core/int/bitwise_logical_rsh.agate",
   "tests/core/int/bitwise_lsh.agate",
   "tests/core/int/bitwise_lsh_operand_not_num.agate",
   "tests/core/int/bitwise_not.agate",

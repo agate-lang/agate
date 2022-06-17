@@ -102,6 +102,7 @@ ESC   (\\([0'"\\abfnrtv%]|x[a-fA-F0-9]{2}|u[a-fA-F0-9]{4}|U[a-fA-F0-9]{8}))
 ".."          { return OP_INCL_RANGE; }
 "&&"          { return OP_LAND; }
 "<="          { return OP_LEQ; }
+">>>"         { return OP_LOGICAL_RSHIFT; }
 "||"          { return OP_LOR; }
 "<<"          { return OP_LSHIFT; }
 "!="          { return OP_NE; }

@@ -60,6 +60,7 @@ static int yyerror(const char *message) {
 %token          OP_INCL_RANGE     ".."
 %token          OP_LAND           "&&"
 %token          OP_LEQ            "<="
+%token          OP_LOGICAL_RSHIFT ">>>"
 %token          OP_LOR            "||"
 %token          OP_LSHIFT         "<<"
 %token          OP_NE             "!="
@@ -189,6 +190,7 @@ binary_operator:
   | '+'
   | OP_LSHIFT
   | OP_RSHIFT
+  | OP_LOGICAL_RSHIFT
   | '*'
   | '^'
   ;
@@ -305,6 +307,7 @@ expr_bitwise_and:
 expr_shift:
     expr_shift OP_LSHIFT expr_range
   | expr_shift OP_RSHIFT expr_range
+  | expr_shift OP_LOGICAL_RSHIFT expr_range
   | expr_range
   ;
 

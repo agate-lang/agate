@@ -1,0 +1,9 @@
+IO.println(0 >>> 0) # expect: 0
+IO.println(1 >>> 0) # expect: 1
+IO.println(0 >>> 1) # expect: 0
+IO.println(1 >>> 1) # expect: 0
+IO.println(0xAAAAAAAA >>> 1) # expect: 1431655765
+IO.println(0xF0F0F0F0 >>> 1) # expect: 2021161080
+
+IO.println(-4 >>> 1) # expect: 9223372036854775806
+IO.println(-1 >>> 32 == 0xFFFFFFFF) # expect: true
