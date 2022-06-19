@@ -1,0 +1,2 @@
+IO.println((42..69).min) # expect: 42
+IO.println((12..7).min)  # expect: 7

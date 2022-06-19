@@ -1,0 +1,1 @@
+IO.println(Int.MIN) # expect: -9223372036854775808

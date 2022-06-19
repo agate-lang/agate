@@ -1,0 +1,4 @@
+IO.println(42 < 69)  # expect: true
+IO.println(42 <= 69) # expect: true
+IO.println(42 > 69)  # expect: false
+IO.println(42 >= 69) # expect: false

@@ -1,0 +1,2 @@
+IO.println(42.to_c) # expect: *
+IO.println(26408.to_c) # expect: 木

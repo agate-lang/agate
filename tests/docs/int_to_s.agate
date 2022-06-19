@@ -1,0 +1,1 @@
+IO.println(42.to_s == "42") # expect: true

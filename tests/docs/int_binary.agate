@@ -1,0 +1,4 @@
+IO.println(42 + 69) # expect: 111
+IO.println(42 - 69) # expect: -27
+IO.println(42 * 69) # expect: 2898
+IO.println(42 / 69) # expect: 0

@@ -1,0 +1,4 @@
+def r = 42..69
+IO.println(r.min) # expect: 42
+IO.println(r.max) # expect: 69
+IO.println(r.inclusive) # expect: true

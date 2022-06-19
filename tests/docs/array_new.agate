@@ -1,2 +1,3 @@
 def a = Array.new()
 IO.println(a.empty) # expect: true
+IO.println(a) # expect: []

@@ -1,0 +1,2 @@
+IO.println((42..69).to) # expect: 69
+IO.println((12..7).to)  # expect: 7

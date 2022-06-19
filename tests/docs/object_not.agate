@@ -1,0 +1,5 @@
+class Saucisse {
+  construct new() { }
+}
+def s = Saucisse.new()
+IO.println(!s) # expect: false

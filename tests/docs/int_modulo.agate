@@ -1,0 +1,4 @@
+IO.println(69 % 42)   # expect: 27
+IO.println(-69 % 42)  # expect: -27
+IO.println(69 % -42)  # expect: 27
+IO.println(-69 % -42) # expect: -27

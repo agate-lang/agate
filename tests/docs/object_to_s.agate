@@ -1,0 +1,5 @@
+class Saucisse {
+  construct new() { }
+}
+def s = Saucisse.new()
+IO.println(s.to_s) # expect: instance of Saucisse

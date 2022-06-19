@@ -1,0 +1,7 @@
+class Saucisse {
+  construct new() { }
+}
+def s = Saucisse.new()
+IO.println(s.type) # expect: Saucisse
+IO.println(s.type.type) # expect: Saucisse metaclass
+IO.println(s.type.type.type) # expect: Class

@@ -1,0 +1,8 @@
+IO.println(42 == 42)   # expect: true
+IO.println(42 == 69)   # expect: false
+IO.println(42 == 42.0) # expect: false
+IO.println(42 == nil)  # expect: false
+
+def a = []
+IO.println(a == a)     # expect: true
+IO.println([] == [])   # expect: false

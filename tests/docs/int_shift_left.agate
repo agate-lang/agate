@@ -1,0 +1,3 @@
+IO.println(1 << 2)  # expect: 4
+IO.println(-1 << 2) # expect: -4
+IO.println(0b10101 << 3 == 0b10101000) # expect: true
