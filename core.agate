@@ -323,7 +323,7 @@ class Map is Sequence {
 }
 
 class Range is Sequence {
-  to_s { "%(.from)%(.is_inclusive ? ".." : "...")%(.to)" }
+  to_s { "%(.from)%(.inclusive ? ".." : "...")%(.to)" }
 }
 
 class IO {

@@ -4575,7 +4575,7 @@ static bool agateCoreRangeTo(AgateVM *vm, int argc, AgateValue *args) {
   return true;
 }
 
-static bool agateCoreRangeIsInclusive(AgateVM *vm, int argc, AgateValue *args) {
+static bool agateCoreRangeInclusive(AgateVM *vm, int argc, AgateValue *args) {
   args[0] = agateBoolValue(agateAsRange(args[0])->kind == AGATE_RANGE_INCLUSIVE);
   return true;
 }
@@ -5113,7 +5113,7 @@ static void agateLoadCoreModule(AgateVM *vm) {
   vm->range_class = agateAsClass(agateFindModuleVariable(vm, core, "Range"));
   agateClassBindPrimitive(vm, vm->range_class, "from", agateCoreRangeFrom);
   agateClassBindPrimitive(vm, vm->range_class, "hash", agateCoreRangeHash);
-  agateClassBindPrimitive(vm, vm->range_class, "is_inclusive", agateCoreRangeIsInclusive);
+  agateClassBindPrimitive(vm, vm->range_class, "inclusive", agateCoreRangeInclusive);
   agateClassBindPrimitive(vm, vm->range_class, "iterate(_)", agateCoreRangeIterate);
   agateClassBindPrimitive(vm, vm->range_class, "iterator_value(_)", agateCoreRangeIteratorValue);
   agateClassBindPrimitive(vm, vm->range_class, "max", agateCoreRangeMax);

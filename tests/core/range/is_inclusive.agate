@@ -1,5 +1,0 @@
-IO.println((0..0).is_inclusive) # expect: true
-IO.println((0...0).is_inclusive) # expect: false
-
-IO.println((-1..1).is_inclusive) # expect: true
-IO.println((-1...1).is_inclusive) # expect: false
