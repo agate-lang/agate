@@ -1,0 +1,1 @@
+IO.println("the cake is a lie".split(' ')) # expect: [the, cake, is, a, lie]

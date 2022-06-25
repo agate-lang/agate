@@ -1,0 +1,1 @@
+IO.println([].accumulate(1) {|a, b| 42 }) # expect: 1

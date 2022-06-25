@@ -1,0 +1,2 @@
+IO.println(" the cake is a lie" * 3)
+# expect:  the cake is a lie the cake is a lie the cake is a lie

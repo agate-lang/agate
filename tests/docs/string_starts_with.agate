@@ -1,0 +1,2 @@
+IO.println("the cake is a lie".starts_with("cake")) # expect: false
+IO.println("東京".starts_with("東")) # expect: true

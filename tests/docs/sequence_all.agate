@@ -1,0 +1,2 @@
+IO.println([ 1, 2, 3 ].all {|n| n > 2 }) # expect: false
+IO.println([ 1, 2, 3 ].all {|n| n < 4 }) # expect: true

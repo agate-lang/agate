@@ -1,0 +1,2 @@
+[ 1, 2, 3 ].each {|n| IO.print(n) } # expect: 123
+IO.println()

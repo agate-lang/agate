@@ -1,2 +1,1 @@
 IO.println([1].reduce {|a, b| 42 }) # expect: 1
-IO.println([].reduce(1) {|a, b| 42 }) # expect: 1

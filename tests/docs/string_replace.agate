@@ -1,0 +1,2 @@
+IO.println("the cake is a lie".replace("cake", "pie").replace("lie", "fake"))
+# expect: the pie is a fake

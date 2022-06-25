@@ -1,0 +1,2 @@
+def range = 1..10
+IO.println(range.accumulate(100) {|a, b| a < b ? a : b }) # expect: 1

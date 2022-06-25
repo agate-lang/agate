@@ -1,0 +1,6 @@
+def seq = [1, 2, 3].take(2)
+for (item in seq) {
+  IO.println(item)
+}
+# expect: 1
+# expect: 2

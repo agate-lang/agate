@@ -1,0 +1,2 @@
+IO.println("the cake is a lie".contains("cake")) # expect: true
+IO.println("the cake is a lie".contains('x')) # expect: false

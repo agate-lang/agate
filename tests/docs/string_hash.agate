@@ -1,0 +1,1 @@
+IO.println("the cake is a lie".hash) # expect: -5017247130378745027

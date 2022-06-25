@@ -1,0 +1,2 @@
+IO.println([ 1, 2, 3 ].none {|n| n < 1 }) # expect: true
+IO.println([ 1, 2, 3 ].none {|n| n > 2 }) # expect: false

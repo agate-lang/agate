@@ -1,0 +1,1 @@
+IO.println("42".to_i) # expect: 42

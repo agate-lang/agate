@@ -1,0 +1,6 @@
+def seq = [1, 2, 3].where {|n| n % 2 != 0 }
+for (item in seq) {
+  IO.println(item)
+}
+# expect: 1
+# expect: 3

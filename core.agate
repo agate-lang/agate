@@ -104,7 +104,7 @@ class Sequence {
 
   where(predicate) { __WhereSequence.new(this, predicate) }
 
-  reduce(val, op) {
+  accumulate(val, op) {
     for (element in this) {
       val = op(val, element)
     }

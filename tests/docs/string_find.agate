@@ -1,0 +1,1 @@
+IO.println("the cake is a lie".find("cake")) # expect: 4

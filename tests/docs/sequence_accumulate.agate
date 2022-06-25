@@ -1,0 +1,1 @@
+IO.println([1, 2, 3].accumulate(4) {|a, b| a + b }) # expect: 10
