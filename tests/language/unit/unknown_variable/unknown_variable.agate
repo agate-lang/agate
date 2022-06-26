@@ -1,0 +1,4 @@
+# result: runtime error
+# Should execute the unit:
+# expect: ran unit
+import "unit" for DoesNotExist # expect: Could not find an object named 'DoesNotExist' in unit 'unit'.

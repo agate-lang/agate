@@ -1,0 +1,3 @@
+import "something/unit" for index
+
+IO.println(index) # expect: index

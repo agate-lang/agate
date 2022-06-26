@@ -52,25 +52,25 @@ typedef enum {
   AGATE_ERROR_STACKTRACE,
 } AgateErrorKind;
 
-typedef void (*AgateErrorFunc)(AgateVM *vm, AgateErrorKind kind, const char *module_name, int line, const char *message);
+typedef void (*AgateErrorFunc)(AgateVM *vm, AgateErrorKind kind, const char *unit_name, int line, const char *message);
 // end::error[]
 
-// tag::module[]
-typedef const char *(*AgateModuleLoadFunc)(const char *name, void *user_data);
-typedef void (*AgateModuleReleaseFunc)(const char *source, void *user_data);
+// tag::unit[]
+typedef const char *(*AgateUnitLoadFunc)(const char *name, void *user_data);
+typedef void (*AgateUnitReleaseFunc)(const char *source, void *user_data);
 
 typedef struct {
-  AgateModuleLoadFunc load;
-  AgateModuleReleaseFunc release;
+  AgateUnitLoadFunc load;
+  AgateUnitReleaseFunc release;
   void *user_data;
-} AgateModuleHandler;
+} AgateUnitHandler;
 
-typedef AgateModuleHandler (*AgateModuleHandlerFunc)(AgateVM *vm, const char *name);
-// end::module[]
+typedef AgateUnitHandler (*AgateUnitHandlerFunc)(AgateVM *vm, const char *name);
+// end::unit[]
 
 // tag::foreign_class[]
-typedef ptrdiff_t (*AgateForeignAllocateFunc)(AgateVM *vm, const char *module_name, const char *class_name);
-typedef void (*AgateForeignDestroyFunc)(AgateVM *vm, const char *module_name, const char *class_name, void *data);
+typedef ptrdiff_t (*AgateForeignAllocateFunc)(AgateVM *vm, const char *unit_name, const char *class_name);
+typedef void (*AgateForeignDestroyFunc)(AgateVM *vm, const char *unit_name, const char *class_name, void *data);
 
 
 typedef struct {
@@ -78,7 +78,7 @@ typedef struct {
   AgateForeignDestroyFunc destroy;
 } AgateForeignClassHandler;
 
-typedef AgateForeignClassHandler (*AgateForeignClassHandlerFunc)(AgateVM *vm, const char *module_name, const char *class_name);
+typedef AgateForeignClassHandler (*AgateForeignClassHandlerFunc)(AgateVM *vm, const char *unit_name, const char *class_name);
 // end::foreign_class[]
 
 // tag::foreign_method[]
@@ -89,14 +89,14 @@ typedef enum {
   AGATE_FOREIGN_METHOD_CLASS,
 } AgateForeignMethodKind;
 
-typedef AgateForeignMethodFunc (*AgateForeignMethodHandlerFunc)(AgateVM *vm, const char *module_name, const char *class_name, AgateForeignMethodKind kind, const char *signature);
+typedef AgateForeignMethodFunc (*AgateForeignMethodHandlerFunc)(AgateVM *vm, const char *unit_name, const char *class_name, AgateForeignMethodKind kind, const char *signature);
 // end::foreign_method[]
 
 // tag::config[]
 typedef struct {
   AgateReallocFunc reallocate;
 
-  AgateModuleHandlerFunc module_handler;
+  AgateUnitHandlerFunc unit_handler;
 
   AgateForeignClassHandlerFunc foreign_class_handler;
   AgateForeignMethodHandlerFunc foreign_method_handler;
@@ -145,7 +145,7 @@ void agateDeleteVM(AgateVM *vm);
 // end::vm_delete[]
 
 // tag::interpret[]
-AgateStatus agateInterpret(AgateVM *vm, const char *module, const char *source);
+AgateStatus agateInterpret(AgateVM *vm, const char *unit, const char *source);
 // end::interpret[]
 
 AgateHandle *agateMakeCallHandle(AgateVM *vm, const char *signature);
@@ -190,9 +190,9 @@ void agateSlotMapGet(AgateVM *vm, ptrdiff_t map_slot, ptrdiff_t key_slot, ptrdif
 void agateSlotMapSet(AgateVM *vm, ptrdiff_t map_slot, ptrdiff_t key_slot, ptrdiff_t value_slot);
 void agateSlotMapErase(AgateVM *vm, ptrdiff_t map_slot, ptrdiff_t key_slot, ptrdiff_t value_slot);
 
-bool agateHasModule(AgateVM *vm, const char *module_name);
-bool agateHasVariable(AgateVM *vm, const char *module_name, const char *variable_name);
-void agateGetVariable(AgateVM *vm, const char *module_name, const char *variable_name, ptrdiff_t slot);
+bool agateHasUnit(AgateVM *vm, const char *unit_name);
+bool agateHasVariable(AgateVM *vm, const char *unit_name, const char *variable_name);
+void agateGetVariable(AgateVM *vm, const char *unit_name, const char *variable_name, ptrdiff_t slot);
 
 void agateAbort(AgateVM *vm, ptrdiff_t slot);
 

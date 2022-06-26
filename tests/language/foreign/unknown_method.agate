@@ -1,4 +1,4 @@
 # result: runtime error
 class Foo {
-  foreign someUnknownMethod # expect: Could not find foreign method 'someUnknownMethod' for class Foo in module 'tests/language/foreign/unknown_method.agate'.
+  foreign someUnknownMethod # expect: Could not find foreign method 'someUnknownMethod' for class Foo in unit 'tests/language/foreign/unknown_method.agate'.
 }

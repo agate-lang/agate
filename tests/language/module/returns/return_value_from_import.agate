@@ -1,5 +1,0 @@
-import "./module_return_value"
-
-IO.println("baz") 
-# expect: foo
-# expect: baz

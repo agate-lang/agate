@@ -1,0 +1,10 @@
+def unit = "outer"
+
+if (true) {
+  import "unit" for unit
+  # expect: ran unit
+
+  IO.println(unit) # expect: from unit
+}
+
+IO.println(unit) # expect: outer

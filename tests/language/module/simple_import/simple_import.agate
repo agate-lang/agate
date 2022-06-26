@@ -1,4 +1,0 @@
-import "./module" for Module
-# expect: ran module
-
-IO.println(Module) # expect: from module

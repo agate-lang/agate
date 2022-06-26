@@ -1,0 +1,4 @@
+import "unit" for unit
+# expect: ran unit
+
+IO.println(unit) # expect: from unit

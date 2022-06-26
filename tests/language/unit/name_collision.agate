@@ -1,0 +1,3 @@
+# result: compile error
+def Collides
+import "unit" for Collides # expect: test:3: Error at 'Collides': Unit variable is already defined.

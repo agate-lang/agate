@@ -1,0 +1,7 @@
+# nontest
+def unit = "from unit"
+IO.println("ran unit")
+
+def value_a = "unit A"
+def value_b = "unit B"
+def value_c = "unit C"

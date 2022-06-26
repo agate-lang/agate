@@ -16,9 +16,6 @@ static void agateEntityPrint(AgateValue value) {
     case AGATE_ENTITY_ARRAY:
       printf("array");
       break;
-    case AGATE_ENTITY_BUFFER:
-      printf("buffer");
-      break;
     case AGATE_ENTITY_CLASS:
       printf("%s", agateAsClass(value)->name->data);
       break;
@@ -37,14 +34,14 @@ static void agateEntityPrint(AgateValue value) {
     case AGATE_ENTITY_MAP:
       printf("map");
       break;
-    case AGATE_ENTITY_MODULE:
-      printf("module");
-      break;
     case AGATE_ENTITY_RANGE:
       printf("range");
       break;
     case AGATE_ENTITY_STRING:
       printf("\"%s\"", agateAsCString(value));
+      break;
+    case AGATE_ENTITY_UNIT:
+      printf("unit");
       break;
     case AGATE_ENTITY_UPVALUE:
       printf("upvalue");
@@ -142,13 +139,13 @@ static ptrdiff_t agateDisassembleInstruction(AgateVM *vm, AgateFunction *functio
     case AGATE_OP_GLOBAL_LOAD:
     {
       uint16_t slot = agateDisassembleRead16(bc, offset + 1);
-      printf("%-16s %4d '%s'\n", "GLOBAL_LOAD", slot, agateSymbolTableReverseFind(&function->module->object_names, slot)->data);
+      printf("%-16s %4d '%s'\n", "GLOBAL_LOAD", slot, agateSymbolTableReverseFind(&function->unit->object_names, slot)->data);
       return offset + 3;
     }
     case AGATE_OP_GLOBAL_STORE:
     {
       uint16_t slot = agateDisassembleRead16(bc, offset + 1);
-      printf("%-16s %4d '%s'\n", "GLOBAL_STORE", slot, agateSymbolTableReverseFind(&function->module->object_names, slot)->data);
+      printf("%-16s %4d '%s'\n", "GLOBAL_STORE", slot, agateSymbolTableReverseFind(&function->unit->object_names, slot)->data);
       return offset + 3;
     }
     case AGATE_OP_LOCAL_LOAD:
@@ -232,10 +229,10 @@ static ptrdiff_t agateDisassembleInstruction(AgateVM *vm, AgateFunction *functio
       return agateDisassembleShortInstruction("METHOD_INSTANCE", bc, offset);
     case AGATE_OP_METHOD_CLASS:
       return agateDisassembleShortInstruction("METHOD_CLASS", bc, offset);
-    case AGATE_OP_IMPORT_MODULE:
+    case AGATE_OP_IMPORT_UNIT:
     {
       uint16_t name = agateDisassembleRead16(bc, offset + 1);
-      printf("%-16s %4d ", "IMPORT_MODULE", name);
+      printf("%-16s %4d ", "IMPORT_UNIT", name);
       agateValuePrint(bc->constants.data[name]);
       printf("\n");
       return offset + 3;
@@ -248,8 +245,8 @@ static ptrdiff_t agateDisassembleInstruction(AgateVM *vm, AgateFunction *functio
       printf("\n");
       return offset + 3;
     }
-    case AGATE_OP_END_MODULE:
-      return agateDisassembleSimpleInstruction("END_MODULE", offset);
+    case AGATE_OP_END_UNIT:
+      return agateDisassembleSimpleInstruction("END_UNIT", offset);
     case AGATE_OP_END:
       return agateDisassembleSimpleInstruction("END", offset);
     default:

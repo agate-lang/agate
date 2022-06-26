@@ -1,0 +1,14 @@
+import "unit"
+# expect: Array
+# expect: Bool
+# expect: Char
+# expect: Class
+# expect: Float
+# expect: Fn
+# expect: Int
+# expect: Map
+# expect: Nil
+# expect: Object
+# expect: Range
+# expect: Sequence
+# expect: String

@@ -1,0 +1,10 @@
+import "unit" for unit_1, unit_2, unit_3, unit_4, unit_5
+
+# Only execute unit body once:
+# expect: ran unit
+
+IO.println(unit_1) # expect: from unit one
+IO.println(unit_2) # expect: from unit two
+IO.println(unit_3) # expect: from unit three
+IO.println(unit_4) # expect: from unit four
+IO.println(unit_5) # expect: from unit five

@@ -1,0 +1,4 @@
+# result: runtime error
+IO.println("before") # expect: before
+# expect: test:2: Error at 'undefined': Variable 'undefined' is used but not defined.
+import "unit" for Unit # expect: Could not compile unit 'unit'.

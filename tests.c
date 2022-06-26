@@ -279,7 +279,7 @@ static void agateTestPrint(AgateVM *vm, const char* text) {
   printf("%s", text);
 }
 
-static void agateTestError(AgateVM *vm, AgateErrorKind kind, const char *module_name, int line, const char *message) {
+static void agateTestError(AgateVM *vm, AgateErrorKind kind, const char *unit_name, int line, const char *message) {
   switch (kind) {
     case AGATE_ERROR_COMPILE:
       printf("test:%d: %s\n", line, message);
@@ -292,7 +292,7 @@ static void agateTestError(AgateVM *vm, AgateErrorKind kind, const char *module_
   }
 }
 
-static const char *agateTestModuleLoadFile(const char *path) {
+static const char *agateTestUnitLoadFile(const char *path) {
   FILE *file = fopen(path, "rb");
 
   if (file == NULL) {
@@ -314,7 +314,7 @@ static const char *agateTestModuleLoadFile(const char *path) {
   return content.data;
 }
 
-static const char *agateTestModuleLoad(const char *name, void *user_data) {
+static const char *agateTestUnitLoad(const char *name, void *user_data) {
   AgateTest *test = user_data;
 
   AgateTestBuffer buffer;
@@ -329,23 +329,23 @@ static const char *agateTestModuleLoad(const char *name, void *user_data) {
   agateTestBufferAppend(&buffer, name, strlen(name));
   agateTestBufferAppend(&buffer, ".agate", 6);
 
-  const char *source = agateTestModuleLoadFile(buffer.data);
+  const char *source = agateTestUnitLoadFile(buffer.data);
 
   agateTestBufferDestroy(&buffer);
 
   return source;
 }
 
-static void agateTestModuleRelease(const char *source, void *user_data) {
+static void agateTestUnitRelease(const char *source, void *user_data) {
   free((void *) source);
 }
 
-static AgateModuleHandler agateTestModuleHandler(AgateVM *vm, const char *name) {
-  AgateModuleHandler module_handler;
-  module_handler.load = agateTestModuleLoad;
-  module_handler.release = agateTestModuleRelease;
-  module_handler.user_data = agateGetUserData(vm);
-  return module_handler;
+static AgateUnitHandler agateTestUnitHandler(AgateVM *vm, const char *name) {
+  AgateUnitHandler unit_handler;
+  unit_handler.load = agateTestUnitLoad;
+  unit_handler.release = agateTestUnitRelease;
+  unit_handler.user_data = agateGetUserData(vm);
+  return unit_handler;
 }
 
 static AgateStatus agateTestRunInterpreter(AgateTest *self) {
@@ -353,7 +353,7 @@ static AgateStatus agateTestRunInterpreter(AgateTest *self) {
   AgateConfig config;
   agateConfigInitialize(&config);
 
-  config.module_handler = agateTestModuleHandler;
+  config.unit_handler = agateTestUnitHandler;
 
   config.assert_handling = AGATE_ASSERT_ABORT;
 

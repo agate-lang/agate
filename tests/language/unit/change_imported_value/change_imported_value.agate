@@ -1,0 +1,10 @@
+import "unit" for unit, Other
+
+IO.println(unit) # expect: before
+
+# Reassigning the variable in the other unit does not affect this one's binding.
+Other.change
+IO.println(unit) # expect: before
+
+# But it does change there.
+Other.show # expect: after

@@ -27,7 +27,7 @@
  *   - bytecode
  *   - entities
  *     - string
- *     - module
+ *     - unit
  *     - function, native, upvalue and closure
  *     - class, instance and foreign
  *     - array, map and range
@@ -53,7 +53,7 @@
  *   - new
  * - symbol table
  * - entities
- *   - module
+ *   - unit
  * - debug
  * - memory
  *   - gc
@@ -106,7 +106,7 @@
 #define AGATE_MAX_INTERPOLATION_NESTING 8
 
 #define AGATE_MAX_CONSTANT_COUNT (1 << 16)
-#define AGATE_MAX_MODULE_OBJECT_COUNT (1 << 16)
+#define AGATE_MAX_UNIT_OBJECT_COUNT (1 << 16)
 #define AGATE_MAX_LOCAL_COUNT (1 << 8)
 #define AGATE_MAX_UPVALUE_COUNT (1 << 7)
 #define AGATE_MAX_FIELDS_COUNT UINT8_MAX
@@ -212,9 +212,9 @@ typedef enum {
   AGATE_ENTITY_FUNCTION,
   AGATE_ENTITY_INSTANCE,
   AGATE_ENTITY_MAP,
-  AGATE_ENTITY_MODULE,
   AGATE_ENTITY_RANGE,
   AGATE_ENTITY_STRING,
+  AGATE_ENTITY_UNIT,
   AGATE_ENTITY_UPVALUE,
 } AgateEntityKind;
 
@@ -244,7 +244,7 @@ typedef struct {
 } AgateString;
 
 /*
- * types - entities - module
+ * types - entities - unit
  */
 
 typedef struct {
@@ -252,7 +252,7 @@ typedef struct {
   AgateValueArray object_values;
   AgateTable object_names;
   AgateString *name;
-} AgateModule;
+} AgateUnit;
 
 /*
  * types - entities - function, native, upvalue and closure
@@ -261,7 +261,7 @@ typedef struct {
 typedef struct {
   AgateEntity base;
   AgateBytecode bc;
-  AgateModule *module;
+  AgateUnit *unit;
   int arity;
   ptrdiff_t slot_count;
   ptrdiff_t upvalue_count;
@@ -317,7 +317,7 @@ AGATE_ARRAY_DECLARE(MethodArray, AgateMethod)
 
 struct AgateClass {
   AgateEntity base;
-  AgateModule *module;
+  AgateUnit *unit;
   AgateClass *supertype;
   ptrdiff_t field_count;
   AgateMethodArray methods;
@@ -400,9 +400,9 @@ typedef struct {
   X(CONSTRUCT_FOREIGN,  0,  0)  \
   X(METHOD_INSTANCE,   -2,  2)  \
   X(METHOD_CLASS,      -2,  2)  \
-  X(IMPORT_MODULE,      1,  2)  \
+  X(IMPORT_UNIT,        1,  2)  \
   X(IMPORT_OBJECT,      1,  2)  \
-  X(END_MODULE,         1,  0)  \
+  X(END_UNIT,           1,  0)  \
   X(END,                0,  0)
 
 typedef enum {
@@ -438,9 +438,9 @@ struct AgateVM {
   AgateStatus status;
   AgateConfig config;
 
-  // modules
+  // units
 
-  AgateTable modules;
+  AgateTable units;
 
   // core types
 
@@ -478,7 +478,7 @@ struct AgateVM {
   // parser
 
   AgateCompiler *compiler;
-  AgateModule *last_module;
+  AgateUnit *last_unit;
 
   // memory
 
@@ -807,9 +807,9 @@ static inline bool agateIsForeign(AgateValue value) { return agateIsEntityKind(v
 static inline bool agateIsFunction(AgateValue value) { return agateIsEntityKind(value, AGATE_ENTITY_FUNCTION); }
 static inline bool agateIsInstance(AgateValue value) { return agateIsEntityKind(value, AGATE_ENTITY_INSTANCE); }
 static inline bool agateIsMap(AgateValue value) { return agateIsEntityKind(value, AGATE_ENTITY_MAP); }
-static inline bool agateIsModule(AgateValue value) { return agateIsEntityKind(value, AGATE_ENTITY_MODULE); }
 static inline bool agateIsRange(AgateValue value) { return agateIsEntityKind(value, AGATE_ENTITY_RANGE); }
 static inline bool agateIsString(AgateValue value) { return agateIsEntityKind(value, AGATE_ENTITY_STRING); }
+static inline bool agateIsUnit(AgateValue value) { return agateIsEntityKind(value, AGATE_ENTITY_UNIT); }
 static inline bool agateIsUpvalue(AgateValue value) { return agateIsEntityKind(value, AGATE_ENTITY_UPVALUE); }
 
 static inline AgateArray *agateAsArray(AgateValue value) { return (AgateArray *) agateAsEntity(value); }
@@ -819,9 +819,9 @@ static inline AgateForeign *agateAsForeign(AgateValue value) { return (AgateFore
 static inline AgateFunction *agateAsFunction(AgateValue value) { return (AgateFunction *) agateAsEntity(value); }
 static inline AgateInstance *agateAsInstance(AgateValue value) { return (AgateInstance *) agateAsEntity(value); }
 static inline AgateMap *agateAsMap(AgateValue value) { return (AgateMap *) agateAsEntity(value); }
-static inline AgateModule *agateAsModule(AgateValue value) { return (AgateModule *) agateAsEntity(value); }
 static inline AgateRange *agateAsRange(AgateValue value) { return (AgateRange *) agateAsEntity(value); }
 static inline AgateString *agateAsString(AgateValue value) { return (AgateString *) agateAsEntity(value); }
+static inline AgateUnit *agateAsUnit(AgateValue value) { return (AgateUnit *) agateAsEntity(value); }
 static inline AgateUpvalue *agateAsUpvalue(AgateValue value) { return (AgateUpvalue *) agateAsEntity(value); }
 
 static inline const char *agateAsCString(AgateValue value) { return ((AgateString *) agateAsEntity(value))->data; }
@@ -977,7 +977,7 @@ static uint64_t agateEntityHash(const AgateEntity *entity) {
     case AGATE_ENTITY_FOREIGN:
     case AGATE_ENTITY_INSTANCE:
     case AGATE_ENTITY_MAP:
-    case AGATE_ENTITY_MODULE:
+    case AGATE_ENTITY_UNIT:
     case AGATE_ENTITY_UPVALUE:
       assert(false);
       return 0;
@@ -1579,9 +1579,9 @@ static AgateArray *agateArrayNew(AgateVM *vm) {
 
 // Class
 
-static AgateClass *agateClassNewBare(AgateVM *vm, AgateModule *module, int field_count, AgateString *name) {
+static AgateClass *agateClassNewBare(AgateVM *vm, AgateUnit *unit, int field_count, AgateString *name) {
   AgateClass *klass = agateAllocateEntity(vm, AgateClass, AGATE_ENTITY_CLASS, NULL);
-  klass->module = module;
+  klass->unit = unit;
   klass->supertype = NULL;
   klass->field_count = field_count;
   klass->name = name;
@@ -1615,14 +1615,14 @@ static void agateClassBindSuperclass(AgateVM *vm, AgateClass *subclass, AgateCla
   }
 }
 
-static AgateClass *agateClassNew(AgateVM *vm, AgateModule *module, AgateClass *superclass, int field_count, AgateString *name) {
+static AgateClass *agateClassNew(AgateVM *vm, AgateUnit *unit, AgateClass *superclass, int field_count, AgateString *name) {
   assert(superclass->base.kind == AGATE_ENTITY_CLASS);
 
   // metaclass creation
   AgateString *metaclass_name = agateStringNewFormat(vm, "@ metaclass", name);
   agatePushRoot(vm, (AgateEntity *) metaclass_name);
 
-  AgateClass *metaclass = agateClassNewBare(vm, module, 0, metaclass_name);
+  AgateClass *metaclass = agateClassNewBare(vm, unit, 0, metaclass_name);
   metaclass->base.type = vm->class_class;
 
   agatePopRoot(vm);
@@ -1631,7 +1631,7 @@ static AgateClass *agateClassNew(AgateVM *vm, AgateModule *module, AgateClass *s
   agateClassBindSuperclass(vm, metaclass, vm->class_class);
 
   // class creation
-  AgateClass *klass = agateClassNewBare(vm, module, field_count, name);
+  AgateClass *klass = agateClassNewBare(vm, unit, field_count, name);
   agatePushRoot(vm, (AgateEntity *) klass);
 
   klass->base.type = metaclass;
@@ -1673,7 +1673,7 @@ static AgateForeign *agateForeignNew(AgateVM *vm, AgateClass *klass) {
   AgateMethod *method = &klass->methods.data[symbol];
   assert(method->kind == AGATE_METHOD_FOREIN_ALLOCATE);
 
-  ptrdiff_t data_size = method->as.foreign_allocate(vm, klass->module->name->data, klass->name->data);
+  ptrdiff_t data_size = method->as.foreign_allocate(vm, klass->unit->name->data, klass->name->data);
 
   AgateForeign *foreign = agateAllocateFlexEntity(vm, AgateForeign, uint8_t, data_size, AGATE_ENTITY_FOREIGN, klass);
   foreign->data_size = data_size;
@@ -1701,15 +1701,15 @@ static void agateForeignDestroy(AgateVM *vm, AgateForeign *foreign) {
   }
 
   assert(method->kind == AGATE_METHOD_FOREIN_DESTROY);
-  method->as.foreign_destroy(vm, klass->module->name->data, klass->name->data, foreign->data);
+  method->as.foreign_destroy(vm, klass->unit->name->data, klass->name->data, foreign->data);
 }
 
 // Function
 
-static AgateFunction *agateFunctionNew(AgateVM *vm, AgateModule *module, ptrdiff_t slot_count) {
+static AgateFunction *agateFunctionNew(AgateVM *vm, AgateUnit *unit, ptrdiff_t slot_count) {
   AgateFunction *function = agateAllocateEntity(vm, AgateFunction, AGATE_ENTITY_FUNCTION, vm->fn_class);
   agateBytecodeCreate(&function->bc);
-  function->module = module;
+  function->unit = unit;
   function->arity = 0;
   function->slot_count = slot_count;
   function->upvalue_count = 0;
@@ -1742,14 +1742,14 @@ static AgateMap *agateMapNew(AgateVM *vm) {
   return map;
 }
 
-// Module
+// Unit
 
-static AgateModule *agateModuleNew(AgateVM *vm, AgateString *name) {
-  AgateModule *module = agateAllocateEntity(vm, AgateModule, AGATE_ENTITY_MODULE, NULL);
-  agateValueArrayCreate(&module->object_values);
-  agateTableCreate(&module->object_names);
-  module->name = name;
-  return module;
+static AgateUnit *agateUnitNew(AgateVM *vm, AgateString *name) {
+  AgateUnit *unit = agateAllocateEntity(vm, AgateUnit, AGATE_ENTITY_UNIT, NULL);
+  agateValueArrayCreate(&unit->object_values);
+  agateTableCreate(&unit->object_names);
+  unit->name = name;
+  return unit;
 }
 
 // Range
@@ -1826,11 +1826,11 @@ static void agateEntityDelete(AgateEntity *entity, AgateVM *vm) {
       break;
     }
 
-    case AGATE_ENTITY_MODULE: {
-      AgateModule *module = (AgateModule *) entity;
-      agateValueArrayDestroy(&module->object_values, vm);
-      agateTableDestroy(&module->object_names, vm);
-      agateFree(vm, AgateModule, module);
+    case AGATE_ENTITY_UNIT: {
+      AgateUnit *unit = (AgateUnit *) entity;
+      agateValueArrayDestroy(&unit->object_values, vm);
+      agateTableDestroy(&unit->object_names, vm);
+      agateFree(vm, AgateUnit, unit);
       break;
     }
 
@@ -1927,26 +1927,26 @@ static AgateString *agateSymbolTableReverseFind(AgateTable *self, ptrdiff_t symb
 }
 
 /*
- * entities - module
+ * entities - unit
  */
 
 #define AGATE_DEFINITION_ALREADY_DEFINED (-1)
 #define AGATE_DEFINITION_TOO_MANY_DEFINITIONS (-2)
 
-static ptrdiff_t agateModuleAddFutureVariable(AgateVM *vm, AgateModule *module, const char *name, ptrdiff_t length, int line) { // ~wrenDeclareVariable
-  if (module->object_values.size == AGATE_MAX_MODULE_OBJECT_COUNT) {
+static ptrdiff_t agateUnitAddFutureVariable(AgateVM *vm, AgateUnit *unit, const char *name, ptrdiff_t length, int line) { // ~wrenDeclareVariable
+  if (unit->object_values.size == AGATE_MAX_UNIT_OBJECT_COUNT) {
     return AGATE_DEFINITION_TOO_MANY_DEFINITIONS;
   }
 
-  agateValueArrayAppend(&module->object_values, agateIntValue(line), vm);
-  return agateSymbolTableInsert(&module->object_names, name, length, vm);
+  agateValueArrayAppend(&unit->object_values, agateIntValue(line), vm);
+  return agateSymbolTableInsert(&unit->object_names, name, length, vm);
 }
 
-static ptrdiff_t agateModuleAddVariable(AgateVM *vm, AgateModule *module, const char *name, ptrdiff_t length, AgateValue value) { // ~wrenDefineVariable
-  assert(module);
-  assert(module->object_names.count == module->object_values.size);
+static ptrdiff_t agateUnitAddVariable(AgateVM *vm, AgateUnit *unit, const char *name, ptrdiff_t length, AgateValue value) { // ~wrenDefineVariable
+  assert(unit);
+  assert(unit->object_names.count == unit->object_values.size);
 
-  if (module->object_values.size == AGATE_MAX_MODULE_OBJECT_COUNT) {
+  if (unit->object_values.size == AGATE_MAX_UNIT_OBJECT_COUNT) {
     return AGATE_DEFINITION_TOO_MANY_DEFINITIONS;
   }
 
@@ -1954,13 +1954,13 @@ static ptrdiff_t agateModuleAddVariable(AgateVM *vm, AgateModule *module, const 
     agatePushRoot(vm, agateAsEntity(value));
   }
 
-  ptrdiff_t symbol = agateSymbolTableFind(&module->object_names, name, length);
+  ptrdiff_t symbol = agateSymbolTableFind(&unit->object_names, name, length);
 
   if (symbol == -1) {
-    symbol = agateSymbolTableInsert(&module->object_names, name, length, vm);
-    agateValueArrayAppend(&module->object_values, value, vm);
-  } else if (agateIsInt(module->object_values.data[symbol])) {
-    module->object_values.data[symbol] = value;
+    symbol = agateSymbolTableInsert(&unit->object_names, name, length, vm);
+    agateValueArrayAppend(&unit->object_values, value, vm);
+  } else if (agateIsInt(unit->object_values.data[symbol])) {
+    unit->object_values.data[symbol] = value;
   } else {
     symbol = AGATE_DEFINITION_ALREADY_DEFINED;
   }
@@ -1972,23 +1972,23 @@ static ptrdiff_t agateModuleAddVariable(AgateVM *vm, AgateModule *module, const 
   return symbol;
 }
 
-static AgateValue agateFindModuleVariable(AgateVM *vm, AgateModule *module, const char *name) {
-  int64_t symbol = agateSymbolTableFind(&module->object_names, name, strlen(name));
-  assert(symbol < module->object_values.size);
-  return module->object_values.data[symbol];
+static AgateValue agateUnitFindVariable(AgateVM *vm, AgateUnit *unit, const char *name) {
+  int64_t symbol = agateSymbolTableFind(&unit->object_names, name, strlen(name));
+  assert(symbol < unit->object_values.size);
+  return unit->object_values.data[symbol];
 }
 
-static AgateValue agateModuleGetVariable(AgateVM *vm, AgateModule *module, AgateValue name) {
+static AgateValue agateUnitGetVariable(AgateVM *vm, AgateUnit *unit, AgateValue name) {
   assert(agateIsString(name));
   AgateString *variable = agateAsString(name);
-  ptrdiff_t symbol = agateSymbolTableFind(&module->object_names, variable->data, variable->length);
+  ptrdiff_t symbol = agateSymbolTableFind(&unit->object_names, variable->data, variable->length);
 
   if (symbol != -1) {
-    assert(symbol < module->object_values.size);
-    return module->object_values.data[symbol];
+    assert(symbol < unit->object_values.size);
+    return unit->object_values.data[symbol];
   }
 
-  vm->error = agateEntityValue(agateStringNewFormat(vm, "Could not find an object named '@' in module '@'.", variable, module->name));
+  vm->error = agateEntityValue(agateStringNewFormat(vm, "Could not find an object named '@' in unit '@'.", variable, unit->name));
   return agateNilValue();
 }
 
@@ -2068,7 +2068,7 @@ static void agateMarkArray(AgateVM *vm, AgateValueArray *array) {
 static void agateMarkCompilerRoots(AgateVM *vm, AgateCompiler *compiler);
 
 static void agateMarkRoots(AgateVM *vm) {
-  agateMarkTable(vm, &vm->modules);
+  agateMarkTable(vm, &vm->units);
   agateMarkTable(vm, &vm->method_names);
 
   for (AgateValue *slot = vm->stack; slot < vm->stack_top; ++slot) {
@@ -2163,11 +2163,11 @@ static void agateBlackenObject(AgateVM *vm, AgateEntity *entity) {
       break;
     }
 
-    case AGATE_ENTITY_MODULE: {
-      AgateModule *module = (AgateModule *) entity;
-      agateMarkArray(vm, &module->object_values);
-      agateMarkTable(vm, &module->object_names);
-      agateMarkEntity(vm, (AgateEntity *) module->name);
+    case AGATE_ENTITY_UNIT: {
+      AgateUnit *unit = (AgateUnit *) entity;
+      agateMarkArray(vm, &unit->object_values);
+      agateMarkTable(vm, &unit->object_names);
+      agateMarkEntity(vm, (AgateEntity *) unit->name);
       break;
     }
 
@@ -2451,11 +2451,11 @@ static void agateCloseUpvalue(AgateVM *vm, AgateValue *last) {
   vm->open_upvalues = current;
 }
 
-static AgateForeignMethodFunc agateFindForeignMethod(AgateVM *vm, const char *module_name, const char *class_name, AgateForeignMethodKind kind, const char *signature) {
+static AgateForeignMethodFunc agateFindForeignMethod(AgateVM *vm, const char *unit_name, const char *class_name, AgateForeignMethodKind kind, const char *signature) {
   AgateForeignMethodFunc method = NULL;
 
   if (vm->config.foreign_method_handler != NULL) {
-    method = vm->config.foreign_method_handler(vm, module_name, class_name, kind, signature);
+    method = vm->config.foreign_method_handler(vm, unit_name, class_name, kind, signature);
   }
 
   return method;
@@ -2518,7 +2518,7 @@ static void agatePatchMethodCode(AgateClass *klass, AgateFunction *function) { /
   }
 }
 
-static void agateBindMethod(AgateVM *vm, AgateOpCode op, ptrdiff_t symbol, AgateModule *module, AgateClass *klass, AgateValue method_value) {
+static void agateBindMethod(AgateVM *vm, AgateOpCode op, ptrdiff_t symbol, AgateUnit *unit, AgateClass *klass, AgateValue method_value) {
   const char *class_name = klass->name->data;
 
   AgateForeignMethodKind kind = op == AGATE_OP_METHOD_INSTANCE ? AGATE_FOREIGN_METHOD_INSTANCE : AGATE_FOREIGN_METHOD_CLASS;
@@ -2532,10 +2532,10 @@ static void agateBindMethod(AgateVM *vm, AgateOpCode op, ptrdiff_t symbol, Agate
   if (agateIsString(method_value)) {
     const char *name = agateAsCString(method_value);
     method.kind = AGATE_METHOD_FOREIGN;
-    method.as.foreign = agateFindForeignMethod(vm, module->name->data, class_name, kind, name);
+    method.as.foreign = agateFindForeignMethod(vm, unit->name->data, class_name, kind, name);
 
     if (method.as.foreign == NULL) {
-      vm->error = agateEntityValue(agateStringNewFormat(vm, "Could not find foreign method '@' for class $ in module '$'.", agateAsString(method_value), klass->name->data, module->name->data));
+      vm->error = agateEntityValue(agateStringNewFormat(vm, "Could not find foreign method '@' for class $ in unit '$'.", agateAsString(method_value), klass->name->data, unit->name->data));
       return;
     }
   } else {
@@ -2574,47 +2574,47 @@ static void agateRuntimeError(AgateVM *vm) {
     AgateCallFrame *frame = &vm->frames[i];
     AgateFunction *function = frame->closure->function;
 
-    if (function->module == NULL) {
+    if (function->unit == NULL) {
       continue;
     }
 
-    // core module
-    if (function->module->name == NULL) {
+    // core unit
+    if (function->unit->name == NULL) {
       continue;
     }
 
     int line = agateBytecodeLineFromOffset(&function->bc, frame->ip - function->bc.code.data - 1);
-    vm->config.error(vm, AGATE_ERROR_STACKTRACE, function->module->name->data, line, function->name->data);
+    vm->config.error(vm, AGATE_ERROR_STACKTRACE, function->unit->name->data, line, function->name->data);
   }
 
   vm->api_stack = NULL;
 }
 
-static AgateModule *agateGetModule(AgateVM *vm, AgateValue name) {
-  AgateValue value = agateTableHashFind(&vm->modules, name);
+static AgateUnit *agateGetUnit(AgateVM *vm, AgateValue name) {
+  AgateValue value = agateTableHashFind(&vm->units, name);
 
   if (agateIsUndefined(value)) {
     return NULL;
   }
 
-  return agateAsModule(value);
+  return agateAsUnit(value);
 }
 
-static AgateFunction *agateRawCompile(AgateVM *vm, AgateModule *module, const char *source);
+static AgateFunction *agateRawCompile(AgateVM *vm, AgateUnit *unit, const char *source);
 
 static AgateClosure *agateCompile(AgateVM *vm, AgateValue name, const char *source) { // ~ compileInModule
-  AgateModule *module = agateGetModule(vm, name);
+  AgateUnit *unit = agateGetUnit(vm, name);
 
-  if (module == NULL) {
+  if (unit == NULL) {
     assert(agateIsString(name));
-    module = agateModuleNew(vm, agateAsString(name));
-    assert(module);
+    unit = agateUnitNew(vm, agateAsString(name));
+    assert(unit);
 
-    agatePushRoot(vm, (AgateEntity *) module);
-    agateTableHashInsert(&vm->modules, name, agateEntityValue(module), vm);
+    agatePushRoot(vm, (AgateEntity *) unit);
+    agateTableHashInsert(&vm->units, name, agateEntityValue(unit), vm);
     agatePopRoot(vm);
 
-    AgateModule *core = agateGetModule(vm, agateNilValue());
+    AgateUnit *core = agateGetUnit(vm, agateNilValue());
     assert(core);
 
     for (ptrdiff_t i = 0; i < core->object_names.capacity; ++i) {
@@ -2624,12 +2624,12 @@ static AgateClosure *agateCompile(AgateVM *vm, AgateValue name, const char *sour
         assert(agateIsInt(entry->value));
         int64_t symbol = agateAsInt(entry->value);
         assert(symbol < core->object_values.size);
-        agateModuleAddVariable(vm, module, name->data, name->length, core->object_values.data[symbol]);
+        agateUnitAddVariable(vm, unit, name->data, name->length, core->object_values.data[symbol]);
       }
     }
   }
 
-  AgateFunction *function = agateRawCompile(vm, module, source);
+  AgateFunction *function = agateRawCompile(vm, unit, source);
 
   if (function == NULL) {
     return NULL;
@@ -2670,13 +2670,13 @@ static AgateValue agateValidateSuperclass(AgateVM *vm, AgateValue name, AgateVal
   return agateNilValue();
 }
 
-static void agateBindForeignClass(AgateVM *vm, AgateClass *klass, AgateModule *module) {
+static void agateBindForeignClass(AgateVM *vm, AgateClass *klass, AgateUnit *unit) {
   AgateForeignClassHandler handler;
   handler.allocate = NULL;
   handler.destroy = NULL;
 
   if (vm->config.foreign_class_handler != NULL) {
-    handler = vm->config.foreign_class_handler(vm, module->name->data, klass->name->data);
+    handler = vm->config.foreign_class_handler(vm, unit->name->data, klass->name->data);
   }
 
   ptrdiff_t allocate_symbol = agateSymbolTableEnsure(&vm->method_names, "<allocate>", 10, vm);
@@ -2698,7 +2698,7 @@ static void agateBindForeignClass(AgateVM *vm, AgateClass *klass, AgateModule *m
   }
 }
 
-static void agateCreateClass(AgateVM *vm, ptrdiff_t field_count, AgateModule *module) {
+static void agateCreateClass(AgateVM *vm, ptrdiff_t field_count, AgateUnit *unit) {
   AgateValue name = vm->stack_top[-2];
   AgateValue superclass = vm->stack_top[-1];
   --vm->stack_top;
@@ -2709,17 +2709,17 @@ static void agateCreateClass(AgateVM *vm, ptrdiff_t field_count, AgateModule *mo
     return;
   }
 
-  AgateClass *klass = agateClassNew(vm, module, agateAsClass(superclass), field_count, agateAsString(name));
+  AgateClass *klass = agateClassNew(vm, unit, agateAsClass(superclass), field_count, agateAsString(name));
   vm->stack_top[-1] = agateEntityValue(klass);
 
   if (field_count == -1) {
-    agateBindForeignClass(vm, klass, module);
+    agateBindForeignClass(vm, klass, unit);
   }
 }
 
-static AgateValue agateImportModule(AgateVM *vm, AgateValue name) {
+static AgateValue agateImportUnit(AgateVM *vm, AgateValue name) {
   assert(agateIsString(name));
-  AgateValue existing = agateTableHashFind(&vm->modules, name);
+  AgateValue existing = agateTableHashFind(&vm->units, name);
 
   if (!agateIsUndefined(existing)) {
     return existing;
@@ -2727,16 +2727,16 @@ static AgateValue agateImportModule(AgateVM *vm, AgateValue name) {
 
   agatePushRoot(vm, agateAsEntity(name));
 
-  AgateModuleHandler handler = { NULL, NULL, NULL };
+  AgateUnitHandler handler = { NULL, NULL, NULL };
   const char *source = NULL;
 
-  if (vm->config.module_handler != NULL) {
-    handler = vm->config.module_handler(vm, agateAsCString(name));
+  if (vm->config.unit_handler != NULL) {
+    handler = vm->config.unit_handler(vm, agateAsCString(name));
     source = handler.load(agateAsCString(name), handler.user_data);
   }
 
   if (source == NULL) {
-    vm->error = agateEntityValue(agateStringNewFormat(vm, "Could not load module '@'.", agateAsString(name)));
+    vm->error = agateEntityValue(agateStringNewFormat(vm, "Could not load unit '@'.", agateAsString(name)));
     agatePopRoot(vm);
     return agateNilValue();
   }
@@ -2748,7 +2748,7 @@ static AgateValue agateImportModule(AgateVM *vm, AgateValue name) {
   }
 
   if (closure == NULL) {
-    vm->error = agateEntityValue(agateStringNewFormat(vm, "Could not compile module '@'.", agateAsString(name)));
+    vm->error = agateEntityValue(agateStringNewFormat(vm, "Could not compile unit '@'.", agateAsString(name)));
     agatePopRoot(vm);
     return agateNilValue();
   }
@@ -2897,7 +2897,7 @@ static AgateStatus agateRun(AgateVM *vm) {
       case AGATE_OP_GLOBAL_LOAD:
       {
         uint16_t global = agateReadShort(frame);
-        AgateValue value = function->module->object_values.data[global];
+        AgateValue value = function->unit->object_values.data[global];
         agatePush(vm, value);
         break;
       }
@@ -2905,7 +2905,7 @@ static AgateStatus agateRun(AgateVM *vm) {
       case AGATE_OP_GLOBAL_STORE:
       {
         uint16_t global = agateReadShort(frame);
-        agateCopy(&function->module->object_values.data[global], agatePeek(vm, 0));
+        agateCopy(&function->unit->object_values.data[global], agatePeek(vm, 0));
         break;
       }
 
@@ -3139,7 +3139,7 @@ static AgateStatus agateRun(AgateVM *vm) {
 
       case AGATE_OP_CLASS_FOREIGN:
       {
-        agateCreateClass(vm, -1, function->module);
+        agateCreateClass(vm, -1, function->unit);
 
         if (!agateIsNil(vm->error)) {
           AGATE_RUNTIME_ERROR();
@@ -3169,7 +3169,7 @@ static AgateStatus agateRun(AgateVM *vm) {
         assert(agateIsClass(agatePeek(vm, 0)));
         AgateClass *klass = agateAsClass(agatePeek(vm, 0));
         AgateValue method = agatePeek(vm, 1);
-        agateBindMethod(vm, instruction, symbol, function->module, klass, method);
+        agateBindMethod(vm, instruction, symbol, function->unit, klass, method);
 
         if (!agateIsNil(vm->error)) {
           AGATE_RUNTIME_ERROR();
@@ -3179,9 +3179,9 @@ static AgateStatus agateRun(AgateVM *vm) {
         break;
       }
 
-      case AGATE_OP_IMPORT_MODULE:
+      case AGATE_OP_IMPORT_UNIT:
       {
-        agatePush(vm, agateImportModule(vm, agateReadConstant(frame)));
+        agatePush(vm, agateImportUnit(vm, agateReadConstant(frame)));
 
         if (!agateIsNil(vm->error)) {
           AGATE_RUNTIME_ERROR();
@@ -3192,7 +3192,7 @@ static AgateStatus agateRun(AgateVM *vm) {
           agateClosureCall(vm, closure, 1);
           AGATE_LOAD_FRAME();
         } else {
-          vm->last_module = agateAsModule(agatePeek(vm, 0));
+          vm->last_unit = agateAsUnit(agatePeek(vm, 0));
         }
 
         break;
@@ -3201,8 +3201,8 @@ static AgateStatus agateRun(AgateVM *vm) {
       case AGATE_OP_IMPORT_OBJECT:
       {
         AgateValue variable = agateReadConstant(frame);
-        assert(vm->last_module != NULL);
-        AgateValue object = agateModuleGetVariable(vm, vm->last_module, variable);
+        assert(vm->last_unit != NULL);
+        AgateValue object = agateUnitGetVariable(vm, vm->last_unit, variable);
 
         if (!agateIsNil(vm->error)) {
           AGATE_RUNTIME_ERROR();
@@ -3212,9 +3212,9 @@ static AgateStatus agateRun(AgateVM *vm) {
         break;
       }
 
-      case AGATE_OP_END_MODULE:
+      case AGATE_OP_END_UNIT:
       {
-        vm->last_module = function->module;
+        vm->last_unit = function->unit;
         agatePush(vm, agateNilValue());
         break;
       }
@@ -4901,12 +4901,12 @@ static bool agateCoreSystemGc(AgateVM *vm, int argc, AgateValue *args) {
 
 // utils
 
-static AgateClass *agateClassNewBasic(AgateVM *vm, AgateModule *module, const char *name) {
+static AgateClass *agateClassNewBasic(AgateVM *vm, AgateUnit *unit, const char *name) {
   AgateString *string = agateStringNew(vm, name, strlen(name));
   agatePushRoot(vm, (AgateEntity *) string);
 
-  AgateClass *klass = agateClassNewBare(vm, module, 0, string);
-  agateModuleAddVariable(vm, module, name, strlen(name), agateEntityValue(klass));
+  AgateClass *klass = agateClassNewBare(vm, unit, 0, string);
+  agateUnitAddVariable(vm, unit, name, strlen(name), agateEntityValue(klass));
 
   agatePopRoot(vm);
   return klass;
@@ -4922,10 +4922,10 @@ static inline void agateClassBindPrimitive(AgateVM *vm, AgateClass *klass, const
   agateClassBindMethod(vm, klass, symbol, method);
 }
 
-static void agateLoadCoreModule(AgateVM *vm) {
-  AgateModule *core = agateModuleNew(vm, NULL);
+static void agateLoadCoreUnit(AgateVM *vm) {
+  AgateUnit *core = agateUnitNew(vm, NULL);
   agatePushRoot(vm, (AgateEntity *) core);
-  agateTableHashInsert(&vm->modules, agateNilValue(), agateEntityValue(core), vm);
+  agateTableHashInsert(&vm->units, agateNilValue(), agateEntityValue(core), vm);
   agatePopRoot(vm);
 
   vm->object_class = agateClassNewBasic(vm, core, "Object");
@@ -4954,7 +4954,7 @@ static void agateLoadCoreModule(AgateVM *vm) {
 
   agateInterpret(vm, NULL, AgateCore);
 
-  vm->array_class = agateAsClass(agateFindModuleVariable(vm, core, "Array"));
+  vm->array_class = agateAsClass(agateUnitFindVariable(vm, core, "Array"));
   agateClassBindPrimitive(vm, vm->array_class->base.type, "new()", agateCoreArrayNew);
   agateClassBindPrimitive(vm, vm->array_class, "__put(_)", agateCoreArrayPut);
   agateClassBindPrimitive(vm, vm->array_class, "[_]", agateCoreArraySubscriptGetter);
@@ -4970,13 +4970,13 @@ static void agateLoadCoreModule(AgateVM *vm) {
   agateClassBindPrimitive(vm, vm->array_class, "remove(_)", agateCoreArrayRemove);
   agateClassBindPrimitive(vm, vm->array_class, "swap(_,_)", agateCoreArraySwap);
 
-  vm->bool_class = agateAsClass(agateFindModuleVariable(vm, core, "Bool"));
+  vm->bool_class = agateAsClass(agateUnitFindVariable(vm, core, "Bool"));
   agateClassBindPrimitive(vm, vm->bool_class, "!", agateCoreBoolNot);
   agateClassBindPrimitive(vm, vm->bool_class, "hash", agateCoreBoolHash);
   agateClassBindPrimitive(vm, vm->bool_class, "to_i", agateCoreBoolToI);
   agateClassBindPrimitive(vm, vm->bool_class, "to_s", agateCoreBoolToS);
 
-  vm->char_class = agateAsClass(agateFindModuleVariable(vm, core, "Char"));
+  vm->char_class = agateAsClass(agateUnitFindVariable(vm, core, "Char"));
   agateClassBindPrimitive(vm, vm->char_class, "<(_)", agateCoreCharLt);
   agateClassBindPrimitive(vm, vm->char_class, "<=(_)", agateCoreCharLEq);
   agateClassBindPrimitive(vm, vm->char_class, ">(_)", agateCoreCharGt);
@@ -4985,7 +4985,7 @@ static void agateLoadCoreModule(AgateVM *vm) {
   agateClassBindPrimitive(vm, vm->char_class, "to_i", agateCoreCharToI);
   agateClassBindPrimitive(vm, vm->char_class, "to_s", agateCoreCharToS);
 
-  vm->float_class = agateAsClass(agateFindModuleVariable(vm, core, "Float"));
+  vm->float_class = agateAsClass(agateUnitFindVariable(vm, core, "Float"));
   agateClassBindPrimitive(vm, vm->float_class->base.type, "EPSILON", agateCoreFloatEpsilon);
   agateClassBindPrimitive(vm, vm->float_class->base.type, "LOWEST", agateCoreFloatLowest);
   agateClassBindPrimitive(vm, vm->float_class->base.type, "INFINITY", agateCoreFloatInfinity);
@@ -5015,12 +5015,12 @@ static void agateLoadCoreModule(AgateVM *vm) {
   agateClassBindPrimitive(vm, vm->float_class, "to_i", agateCoreFloatToI);
   agateClassBindPrimitive(vm, vm->float_class, "to_s", agateCoreFloatToS);
 
-  vm->fn_class = agateAsClass(agateFindModuleVariable(vm, core, "Fn"));
+  vm->fn_class = agateAsClass(agateUnitFindVariable(vm, core, "Fn"));
   agateClassBindPrimitive(vm, vm->fn_class->base.type, "new(_)", agateCoreFnNew);
   agateClassBindPrimitive(vm, vm->fn_class, "arity", agateCoreFnArity);
   agateClassBindPrimitive(vm, vm->fn_class, "to_s", agateCoreFnToS);
 
-  vm->int_class = agateAsClass(agateFindModuleVariable(vm, core, "Int"));
+  vm->int_class = agateAsClass(agateUnitFindVariable(vm, core, "Int"));
   agateClassBindPrimitive(vm, vm->int_class->base.type, "LOWEST", agateCoreIntLowest);
   agateClassBindPrimitive(vm, vm->int_class->base.type, "MAX", agateCoreIntMax);
   agateClassBindPrimitive(vm, vm->int_class->base.type, "MIN", agateCoreIntMin);
@@ -5049,10 +5049,10 @@ static void agateLoadCoreModule(AgateVM *vm) {
   agateClassBindPrimitive(vm, vm->int_class, "to_f", agateCoreIntToF);
   agateClassBindPrimitive(vm, vm->int_class, "to_s", agateCoreIntToS);
 
-  AgateClass *io_class = agateAsClass(agateFindModuleVariable(vm, core, "IO"));
+  AgateClass *io_class = agateAsClass(agateUnitFindVariable(vm, core, "IO"));
   agateClassBindPrimitive(vm, io_class->base.type, "__print(_)", agateCoreIoPrint);
 
-  vm->map_class = agateAsClass(agateFindModuleVariable(vm, core, "Map"));
+  vm->map_class = agateAsClass(agateUnitFindVariable(vm, core, "Map"));
   agateClassBindPrimitive(vm, vm->map_class->base.type, "new()", agateCoreMapNew);
   agateClassBindPrimitive(vm, vm->map_class, "__contains(_,_)", agateCoreMapContains);
   agateClassBindPrimitive(vm, vm->map_class, "__erase(_,_)", agateCoreMapErase);
@@ -5066,7 +5066,7 @@ static void agateLoadCoreModule(AgateVM *vm) {
   agateClassBindPrimitive(vm, vm->map_class, "count", agateCoreMapCount);
   agateClassBindPrimitive(vm, vm->map_class, "iterate(_)", agateCoreMapIterate);
 
-  AgateClass *math_class = agateAsClass(agateFindModuleVariable(vm, core, "Math"));
+  AgateClass *math_class = agateAsClass(agateUnitFindVariable(vm, core, "Math"));
   agateClassBindPrimitive(vm, math_class->base.type, "E", agateCoreMathE);
   agateClassBindPrimitive(vm, math_class->base.type, "INV_PI", agateCoreMathInvPi);
   agateClassBindPrimitive(vm, math_class->base.type, "INV_PI2", agateCoreMathInvPi2);
@@ -5105,12 +5105,12 @@ static void agateLoadCoreModule(AgateVM *vm) {
   agateClassBindPrimitive(vm, math_class->base.type, "tan(_)", agateCoreMathTan);
   agateClassBindPrimitive(vm, math_class->base.type, "trunc(_)", agateCoreMathTrunc);
 
-  vm->nil_class = agateAsClass(agateFindModuleVariable(vm, core, "Nil"));
+  vm->nil_class = agateAsClass(agateUnitFindVariable(vm, core, "Nil"));
   agateClassBindPrimitive(vm, vm->nil_class, "!", agateCoreNilNot);
   agateClassBindPrimitive(vm, vm->nil_class, "hash", agateCoreNilHash);
   agateClassBindPrimitive(vm, vm->nil_class, "to_s", agateCoreNilToS);
 
-  vm->range_class = agateAsClass(agateFindModuleVariable(vm, core, "Range"));
+  vm->range_class = agateAsClass(agateUnitFindVariable(vm, core, "Range"));
   agateClassBindPrimitive(vm, vm->range_class, "from", agateCoreRangeFrom);
   agateClassBindPrimitive(vm, vm->range_class, "hash", agateCoreRangeHash);
   agateClassBindPrimitive(vm, vm->range_class, "inclusive", agateCoreRangeInclusive);
@@ -5120,7 +5120,7 @@ static void agateLoadCoreModule(AgateVM *vm) {
   agateClassBindPrimitive(vm, vm->range_class, "min", agateCoreRangeMin);
   agateClassBindPrimitive(vm, vm->range_class, "to", agateCoreRangeTo);
 
-  vm->string_class = agateAsClass(agateFindModuleVariable(vm, core, "String"));
+  vm->string_class = agateAsClass(agateUnitFindVariable(vm, core, "String"));
   agateClassBindPrimitive(vm, vm->string_class, "__trim(_,_,_)", agateCoreStringTrim);
   agateClassBindPrimitive(vm, vm->string_class, "+(_)", agateCoreStringPlus);
   agateClassBindPrimitive(vm, vm->string_class, "*(_)", agateCoreStringTimes);
@@ -5138,7 +5138,7 @@ static void agateLoadCoreModule(AgateVM *vm) {
   agateClassBindPrimitive(vm, vm->string_class, "to_i", agateCoreStringToI);
   agateClassBindPrimitive(vm, vm->string_class, "to_s", agateCoreStringToS);
 
-  AgateClass *system_class = agateAsClass(agateFindModuleVariable(vm, core, "System"));
+  AgateClass *system_class = agateAsClass(agateUnitFindVariable(vm, core, "System"));
   agateClassBindPrimitive(vm, system_class->base.type, "abort(_)", agateCoreSystemAbort);
   agateClassBindPrimitive(vm, system_class->base.type, "clock", agateCoreSystemClock);
   agateClassBindPrimitive(vm, system_class->base.type, "gc()", agateCoreSystemGc);
@@ -5198,17 +5198,17 @@ static void agateHandleDelete(AgateVM *vm, AgateHandle *handle) {
  * api
  */
 
-AgateStatus agateInterpret(AgateVM *vm, const char *module, const char *source) { // ~ wrenInterpret + wrenCompileSource
+AgateStatus agateInterpret(AgateVM *vm, const char *unit, const char *source) { // ~ wrenInterpret + wrenCompileSource
   AgateValue name = agateNilValue();
 
-  if (module != NULL) {
-    name = agateEntityValue(agateStringNew(vm, module, strlen(module)));
+  if (unit != NULL) {
+    name = agateEntityValue(agateStringNew(vm, unit, strlen(unit)));
     agatePushRoot(vm, agateAsEntity(name));
   }
 
   AgateClosure *closure = agateCompile(vm, name, source);
 
-  if (module != NULL) {
+  if (unit != NULL) {
     agatePopRoot(vm);
   }
 
@@ -5225,7 +5225,7 @@ AgateStatus agateInterpret(AgateVM *vm, const char *module, const char *source) 
 
 void agateConfigInitialize(AgateConfig *config) {
   config->reallocate = NULL;
-  config->module_handler = NULL;
+  config->unit_handler = NULL;
   config->foreign_class_handler = NULL;
   config->foreign_method_handler = NULL;
   config->parse_int = NULL;
@@ -5282,7 +5282,7 @@ AgateVM *agateNewVM(const AgateConfig *config) {
 
   vm->status = AGATE_STATUS_OK;
 
-  agateTableCreate(&vm->modules);
+  agateTableCreate(&vm->units);
 
   vm->array_class = NULL;
   vm->bool_class = NULL;
@@ -5312,11 +5312,11 @@ AgateVM *agateNewVM(const AgateConfig *config) {
   vm->error = agateNilValue();
 
   vm->compiler = NULL;
-  vm->last_module = NULL;
+  vm->last_unit = NULL;
 
   // load core
 
-  agateLoadCoreModule(vm);
+  agateLoadCoreUnit(vm);
 
   return vm;
 }
@@ -5325,7 +5325,7 @@ void agateDeleteVM(AgateVM *vm) {
   agateFreeArray(vm, AgateCallFrame, vm->frames, vm->frames_capacity);
   agateFreeArray(vm, AgateValue, vm->stack, vm->stack_capacity);
   agateTableDestroy(&vm->method_names, vm);
-  agateTableDestroy(&vm->modules, vm);
+  agateTableDestroy(&vm->units, vm);
 
   // destroy entities
 
@@ -5697,50 +5697,50 @@ void agateSlotMapErase(AgateVM *vm, ptrdiff_t map_slot, ptrdiff_t key_slot, ptrd
   vm->api_stack[value_slot] = erased;
 }
 
-bool agateHasModule(AgateVM *vm, const char *module_name) {
-  assert(module_name != NULL);
+bool agateHasUnit(AgateVM *vm, const char *unit_name) {
+  assert(unit_name != NULL);
 
-  AgateValue name = agateEntityValue(agateStringNew(vm, module_name, strlen(module_name)));
+  AgateValue name = agateEntityValue(agateStringNew(vm, unit_name, strlen(unit_name)));
   agatePushRoot(vm, agateAsEntity(name));
 
-  AgateModule *module = agateGetModule(vm, name);
+  AgateUnit *unit = agateGetUnit(vm, name);
 
   agatePopRoot(vm);
-  return module != NULL;
+  return unit != NULL;
 }
 
-bool agateHasVariable(AgateVM *vm, const char *module_name, const char *variable_name) {
-  assert(module_name != NULL);
+bool agateHasVariable(AgateVM *vm, const char *unit_name, const char *variable_name) {
+  assert(unit_name != NULL);
   assert(variable_name != NULL);
 
-  AgateValue name = agateEntityValue(agateStringNew(vm, module_name, strlen(module_name)));
+  AgateValue name = agateEntityValue(agateStringNew(vm, unit_name, strlen(unit_name)));
   agatePushRoot(vm, agateAsEntity(name));
 
-  AgateModule *module = agateGetModule(vm, name);
-  assert(module != NULL);
+  AgateUnit *unit = agateGetUnit(vm, name);
+  assert(unit != NULL);
 
   agatePopRoot(vm);
 
-  ptrdiff_t symbol = agateSymbolTableFind(&module->object_names, variable_name, strlen(variable_name));
+  ptrdiff_t symbol = agateSymbolTableFind(&unit->object_names, variable_name, strlen(variable_name));
   return symbol != -1;
 }
 
-void agateGetVariable(AgateVM *vm, const char *module_name, const char *variable_name, ptrdiff_t slot) {
-  assert(module_name != NULL);
+void agateGetVariable(AgateVM *vm, const char *unit_name, const char *variable_name, ptrdiff_t slot) {
+  assert(unit_name != NULL);
   assert(variable_name != NULL);
 
-  AgateValue name = agateEntityValue(agateStringNew(vm, module_name, strlen(module_name)));
+  AgateValue name = agateEntityValue(agateStringNew(vm, unit_name, strlen(unit_name)));
   agatePushRoot(vm, agateAsEntity(name));
 
-  AgateModule *module = agateGetModule(vm, name);
-  assert(module != NULL);
+  AgateUnit *unit = agateGetUnit(vm, name);
+  assert(unit != NULL);
 
   agatePopRoot(vm);
 
-  ptrdiff_t symbol = agateSymbolTableFind(&module->object_names, variable_name, strlen(variable_name));
+  ptrdiff_t symbol = agateSymbolTableFind(&unit->object_names, variable_name, strlen(variable_name));
   assert(symbol != -1);
 
-  agateSlotSetValue(vm, slot, module->object_values.data[symbol]);
+  agateSlotSetValue(vm, slot, unit->object_values.data[symbol]);
 }
 
 void agateAbort(AgateVM *vm, ptrdiff_t slot) {
@@ -5845,7 +5845,7 @@ typedef struct {
 
 typedef struct {
   AgateVM *vm;
-  AgateModule *module;
+  AgateUnit *unit;
 
   const char *source_start;
   const char *source_end;
@@ -5981,10 +5981,10 @@ static void agateErrorPrint(AgateParser *parser, int line, const char *label, co
   length += vsnprintf(message + length, AGATE_ERROR_MESSAGE_SIZE - length, format, args);
   assert(length < AGATE_ERROR_MESSAGE_SIZE);
 
-  AgateString *module = parser->module->name;
-  const char *module_name = module ? module->data : "<unknown>";
+  AgateString *unit_string = parser->unit->name;
+  const char *unit_name = unit_string ? unit_string->data : "<unknown>";
 
-  parser->vm->config.error(parser->vm, AGATE_ERROR_COMPILE, module_name, line, message);
+  parser->vm->config.error(parser->vm, AGATE_ERROR_COMPILE, unit_name, line, message);
   parser->vm->status = AGATE_STATUS_COMPILE_ERROR;
 }
 
@@ -6092,7 +6092,7 @@ static void agateCompilerCreate(AgateCompiler *compiler, AgateParser *parser, Ag
     compiler->scope_depth = 0;
   }
 
-  compiler->function = agateFunctionNew(parser->vm, parser->module, compiler->locals_count);
+  compiler->function = agateFunctionNew(parser->vm, parser->unit, compiler->locals_count);
 }
 
 
@@ -6905,14 +6905,14 @@ static ptrdiff_t agateCompilerDeclareVariable(AgateCompiler *compiler, AgateToke
   }
 
   if (compiler->scope_depth == -1) {
-    ptrdiff_t symbol = agateModuleAddVariable(compiler->parser->vm, compiler->parser->module, token->start, token->length, agateNilValue());
+    ptrdiff_t symbol = agateUnitAddVariable(compiler->parser->vm, compiler->parser->unit, token->start, token->length, agateNilValue());
 
     switch (symbol) {
       case AGATE_DEFINITION_ALREADY_DEFINED:
-        agateError(compiler, "Module variable is already defined.");
+        agateError(compiler, "Unit variable is already defined.");
         break;
       case AGATE_DEFINITION_TOO_MANY_DEFINITIONS:
-        agateError(compiler, "Too many module variables defined.");
+        agateError(compiler, "Too many unit variables defined.");
         break;
       default:
         break;
@@ -7056,7 +7056,7 @@ static AgateVariable agateCompilerResolveName(AgateCompiler *compiler, const cha
   }
 
   variable.scope = AGATE_SCOPE_GLOBAL;
-  variable.index = agateSymbolTableFind(&compiler->parser->module->object_names, name, length);
+  variable.index = agateSymbolTableFind(&compiler->parser->unit->object_names, name, length);
   return variable;
 }
 
@@ -7484,7 +7484,7 @@ static void agateEmitLoadThis(AgateCompiler *compiler) {
 }
 
 static void agateEmitLoadCoreVariable(AgateCompiler *compiler, const char *name) {
-  ptrdiff_t symbol = agateSymbolTableFind(&compiler->parser->module->object_names, name, strlen(name));
+  ptrdiff_t symbol = agateSymbolTableFind(&compiler->parser->unit->object_names, name, strlen(name));
   assert(symbol != -1);
   agateEmitShortArg(compiler, AGATE_OP_GLOBAL_LOAD, symbol);
 }
@@ -7671,10 +7671,10 @@ static void agateIdentifierExpression(AgateCompiler *compiler, bool can_assign) 
 
   if (variable.index == -1) {
     variable.scope = AGATE_SCOPE_GLOBAL;
-    variable.index = agateModuleAddFutureVariable(compiler->parser->vm, compiler->parser->module, token->start, token->length, token->line);
+    variable.index = agateUnitAddFutureVariable(compiler->parser->vm, compiler->parser->unit, token->start, token->length, token->line);
 
     if (variable.index == AGATE_DEFINITION_TOO_MANY_DEFINITIONS) {
-      agateError(compiler, "Too many module variables defined.");
+      agateError(compiler, "Too many unit variables defined.");
     }
   }
 
@@ -8548,9 +8548,9 @@ static void agateVariableOrFunctionDeclaration(AgateCompiler *compiler) {
 
 static void agateImport(AgateCompiler *compiler) {
   agateCompilerConsume(compiler, AGATE_TOKEN_STRING, "Expect a string after 'import'.");
-  ptrdiff_t module_constant = agateCompilerAddConstant(compiler, compiler->parser->previous.value);
+  ptrdiff_t unit_constant = agateCompilerAddConstant(compiler, compiler->parser->previous.value);
 
-  agateEmitShortArg(compiler, AGATE_OP_IMPORT_MODULE, module_constant);
+  agateEmitShortArg(compiler, AGATE_OP_IMPORT_UNIT, unit_constant);
   agateEmitOpcode(compiler, AGATE_OP_POP);
 
   if (!agateCompilerMatch(compiler, AGATE_TOKEN_FOR)) {
@@ -8628,15 +8628,15 @@ static void agateUnit(AgateCompiler *compiler) {
     agateDeclaration(compiler);
   }
 
-  agateEmitOpcode(compiler, AGATE_OP_END_MODULE);
+  agateEmitOpcode(compiler, AGATE_OP_END_UNIT);
   agateEmitOpcode(compiler, AGATE_OP_RETURN);
 }
 
-static AgateFunction *agateRawCompile(AgateVM *vm, AgateModule *module, const char *source) { // # ~wrenCompile
+static AgateFunction *agateRawCompile(AgateVM *vm, AgateUnit *unit, const char *source) { // # ~wrenCompile
   AgateParser parser;
 
   parser.vm = vm;
-  parser.module = module;
+  parser.unit = unit;
 
   parser.source_start = source;
   parser.source_end = source + strlen(source);
@@ -8652,7 +8652,7 @@ static AgateFunction *agateRawCompile(AgateVM *vm, AgateModule *module, const ch
 
   parser.has_error = false;
 
-  ptrdiff_t existing_object_count = module->object_values.size;
+  ptrdiff_t existing_object_count = unit->object_values.size;
 
   AgateCompiler compiler;
   agateCompilerCreate(&compiler, &parser, NULL, false);
@@ -8660,14 +8660,14 @@ static AgateFunction *agateRawCompile(AgateVM *vm, AgateModule *module, const ch
 
   agateUnit(&compiler);
 
-  for (ptrdiff_t i = existing_object_count; i < module->object_values.size; ++i) {
-    if (agateIsInt(module->object_values.data[i])) {
-      AgateString *name = agateSymbolTableReverseFind(&module->object_names, i);
+  for (ptrdiff_t i = existing_object_count; i < unit->object_values.size; ++i) {
+    if (agateIsInt(unit->object_values.data[i])) {
+      AgateString *name = agateSymbolTableReverseFind(&unit->object_names, i);
 
       parser.previous.kind = AGATE_TOKEN_IDENTIFIER;
       parser.previous.start = name->data;
       parser.previous.length = name->length;
-      parser.previous.line = agateAsInt(module->object_values.data[i]);
+      parser.previous.line = agateAsInt(unit->object_values.data[i]);
       agateError(&compiler, "Variable '%s' is used but not defined.", name->data);
     }
   }

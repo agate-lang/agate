@@ -1,0 +1,11 @@
+def unit = "from here"
+def value_c = "value C"
+import "unit" for value_a, unit as another, value_b # expect: ran unit
+import "unit" for value_c as other_c
+
+IO.println(unit)  # expect: from here
+IO.println(another) # expect: from unit
+IO.println(value_a)  # expect: unit A
+IO.println(value_b)  # expect: unit B
+IO.println(value_c)  # expect: value C
+IO.println(other_c)  # expect: unit C
