@@ -1,0 +1,4 @@
+12345      # decimal form
+0xDeadBeef # hexadecimal form
+0o755      # octal form
+0b101010   # binary form

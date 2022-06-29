@@ -6324,23 +6324,7 @@ static void agateParserReadString(AgateParser *parser) {
     uint32_t codepoint = AGATE_INVALID_CHAR;
 
     if (c == '\\') {
-      if (agateParserPeekNextChar(parser) == 'x') {
-        agateParserAdvanceChar(parser); // eat '\'
-        agateParserAdvanceChar(parser); // eat x
-        uint32_t val = agateParserHexEscapeDecode(parser, 2);
-
-        if (val == AGATE_INVALID_CHAR) {
-          agateLexicalError(parser, "Malformed string.");
-          agateCharArrayDestroy(&buffer, parser->vm);
-          return;
-        }
-
-        assert(val <= UINT8_MAX);
-        agateCharArrayAppend(&buffer, val, parser->vm);
-        continue;
-      } else {
-        codepoint = agateParserEscapeDecode(parser);
-      }
+      codepoint = agateParserEscapeDecode(parser);
     } else {
       codepoint = agateParserUtf8Decode(parser);
     }

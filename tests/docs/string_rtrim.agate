@@ -1,0 +1,2 @@
+IO.println("the cake is a lie \n\r".rtrim()) # expect: the cake is a lie
+IO.println("the cake is a lie".rtrim(" eht")) # expect: the cake is a li

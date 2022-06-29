@@ -1,0 +1,2 @@
+IO.println("The answer is %(6 * 7)") # expect: The answer is 42
+IO.println("The answer is %((2..1).map {|n| 2 * n}.join())") # expect: The answer is 42

@@ -1,3 +1,0 @@
-# result: compile error
-# expect: test:3: Error: Malformed string.
-"\x0

@@ -33,7 +33,7 @@ HEX   [a-fA-F0-9]
 HEXP  (0x)
 EXP   (e[+-]?{DEC}+)
 ID    [a-zA-Z_]([a-zA-Z0-9_])*
-ESC   (\\([0'"\\abfnrtv%]|x[a-fA-F0-9]{2}|u[a-fA-F0-9]{4}|U[a-fA-F0-9]{8}))
+ESC   (\\([0'"\\abefnrtv%]|u[a-fA-F0-9]{4}|U[a-fA-F0-9]{8}))
 
 %%
 

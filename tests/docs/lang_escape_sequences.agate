@@ -1,0 +1,16 @@
+'\0' # U+0000 NULL
+'\a' # U+0007 BELL
+'\b' # U+0008 BACKSPACE
+'\t' # U+0009 CHARACTER TABULATION (horizontal tabulation)
+'\n' # U+000A LINE FEED (new line)
+'\v' # U+000B LINE TABULATION (vertical tabulation)
+'\f' # U+000C FORM FEED
+'\r' # U+000D CARRIAGE RETURN
+'\e' # U+001B ESCAPE
+'\"' # U+0022 QUOTATION MARK (double quote)
+'\%' # U+0025 PERCENT SIGN
+'\'' # U+0027 APOSTROPHE (single quote)
+'\\' # U+005C REVERSE SOLIDUS (backslash)
+
+'\u6728'     # '木'
+'\U0001F3AE' # '🎮'
