@@ -80,6 +80,9 @@ if(UNIX AND AGATE_DEV)
       tests.c
       ${BISON_agate-parser_OUTPUTS}
       ${FLEX_agate-lexer_OUTPUTS}
+      tests/api/api_tests.c
+      # tests
+      tests/api/handle.c
     )
 
     target_compile_definitions(agate-tests
@@ -90,6 +93,7 @@ if(UNIX AND AGATE_DEV)
     target_include_directories(agate-tests
       PRIVATE
         "${CMAKE_CURRENT_BINARY_DIR}"
+        "${CMAKE_CURRENT_SOURCE_DIR}"
     )
 
     target_link_libraries(agate-tests

@@ -16,6 +16,8 @@
 
 #include "agate.h"
 
+#include "tests/api/api_tests.h"
+
 // useful declaration from generated files
 extern FILE *yyin;
 int yyparse(void);
@@ -362,8 +364,20 @@ static AgateStatus agateTestRunInterpreter(AgateTest *self) {
 
   config.user_data = self;
 
+  bool is_api_test = agateTestIsApi(self->path);
+
+  if (is_api_test) {
+    config.foreign_class_handler = agateTestForeignClassHandler;
+    config.foreign_method_handler = agateTestForeignMethodHandler;
+  }
+
   AgateVM *vm = agateNewVM(&config);
   AgateStatus status = agateInterpret(vm, self->path, self->content.data);
+
+  if (is_api_test) {
+    agateTestRunNative(vm, self->path);
+  }
+
   agateDeleteVM(vm);
 
   return status;
