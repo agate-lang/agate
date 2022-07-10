@@ -10,4 +10,4 @@ for (i in 0...100) {
   }
 }
 
-IO.println(map.count) # expect: 10
+IO.println(map.size) # expect: 10

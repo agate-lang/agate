@@ -1,4 +1,4 @@
-IO.println("".count)   # expect: 0
+IO.println("".size)    # expect: 0
 IO.println("a string") # expect: a string
 
 # Non-ASCII.

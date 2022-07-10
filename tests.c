@@ -69,12 +69,12 @@ static void agateTestBufferReset(AgateTestBuffer *self) {
   memset(self->data, 0, self->capacity);
 }
 
-static void agateTestBufferAppend(AgateTestBuffer *self, const char *buffer, size_t length) {
-  if (length == 0) {
+static void agateTestBufferAppend(AgateTestBuffer *self, const char *buffer, size_t size) {
+  if (size == 0) {
     return;
   }
 
-  ptrdiff_t needed = self->size + length + 1;
+  ptrdiff_t needed = self->size + size + 1;
 
   if (self->capacity < needed) {
     while (self->capacity < needed) {
@@ -90,9 +90,9 @@ static void agateTestBufferAppend(AgateTestBuffer *self, const char *buffer, siz
     self->data = data;
   }
 
-  memcpy(self->data + self->size, buffer, length);
+  memcpy(self->data + self->size, buffer, size);
 
-  self->size += length;
+  self->size += size;
   self->data[self->size] = '\0';
 }
 
@@ -151,15 +151,15 @@ static bool agateTestReadFile(AgateTest *self) {
   char buffer[BUFFER_SIZE];
 
   while (fgets(buffer, BUFFER_SIZE, self->file) != NULL) {
-    size_t length = strlen(buffer);
+    size_t size = strlen(buffer);
 
-    agateTestBufferAppend(&self->content, buffer, length);
+    agateTestBufferAppend(&self->content, buffer, size);
 
     char *where = strstr(buffer, EXPECT_STRING);
 
     if (where != NULL) {
       where += sizeof(EXPECT_STRING) - 1; // -1 for '\0'
-      agateTestBufferAppend(&self->expected.print, where, length - (where - buffer)); // this includes the final '\n'
+      agateTestBufferAppend(&self->expected.print, where, size - (where - buffer)); // this includes the final '\n'
     }
 
     if (strstr(buffer, STATUS_OK_STRING) != NULL) {
@@ -224,16 +224,16 @@ static bool agateTestExecFile(AgateTest *self, AgateTestFunc func, AgateOutcome 
   char buffer[BUFFER_SIZE];
 
   for (;;) {
-    ssize_t length = read(out[0], buffer, BUFFER_SIZE);
-    assert(length != -1);
+    ssize_t size = read(out[0], buffer, BUFFER_SIZE);
+    assert(size != -1);
 
-    if (length == 0) {
+    if (size == 0) {
       ret = close(out[0]);
       assert(ret != -1);
       break;
     }
 
-    agateTestBufferAppend(&outcome->print, buffer, length);
+    agateTestBufferAppend(&outcome->print, buffer, size);
   }
 
   int status;

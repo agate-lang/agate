@@ -1,0 +1,15 @@
+IO.println("".size)         # expect: 0
+IO.println("a string".size) # expect: 8
+
+# 8-bit clean.
+IO.println("\0".size)       # expect: 1
+IO.println("a\0b".size)     # expect: 3
+IO.println("\0c".size)      # expect: 2
+IO.println(("a\0b" + "\0c").size)  # expect: 5
+
+# Treats a UTF-8 sequence as a single item.
+#
+# Bytes:           11111
+#        012345678901234
+# Chars: sø mé ஃ  thî ng
+IO.println("søméஃthîng".size) # expect: 10

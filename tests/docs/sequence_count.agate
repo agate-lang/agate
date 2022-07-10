@@ -1,1 +1,0 @@
-IO.println((1..42).count) # expect: 42

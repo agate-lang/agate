@@ -27,7 +27,7 @@ IO.println(true == 10 is Int) # expect: true
 IO.println(10 is Int == false) # expect: false
 
 # Unary - has lower precedence than ..
-IO.println(-"abc".count) # expect: -3
+IO.println(-"abc".size) # expect: -3
 
 # 1 - 1 is not space-sensitive.
 IO.println(1 - 1) # expect: 0

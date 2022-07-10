@@ -14,4 +14,4 @@ class TestSequence is Sequence {
   iterator_value(iterator) { iterator }
 }
 
-IO.println(TestSequence.new().count) # expect: 10
+IO.println(TestSequence.new().size) # expect: 10

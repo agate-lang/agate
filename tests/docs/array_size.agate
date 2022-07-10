@@ -1,2 +1,2 @@
 def a = [ 1, 'a', 3.14, "good", true ]
-IO.println(a.count) # expect: 5
+IO.println(a.size) # expect: 5

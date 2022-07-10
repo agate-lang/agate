@@ -61,16 +61,16 @@ def fishes = [
 
 def map = { }
 for (fish in fishes) {
-  map[fish] = fish.count
+  map[fish] = fish.size
 }
 
-IO.println(map.count) # expect: 249
+IO.println(map.size) # expect: 249
 
 for (n in 0...150) {
   map.erase(fishes[n])
 }
 
-IO.println(map.count) # expect: 99
+IO.println(map.size) # expect: 99
 
 # Make sure we can still find all of the remaining ones.
 def contained = 0

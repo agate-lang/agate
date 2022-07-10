@@ -1,0 +1,12 @@
+def map = {}
+IO.println(map.size) # expect: 0
+map["one"] = "value"
+IO.println(map.size) # expect: 1
+map["two"] = "value"
+IO.println(map.size) # expect: 2
+map["three"] = "value"
+IO.println(map.size) # expect: 3
+
+# Adding existing key does not increase size.
+map["two"] = "new value"
+IO.println(map.size) # expect: 3

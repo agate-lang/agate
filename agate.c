@@ -113,11 +113,11 @@
 
 #define AGATE_MAX_BREAK_COUNT 32
 
-#define AGATE_MAX_VARIABLE_NAME_LENGTH 64
+#define AGATE_MAX_VARIABLE_NAME_SIZE 64
 
 #define AGATE_MAX_PARAMETERS 16
-#define AGATE_MAX_METHOD_NAME_LENGTH 64
-#define AGATE_MAX_METHOD_SIGNATURE_LENGTH (AGATE_MAX_METHOD_NAME_LENGTH + (AGATE_MAX_PARAMETERS * 2) + 1)
+#define AGATE_MAX_METHOD_NAME_SIZE 64
+#define AGATE_MAX_METHOD_SIGNATURE_SIZE (AGATE_MAX_METHOD_NAME_SIZE + (AGATE_MAX_PARAMETERS * 2) + 1)
 
 #define AGATE_GC_HEAP_GROW_FACTOR 2
 
@@ -175,7 +175,7 @@ typedef struct {
 
 typedef struct {
   ptrdiff_t capacity;
-  ptrdiff_t count;
+  ptrdiff_t size;
   AgateTableEntry *entries;
 } AgateTable;
 
@@ -189,7 +189,7 @@ AGATE_ARRAY_DECLARE(ValueArray, AgateValue)
 typedef struct {
   int line;
   ptrdiff_t start;
-  ptrdiff_t length;
+  ptrdiff_t size;
 } AgateLineInfo;
 
 AGATE_ARRAY_DECLARE(LineInfoArray, AgateLineInfo)
@@ -238,7 +238,7 @@ struct AgateEntity {
 
 typedef struct {
   AgateEntity base;
-  ptrdiff_t length;
+  ptrdiff_t size;
   uint64_t hash;
   char data[];
 } AgateString;
@@ -585,12 +585,12 @@ static void agate ## name ## Resize(Agate ## name *self, ptrdiff_t size, type va
 
 // AppendMultiple
 #define AGATE_ARRAY_DEFINE_APPEND_MULTIPLE(name, type)                            \
-static void agate ## name ## AppendMultiple(Agate ## name *self, const type *start, ptrdiff_t length, AgateVM *vm) { \
+static void agate ## name ## AppendMultiple(Agate ## name *self, const type *start, ptrdiff_t size, AgateVM *vm) { \
   assert(self);                                                                   \
-  if (self->size + length > self->capacity) {                                     \
-    agate ## name ## Grow(self, self->size + length, vm);                         \
+  if (self->size + size > self->capacity) {                                       \
+    agate ## name ## Grow(self, self->size + size, vm);                           \
   }                                                                               \
-  for (ptrdiff_t i = 0; i < length; ++i) {                                        \
+  for (ptrdiff_t i = 0; i < size; ++i) {                                          \
     self->data[self->size++] = start[i];                                          \
   }                                                                               \
   assert(self->size <= self->capacity);                                           \
@@ -611,9 +611,9 @@ AGATE_ARRAY_DEFINE_RESIZE(MethodArray, AgateMethod)
  */
 
 #define AGATE_INVALID_CHAR UINT32_C(0xFFFFFFFF)
-#define AGATE_CHAR_BUFFER_LENGTH 8
+#define AGATE_CHAR_BUFFER_SIZE 8
 
-static ptrdiff_t agateUtf8DecodeLength(const char *text) {
+static ptrdiff_t agateUtf8DecodeSize(const char *text) {
   uint8_t c = *text;
 
   if ((c & 0x80) == 0x00) { return 1; }
@@ -625,8 +625,8 @@ static ptrdiff_t agateUtf8DecodeLength(const char *text) {
   return 0;
 }
 
-static uint32_t agateUtf8Decode(const char *text, ptrdiff_t length, const char **end) {
-  if (length == 0) {
+static uint32_t agateUtf8Decode(const char *text, ptrdiff_t size, const char **end) {
+  if (size == 0) {
     return AGATE_INVALID_CHAR;
   }
 
@@ -656,7 +656,7 @@ static uint32_t agateUtf8Decode(const char *text, ptrdiff_t length, const char *
     return AGATE_INVALID_CHAR;
   }
 
-  if (length < expected) {
+  if (size < expected) {
     return AGATE_INVALID_CHAR;
   }
 
@@ -682,7 +682,7 @@ static uint32_t agateUtf8Decode(const char *text, ptrdiff_t length, const char *
   return codepoint;
 }
 
-static inline ptrdiff_t agateUtf8EncodeLength(uint32_t c) {
+static inline ptrdiff_t agateUtf8EncodeSize(uint32_t c) {
   if (c < 0x80) { return 1; }
   if (c < 0x800) { return 2; }
   if (c < 0x10000) { return 3; }
@@ -826,13 +826,13 @@ static inline AgateUpvalue *agateAsUpvalue(AgateValue value) { return (AgateUpva
 
 static inline const char *agateAsCString(AgateValue value) { return ((AgateString *) agateAsEntity(value))->data; }
 
-static inline bool agateStringCompare(AgateValue value, const char *data, ptrdiff_t length) {
+static inline bool agateStringCompare(AgateValue value, const char *data, ptrdiff_t size) {
   if (!agateIsString(value)) {
     return false;
   }
 
   AgateString *string = agateAsString(value);
-  return string->length == length && memcmp(string->data, data, length) == 0;
+  return string->size == size && memcmp(string->data, data, size) == 0;
 }
 
 static inline AgateClass *agateValueGetClass(AgateValue value, AgateVM *vm) {
@@ -880,7 +880,7 @@ static inline bool agateEntityEquals(AgateValue a, AgateValue b) {
     case AGATE_ENTITY_STRING: {
       AgateString *sa = agateAsString(a);
       AgateString *sb = agateAsString(b);
-      return sa->hash == sb->hash && sa->length == sb->length && memcmp(sa->data, sb->data, sa->length) == 0;
+      return sa->hash == sb->hash && sa->size == sb->size && memcmp(sa->data, sb->data, sa->size) == 0;
     }
 
     default:
@@ -1074,10 +1074,10 @@ static void agateBytecodeWrite(AgateBytecode *self, uint8_t byte, int line, Agat
     AgateLineInfo info;
     info.line = line;
     info.start = self->code.size;
-    info.length = 1;
+    info.size = 1;
     agateLineInfoArrayAppend(&self->lines, info, vm);
   } else {
-    ++self->lines.data[self->lines.size - 1].length;
+    ++self->lines.data[self->lines.size - 1].size;
   }
 
   agateBytecodeArrayAppend(&self->code, byte, vm);
@@ -1102,7 +1102,7 @@ static int agateBytecodeLineFromOffset(const AgateBytecode *bc, ptrdiff_t offset
   for (ptrdiff_t i = 0; i < bc->lines.size; ++i) {
     AgateLineInfo *info = &bc->lines.data[i];
 
-    if (info->start <= offset && offset < info->start + info->length) {
+    if (info->start <= offset && offset < info->start + info->size) {
       return info->line;
     }
   }
@@ -1172,10 +1172,10 @@ AGATE_ARRAY_DEFINE_RESIZE(ValueArray, AgateValue)
  */
 
 // 64-bit FNV-1a hash
-static uint64_t agateStringHash(const char *data, ptrdiff_t length) {
+static uint64_t agateStringHash(const char *data, ptrdiff_t size) {
   uint64_t hash = UINT64_C(14695981039346656037);
 
-  for (ptrdiff_t i = 0; i < length; ++i) {
+  for (ptrdiff_t i = 0; i < size; ++i) {
     hash ^= (uint8_t) data[i];
     hash *= UINT64_C(1099511628211);
   }
@@ -1186,13 +1186,13 @@ static uint64_t agateStringHash(const char *data, ptrdiff_t length) {
 static void agateTableCreate(AgateTable *self) {
   assert(self);
   self->capacity = 0;
-  self->count = 0;
+  self->size = 0;
   self->entries = NULL;
 }
 
 static void agateTableClear(AgateTable *self) {
   assert(self);
-  self->count = 0;
+  self->size = 0;
 
   for (ptrdiff_t i = 0; i < self->capacity; ++i) {
     self->entries[i].key = agateUndefinedValue();
@@ -1204,7 +1204,7 @@ static void agateTableDestroy(AgateTable *self, AgateVM *vm) {
   assert(self);
   agateFreeArray(vm, AgateTableEntry, self->entries, self->capacity);
   self->capacity = 0;
-  self->count = 0;
+  self->size = 0;
   self->entries = NULL;
 }
 
@@ -1307,13 +1307,13 @@ static inline AgateValue agateTableHashFind(AgateTable *self, AgateValue key) {
 }
 
 static bool agateTableInsert(AgateTable *self, AgateValue key, AgateValue value, uint64_t hash, AgateVM *vm) {
-  if (self->count + 1 > self->capacity * AGATE_TABLE_MAX_LOAD_NUM / AGATE_TABLE_MAX_LOAD_DEN) {
+  if (self->size + 1 > self->capacity * AGATE_TABLE_MAX_LOAD_NUM / AGATE_TABLE_MAX_LOAD_DEN) {
     ptrdiff_t capacity = agateGrowCapacity(self->capacity);
     agateTableGrow(self, capacity, vm);
   }
 
   if (agateEntriesInsert(self->entries, self->capacity, key, value, hash)) {
-    ++self->count;
+    ++self->size;
     return true;
   }
 
@@ -1336,7 +1336,7 @@ static AgateValue agateTableErase(AgateTable *self, AgateValue key, uint64_t has
   entry->value = agateBoolValue(true); // tombstone
   entry->hash = 0;
 
-  --self->count;
+  --self->size;
 
   return value;
 }
@@ -1375,44 +1375,44 @@ static AgateEntity *agateEntityNew(ptrdiff_t size, AgateEntityKind kind, ptrdiff
 
 // String
 
-static inline AgateString *agateStringAllocate(AgateVM *vm, ptrdiff_t length, uint64_t hash) {
-  AgateString *string = agateAllocateFlexEntity(vm, AgateString, char, (length + 1), AGATE_ENTITY_STRING, vm->string_class);
-  string->length = length;
+static inline AgateString *agateStringAllocate(AgateVM *vm, ptrdiff_t size, uint64_t hash) {
+  AgateString *string = agateAllocateFlexEntity(vm, AgateString, char, (size + 1), AGATE_ENTITY_STRING, vm->string_class);
+  string->size = size;
   string->hash = hash;
   return string;
 }
 
-static AgateString *agateStringNew(AgateVM *vm, const char *data, ptrdiff_t length) {
-  uint64_t hash = agateStringHash(data, length);
-  AgateString *string = agateStringAllocate(vm, length, hash);
-  memcpy(string->data, data, length);
-  string->data[length] = '\0';
+static AgateString *agateStringNew(AgateVM *vm, const char *data, ptrdiff_t size) {
+  uint64_t hash = agateStringHash(data, size);
+  AgateString *string = agateStringAllocate(vm, size, hash);
+  memcpy(string->data, data, size);
+  string->data[size] = '\0';
   return string;
 }
 
 static AgateString *agateStringNewFormat(AgateVM *vm, const char *format, ...) {
   va_list args;
   va_start(args, format);
-  ptrdiff_t length = 0;
+  ptrdiff_t size = 0;
 
   for (const char *ptr = format; *ptr != '\0'; ++ptr) {
     switch (*ptr) {
       case '$':
-        length += strlen(va_arg(args, const char *));
+        size += strlen(va_arg(args, const char *));
         break;
 
       case '@':
-        length += va_arg(args, AgateString *)->length;
+        size += va_arg(args, AgateString *)->size;
         break;
 
       default:
-        ++length;
+        ++size;
     }
   }
 
   va_end(args);
 
-  AgateString *string = agateStringAllocate(vm, length, 0);
+  AgateString *string = agateStringAllocate(vm, size, 0);
   char *out = string->data;
 
   va_start(args, format);
@@ -1422,17 +1422,17 @@ static AgateString *agateStringNewFormat(AgateVM *vm, const char *format, ...) {
       case '$':
       {
         const char *raw = va_arg(args, const char *);
-        length = strlen(raw);
-        memcpy(out, raw, length);
-        out += length;
+        size = strlen(raw);
+        memcpy(out, raw, size);
+        out += size;
         break;
       }
 
       case '@':
       {
         AgateString *raw = va_arg(args, AgateString *);
-        memcpy(out, raw->data, raw->length);
-        out += raw->length;
+        memcpy(out, raw->data, raw->size);
+        out += raw->size;
         break;
       }
 
@@ -1444,45 +1444,45 @@ static AgateString *agateStringNewFormat(AgateVM *vm, const char *format, ...) {
 
   va_end(args);
 
-  string->hash = agateStringHash(string->data, string->length);
+  string->hash = agateStringHash(string->data, string->size);
   return string;
 }
 
-static ptrdiff_t agateStringFind(AgateString *haystack, const char *needle, ptrdiff_t needle_length, ptrdiff_t start) {
-  const ptrdiff_t haystack_length = haystack->length;
+static ptrdiff_t agateStringFind(AgateString *haystack, const char *needle, ptrdiff_t needle_size, ptrdiff_t start) {
+  const ptrdiff_t haystack_size = haystack->size;
 
-  if (needle_length == 0) {
+  if (needle_size == 0) {
     return start;
   }
 
-  if (start >= haystack_length) {
+  if (start >= haystack_size) {
     return -1;
   }
 
-  if (start + needle_length > haystack_length) {
+  if (start + needle_size > haystack_size) {
     return -1;
   }
 
   ptrdiff_t skip[UINT8_MAX];
 
   for (ptrdiff_t i = 0; i < UINT8_MAX; ++i) {
-    skip[i] = needle_length;
+    skip[i] = needle_size;
   }
 
-  for (ptrdiff_t i = 0; i < needle_length - 1; ++i) {
+  for (ptrdiff_t i = 0; i < needle_size - 1; ++i) {
     uint8_t c = needle[i];
-    skip[c] = needle_length - i - 1;
+    skip[c] = needle_size - i - 1;
   }
 
   ptrdiff_t index = start;
-  ptrdiff_t max = haystack_length - needle_length;
-  uint8_t last = needle[needle_length - 1];
+  ptrdiff_t max = haystack_size - needle_size;
+  uint8_t last = needle[needle_size - 1];
 
   while (index <= max) {
-    uint8_t c = haystack->data[index + needle_length - 1];
+    uint8_t c = haystack->data[index + needle_size - 1];
 
     if (c == last) {
-      if (memcmp(haystack->data + index, needle, needle_length - 1) == 0) {
+      if (memcmp(haystack->data + index, needle, needle_size - 1) == 0) {
         return index;
       }
     }
@@ -1500,7 +1500,7 @@ static AgateString *agateStringReplace(AgateVM *vm, AgateString *text, AgateStri
   ptrdiff_t index = 0;
 
   do {
-    ptrdiff_t next = agateStringFind(text, from->data, from->length, index);
+    ptrdiff_t next = agateStringFind(text, from->data, from->size, index);
 
     if (next == -1) {
       break;
@@ -1510,13 +1510,13 @@ static AgateString *agateStringReplace(AgateVM *vm, AgateString *text, AgateStri
       agateCharArrayAppendMultiple(&buffer, text->data + index, next - index, vm);
     }
 
-    agateCharArrayAppendMultiple(&buffer, to->data, to->length, vm);
-    index = next + from->length;
-  } while (index < text->length);
+    agateCharArrayAppendMultiple(&buffer, to->data, to->size, vm);
+    index = next + from->size;
+  } while (index < text->size);
 
   // add the end
-  if (index < text->length) {
-    agateCharArrayAppendMultiple(&buffer, text->data + index, text->length - index, vm);
+  if (index < text->size) {
+    agateCharArrayAppendMultiple(&buffer, text->data + index, text->size - index, vm);
   }
 
   AgateString *result = agateStringNew(vm, buffer.data, buffer.size);
@@ -1533,19 +1533,19 @@ typedef enum {
 
 static AgateString *agateStringTrim(AgateVM *vm, AgateString *text, AgateString *chars, AgateTrimKind kind) {
   ptrdiff_t start = 0;
-  ptrdiff_t stop = text->length;
+  ptrdiff_t stop = text->size;
 
   if (kind == AGATE_TRIM_LEFT || kind == AGATE_TRIM_BOTH) {
     ptrdiff_t index = 0;
 
-    while (index < chars->length) {
-      ptrdiff_t length = agateUtf8DecodeLength(chars->data + index);
+    while (index < chars->size) {
+      ptrdiff_t size = agateUtf8DecodeSize(chars->data + index);
 
-      if (start + length <= text->length && memcmp(text->data + start, chars->data + index, length) == 0) {
-        start += length;
+      if (start + size <= text->size && memcmp(text->data + start, chars->data + index, size) == 0) {
+        start += size;
         index = 0;
       } else {
-        index += length;
+        index += size;
       }
     }
   }
@@ -1553,14 +1553,14 @@ static AgateString *agateStringTrim(AgateVM *vm, AgateString *text, AgateString 
   if (kind == AGATE_TRIM_RIGHT || kind == AGATE_TRIM_BOTH) {
     ptrdiff_t index = 0;
 
-    while (index < chars->length) {
-      ptrdiff_t length = agateUtf8DecodeLength(chars->data + index);
+    while (index < chars->size) {
+      ptrdiff_t size = agateUtf8DecodeSize(chars->data + index);
 
-      if (stop - length >= start && memcmp(text->data + stop - length, chars->data + index, length) == 0) {
-        stop -= length;
+      if (stop - size >= start && memcmp(text->data + stop - size, chars->data + index, size) == 0) {
+        stop -= size;
         index = 0;
       } else {
-        index += length;
+        index += size;
       }
     }
   }
@@ -1661,7 +1661,7 @@ static AgateClosure *agateClosureNew(AgateVM *vm, AgateFunction *function) {
 
 // Foreign
 
-static ptrdiff_t agateSymbolTableFind(AgateTable *self, const char *name, ptrdiff_t length);
+static ptrdiff_t agateSymbolTableFind(AgateTable *self, const char *name, ptrdiff_t size);
 
 static AgateForeign *agateForeignNew(AgateVM *vm, AgateClass *klass) {
   assert(klass->field_count == -1);
@@ -1717,8 +1717,8 @@ static AgateFunction *agateFunctionNew(AgateVM *vm, AgateUnit *unit, ptrdiff_t s
   return function;
 }
 
-static void agateFunctionBindName(AgateVM *vm, AgateFunction *function, const char *name, ptrdiff_t length) {
-  function->name = agateStringNew(vm, name, length);
+static void agateFunctionBindName(AgateVM *vm, AgateFunction *function, const char *name, ptrdiff_t size) {
+  function->name = agateStringNew(vm, name, size);
 }
 
 // Instance
@@ -1841,7 +1841,7 @@ static void agateEntityDelete(AgateEntity *entity, AgateVM *vm) {
 
     case AGATE_ENTITY_STRING: {
       AgateString *string = (AgateString *) entity;
-      agateFreeFlex(vm, AgateString, string, char, (string->length + 1));
+      agateFreeFlex(vm, AgateString, string, char, (string->size + 1));
       break;
     }
 
@@ -1857,12 +1857,12 @@ static void agateEntityDelete(AgateEntity *entity, AgateVM *vm) {
  * symbol table
  */
 
-static ptrdiff_t agateSymbolTableFind(AgateTable *self, const char *name, ptrdiff_t length) {
+static ptrdiff_t agateSymbolTableFind(AgateTable *self, const char *name, ptrdiff_t size) {
   if (self->capacity == 0) {
     return -1;
   }
 
-  uint64_t hash = agateStringHash(name, length);
+  uint64_t hash = agateStringHash(name, size);
 
   ptrdiff_t start = hash % self->capacity;
   ptrdiff_t index = start;
@@ -1876,7 +1876,7 @@ static ptrdiff_t agateSymbolTableFind(AgateTable *self, const char *name, ptrdif
         // not a tombstone
         return -1;
       }
-    } else if (agateStringCompare(entry->key, name, length)) {
+    } else if (agateStringCompare(entry->key, name, size)) {
       assert(agateIsInt(entry->value));
       return agateAsInt(entry->value);
     }
@@ -1887,9 +1887,9 @@ static ptrdiff_t agateSymbolTableFind(AgateTable *self, const char *name, ptrdif
   return -1;
 }
 
-static ptrdiff_t agateSymbolTableInsert(AgateTable *self, const char *name, ptrdiff_t length, AgateVM *vm) {
-  AgateString *string = agateStringNew(vm, name, length);
-  ptrdiff_t symbol = self->count;
+static ptrdiff_t agateSymbolTableInsert(AgateTable *self, const char *name, ptrdiff_t size, AgateVM *vm) {
+  AgateString *string = agateStringNew(vm, name, size);
+  ptrdiff_t symbol = self->size;
   agatePushRoot(vm, (AgateEntity *) string);
   bool inserted = agateTableInsert(self, agateEntityValue(string), agateIntValue(symbol), string->hash, vm);
   agatePopRoot(vm);
@@ -1897,14 +1897,14 @@ static ptrdiff_t agateSymbolTableInsert(AgateTable *self, const char *name, ptrd
   return symbol;
 }
 
-static ptrdiff_t agateSymbolTableEnsure(AgateTable *self, const char *name, ptrdiff_t length, AgateVM *vm) {
-  ptrdiff_t symbol = agateSymbolTableFind(self, name, length);
+static ptrdiff_t agateSymbolTableEnsure(AgateTable *self, const char *name, ptrdiff_t size, AgateVM *vm) {
+  ptrdiff_t symbol = agateSymbolTableFind(self, name, size);
 
   if (symbol != -1) {
     return symbol;
   }
 
-  return agateSymbolTableInsert(self, name, length, vm);
+  return agateSymbolTableInsert(self, name, size, vm);
 }
 
 static AgateString *agateSymbolTableReverseFind(AgateTable *self, ptrdiff_t symbol) {
@@ -1933,18 +1933,18 @@ static AgateString *agateSymbolTableReverseFind(AgateTable *self, ptrdiff_t symb
 #define AGATE_DEFINITION_ALREADY_DEFINED (-1)
 #define AGATE_DEFINITION_TOO_MANY_DEFINITIONS (-2)
 
-static ptrdiff_t agateUnitAddFutureVariable(AgateVM *vm, AgateUnit *unit, const char *name, ptrdiff_t length, int line) { // ~wrenDeclareVariable
+static ptrdiff_t agateUnitAddFutureVariable(AgateVM *vm, AgateUnit *unit, const char *name, ptrdiff_t size, int line) { // ~wrenDeclareVariable
   if (unit->object_values.size == AGATE_MAX_UNIT_OBJECT_COUNT) {
     return AGATE_DEFINITION_TOO_MANY_DEFINITIONS;
   }
 
   agateValueArrayAppend(&unit->object_values, agateIntValue(line), vm);
-  return agateSymbolTableInsert(&unit->object_names, name, length, vm);
+  return agateSymbolTableInsert(&unit->object_names, name, size, vm);
 }
 
-static ptrdiff_t agateUnitAddVariable(AgateVM *vm, AgateUnit *unit, const char *name, ptrdiff_t length, AgateValue value) { // ~wrenDefineVariable
+static ptrdiff_t agateUnitAddVariable(AgateVM *vm, AgateUnit *unit, const char *name, ptrdiff_t size, AgateValue value) { // ~wrenDefineVariable
   assert(unit);
-  assert(unit->object_names.count == unit->object_values.size);
+  assert(unit->object_names.size == unit->object_values.size);
 
   if (unit->object_values.size == AGATE_MAX_UNIT_OBJECT_COUNT) {
     return AGATE_DEFINITION_TOO_MANY_DEFINITIONS;
@@ -1954,10 +1954,10 @@ static ptrdiff_t agateUnitAddVariable(AgateVM *vm, AgateUnit *unit, const char *
     agatePushRoot(vm, agateAsEntity(value));
   }
 
-  ptrdiff_t symbol = agateSymbolTableFind(&unit->object_names, name, length);
+  ptrdiff_t symbol = agateSymbolTableFind(&unit->object_names, name, size);
 
   if (symbol == -1) {
-    symbol = agateSymbolTableInsert(&unit->object_names, name, length, vm);
+    symbol = agateSymbolTableInsert(&unit->object_names, name, size, vm);
     agateValueArrayAppend(&unit->object_values, value, vm);
   } else if (agateIsInt(unit->object_values.data[symbol])) {
     unit->object_values.data[symbol] = value;
@@ -1981,7 +1981,7 @@ static AgateValue agateUnitFindVariable(AgateVM *vm, AgateUnit *unit, const char
 static AgateValue agateUnitGetVariable(AgateVM *vm, AgateUnit *unit, AgateValue name) {
   assert(agateIsString(name));
   AgateString *variable = agateAsString(name);
-  ptrdiff_t symbol = agateSymbolTableFind(&unit->object_names, variable->data, variable->length);
+  ptrdiff_t symbol = agateSymbolTableFind(&unit->object_names, variable->data, variable->size);
 
   if (symbol != -1) {
     assert(symbol < unit->object_values.size);
@@ -2624,7 +2624,7 @@ static AgateClosure *agateCompile(AgateVM *vm, AgateValue name, const char *sour
         assert(agateIsInt(entry->value));
         int64_t symbol = agateAsInt(entry->value);
         assert(symbol < core->object_values.size);
-        agateUnitAddVariable(vm, unit, name->data, name->length, core->object_values.data[symbol]);
+        agateUnitAddVariable(vm, unit, name->data, name->size, core->object_values.data[symbol]);
       }
     }
   }
@@ -3637,10 +3637,10 @@ static bool agateCoreIntToC(AgateVM *vm, int argc, AgateValue *args) {
 }
 
 static bool agateCoreIntToS(AgateVM *vm, int argc, AgateValue *args) {
-#define AGATE_INT_BUFFER_LENGTH 32
-  char buffer[AGATE_INT_BUFFER_LENGTH];
-  ptrdiff_t length = snprintf(buffer, AGATE_INT_BUFFER_LENGTH, "%" PRIi64, agateAsInt(args[0]));
-  args[0] = agateEntityValue(agateStringNew(vm, buffer, length));
+#define AGATE_INT_BUFFER_SIZE 32
+  char buffer[AGATE_INT_BUFFER_SIZE];
+  ptrdiff_t size = snprintf(buffer, AGATE_INT_BUFFER_SIZE, "%" PRIi64, agateAsInt(args[0]));
+  args[0] = agateEntityValue(agateStringNew(vm, buffer, size));
   return true;
 }
 
@@ -3807,29 +3807,29 @@ static bool agateCoreFloatIsNan(AgateVM *vm, int argc, AgateValue *args) {
 }
 
 static bool agateCoreFloatToS(AgateVM *vm, int argc, AgateValue *args) {
-#define AGATE_FLOAT_BUFFER_LENGTH 32
+#define AGATE_FLOAT_BUFFER_SIZE 32
   double value = agateAsFloat(args[0]);
-  char buffer[AGATE_FLOAT_BUFFER_LENGTH];
+  char buffer[AGATE_FLOAT_BUFFER_SIZE];
   char *start = NULL;
-  ptrdiff_t length = 0;
+  ptrdiff_t size = 0;
 
   if (isnan(value)) {
     start = "nan";
-    length = 3;
+    size = 3;
   } else if (isinf(value)) {
     if (value > 0.0) {
       start = "inf";
-      length = 3;
+      size = 3;
     } else {
       start = "-inf";
-      length = 4;
+      size = 4;
     }
   } else {
     start = buffer;
-    length = snprintf(buffer, AGATE_FLOAT_BUFFER_LENGTH, "%.14g", value);
+    size = snprintf(buffer, AGATE_FLOAT_BUFFER_SIZE, "%.14g", value);
   }
 
-  args[0] = agateEntityValue(agateStringNew(vm, start, length));
+  args[0] = agateEntityValue(agateStringNew(vm, start, size));
   return true;
 }
 
@@ -3862,16 +3862,16 @@ static bool agateCoreCharToI(AgateVM *vm, int argc, AgateValue *args) {
 }
 
 static bool agateCoreCharToS(AgateVM *vm, int argc, AgateValue *args) {
-  char buffer[AGATE_CHAR_BUFFER_LENGTH];
-  ptrdiff_t length = agateUtf8Encode(agateAsChar(args[0]), buffer);
-  assert(length < AGATE_CHAR_BUFFER_LENGTH);
+  char buffer[AGATE_CHAR_BUFFER_SIZE];
+  ptrdiff_t size = agateUtf8Encode(agateAsChar(args[0]), buffer);
+  assert(size < AGATE_CHAR_BUFFER_SIZE);
 
-  if (length == 0) {
+  if (size == 0) {
     vm->error = agateEntityValue(agateStringNewFormat(vm, "Invalid chararacter."));
     return false;
   }
 
-  args[0] = agateEntityValue(agateStringNew(vm, buffer, length));
+  args[0] = agateEntityValue(agateStringNew(vm, buffer, size));
   return true;
 }
 
@@ -3926,7 +3926,7 @@ static bool agateCoreArrayClear(AgateVM *vm, int argc, AgateValue *args) {
   return true;
 }
 
-static bool agateCoreArrayCount(AgateVM *vm, int argc, AgateValue *args) {
+static bool agateCoreArraySize(AgateVM *vm, int argc, AgateValue *args) {
   args[0] = agateIntValue(agateAsArray(args[0])->elements.size);
   return true;
 }
@@ -4099,15 +4099,15 @@ static bool agateCoreStringContains(AgateVM *vm, int argc, AgateValue *args) {
   AgateString *haystack = agateAsString(args[0]);
 
   const char *needle = NULL;
-  ptrdiff_t needle_length = 0;
+  ptrdiff_t needle_size = 0;
 
-  char buffer[AGATE_CHAR_BUFFER_LENGTH];
+  char buffer[AGATE_CHAR_BUFFER_SIZE];
 
   if (agateIsChar(args[1])) {
-    needle_length = agateUtf8Encode(agateAsChar(args[1]), buffer);
-    assert(needle_length < AGATE_CHAR_BUFFER_LENGTH - 1);
+    needle_size = agateUtf8Encode(agateAsChar(args[1]), buffer);
+    assert(needle_size < AGATE_CHAR_BUFFER_SIZE - 1);
 
-    if (needle_length == 0) {
+    if (needle_size == 0) {
       vm->error = AGATE_CONST_STRING(vm, "Invalid chararacter.");
       return false;
     }
@@ -4116,13 +4116,13 @@ static bool agateCoreStringContains(AgateVM *vm, int argc, AgateValue *args) {
   } else if (agateIsString(args[1])) {
     AgateString *string = agateAsString(args[1]);
     needle = string->data;
-    needle_length = string->length;
+    needle_size = string->size;
   } else {
     vm->error = AGATE_CONST_STRING(vm, "Argument must be a character or a string.");
     return false;
   }
 
-  args[0] = agateBoolValue(agateStringFind(haystack, needle, needle_length, 0) != -1);
+  args[0] = agateBoolValue(agateStringFind(haystack, needle, needle_size, 0) != -1);
   return true;
 }
 
@@ -4134,12 +4134,12 @@ static bool agateCoreStringStartsWith(AgateVM *vm, int argc, AgateValue *args) {
   AgateString *haystack = agateAsString(args[0]);
   AgateString *needle = agateAsString(args[1]);
 
-  if (needle->length > haystack->length) {
+  if (needle->size > haystack->size) {
     args[0] = agateBoolValue(false);
     return true;
   }
 
-  args[0] = agateBoolValue(memcmp(haystack->data, needle->data, needle->length) == 0);
+  args[0] = agateBoolValue(memcmp(haystack->data, needle->data, needle->size) == 0);
   return true;
 }
 
@@ -4151,12 +4151,12 @@ static bool agateCoreStringEndsWith(AgateVM *vm, int argc, AgateValue *args) {
   AgateString *haystack = agateAsString(args[0]);
   AgateString *needle = agateAsString(args[1]);
 
-  if (needle->length > haystack->length) {
+  if (needle->size > haystack->size) {
     args[0] = agateBoolValue(false);
     return true;
   }
 
-  args[0] = agateBoolValue(memcmp(haystack->data + haystack->length - needle->length, needle->data, needle->length) == 0);
+  args[0] = agateBoolValue(memcmp(haystack->data + haystack->size - needle->size, needle->data, needle->size) == 0);
   return true;
 }
 
@@ -4167,7 +4167,7 @@ static bool agateCoreStringFind1(AgateVM *vm, int argc, AgateValue *args) {
 
   AgateString *haystack = agateAsString(args[0]);
   AgateString *needle = agateAsString(args[1]);
-  ptrdiff_t index = agateStringFind(haystack, needle->data, needle->length, 0);
+  ptrdiff_t index = agateStringFind(haystack, needle->data, needle->size, 0);
   args[0] = agateIntValue(index);
   return true;
 }
@@ -4179,13 +4179,13 @@ static bool agateCoreStringFind2(AgateVM *vm, int argc, AgateValue *args) {
 
   AgateString *haystack = agateAsString(args[0]);
   AgateString *needle = agateAsString(args[1]);
-  ptrdiff_t start = agateValidateIndex(vm, args[2], haystack->length, "Start");
+  ptrdiff_t start = agateValidateIndex(vm, args[2], haystack->size, "Start");
 
   if (start == AGATE_INDEX_ERROR) {
     return false;
   }
 
-  ptrdiff_t index = agateStringFind(haystack, needle->data, needle->length, start);
+  ptrdiff_t index = agateStringFind(haystack, needle->data, needle->size, start);
   args[0] = agateIntValue(index);
   return true;
 }
@@ -4197,7 +4197,7 @@ static bool agateCoreStringReplace(AgateVM *vm, int argc, AgateValue *args) {
 
   AgateString *from = agateAsString(args[1]);
 
-  if (from->length == 0) {
+  if (from->size == 0) {
     vm->error = AGATE_CONST_STRING(vm, "From must be a non-empty string.");
     return false;
   }
@@ -4232,21 +4232,21 @@ static bool agateCoreStringSplit(AgateVM *vm, int argc, AgateValue *args) {
   AgateString *string = agateAsString(args[0]);
 
   const char *separator = NULL;
-  ptrdiff_t separator_length = 0;
+  ptrdiff_t separator_size = 0;
 
-  char buffer[AGATE_CHAR_BUFFER_LENGTH];
+  char buffer[AGATE_CHAR_BUFFER_SIZE];
 
   if (agateIsChar(args[1])) {
-    separator_length = agateUtf8Encode(agateAsChar(args[1]), buffer);
-    assert(separator_length < AGATE_CHAR_BUFFER_LENGTH - 1);
+    separator_size = agateUtf8Encode(agateAsChar(args[1]), buffer);
+    assert(separator_size < AGATE_CHAR_BUFFER_SIZE - 1);
     separator = buffer;
   } else if (agateIsString(args[1])) {
     AgateString *raw = agateAsString(args[1]);
     separator = raw->data;
-    separator_length = raw->length;
+    separator_size = raw->size;
   }
 
-  if (separator == NULL || separator_length == 0) {
+  if (separator == NULL || separator_size == 0) {
     vm->error = AGATE_CONST_STRING(vm, "Separator must be a character or a non-empty string.");
     return false;
   }
@@ -4257,7 +4257,7 @@ static bool agateCoreStringSplit(AgateVM *vm, int argc, AgateValue *args) {
   ptrdiff_t start = 0;
 
   for (;;) {
-    ptrdiff_t stop = agateStringFind(string, separator, separator_length, start);
+    ptrdiff_t stop = agateStringFind(string, separator, separator_size, start);
 
     if (stop == -1) {
       break;
@@ -4268,10 +4268,10 @@ static bool agateCoreStringSplit(AgateVM *vm, int argc, AgateValue *args) {
     agateValueArrayAppend(&result->elements, agateEntityValue(item), vm);
     agatePopRoot(vm);
 
-    start = stop + separator_length;
+    start = stop + separator_size;
   }
 
-  AgateString *item = agateStringNew(vm, string->data + start, string->length - start);
+  AgateString *item = agateStringNew(vm, string->data + start, string->size - start);
   agatePushRoot(vm, (AgateEntity *) item);
   agateValueArrayAppend(&result->elements, agateEntityValue(item), vm);
   agatePopRoot(vm);
@@ -4285,7 +4285,7 @@ static bool agateCoreStringIterate(AgateVM *vm, int argc, AgateValue *args) {
   AgateString *string = agateAsString(args[0]);
 
   if (agateIsNil(args[1])) {
-    if (string->length == 0) {
+    if (string->size == 0) {
       args[0] = agateNilValue();
     } else {
       args[0] = agateIntValue(0);
@@ -4308,7 +4308,7 @@ static bool agateCoreStringIterate(AgateVM *vm, int argc, AgateValue *args) {
   do {
     ++index;
 
-    if (index >= string->length) {
+    if (index >= string->size) {
       args[0] = agateNilValue();
       return true;
     }
@@ -4327,12 +4327,12 @@ static bool agateCoreStringIteratorValue(AgateVM *vm, int argc, AgateValue *args
 
   int64_t index = agateAsInt(args[1]);
 
-  if (index < 0 || index >= string->length) {
+  if (index < 0 || index >= string->size) {
     vm->error = AGATE_CONST_STRING(vm, "Iterator out of bounds.");
     return false;
   }
 
-  uint32_t c = agateUtf8Decode(string->data + index, string->length - index, NULL);
+  uint32_t c = agateUtf8Decode(string->data + index, string->size - index, NULL);
 
   if (c == AGATE_INVALID_CHAR) {
     vm->error = AGATE_CONST_STRING(vm, "Iterator does not point to a valid character.");
@@ -4365,7 +4365,7 @@ static bool agateCoreStringTimes(AgateVM *vm, int argc, AgateValue *args) {
   agateCharArrayCreate(&buffer);
 
   for (int64_t i = 0; i < count; ++i) {
-    agateCharArrayAppendMultiple(&buffer, string->data, string->length, vm);
+    agateCharArrayAppendMultiple(&buffer, string->data, string->size, vm);
   }
 
   args[0] = agateEntityValue(agateStringNew(vm, buffer.data, buffer.size));
@@ -4381,7 +4381,7 @@ static bool agateCoreStringToI(AgateVM *vm, int argc, AgateValue *args) {
   AgateString *string = agateAsString(args[0]);
   int64_t result;
 
-  if (!vm->config.parse_int(string->data, string->length, 0, &result)) {
+  if (!vm->config.parse_int(string->data, string->size, 0, &result)) {
     vm->error = AGATE_CONST_STRING(vm, "Could not parse integer string.");
     return false;
   }
@@ -4394,7 +4394,7 @@ static bool agateCoreStringToF(AgateVM *vm, int argc, AgateValue *args) {
   AgateString *string = agateAsString(args[0]);
   double result;
 
-  if (!vm->config.parse_float(string->data, string->length, &result)) {
+  if (!vm->config.parse_float(string->data, string->size, &result)) {
     vm->error = AGATE_CONST_STRING(vm, "Could not parse float string.");
     return false;
   }
@@ -4421,8 +4421,8 @@ static bool agateCoreMapClear(AgateVM *vm, int argc, AgateValue *args) {
   return true;
 }
 
-static bool agateCoreMapCount(AgateVM *vm, int argc, AgateValue *args) {
-  args[0] = agateIntValue(agateAsMap(args[0])->members.count);
+static bool agateCoreMapSize(AgateVM *vm, int argc, AgateValue *args) {
+  args[0] = agateIntValue(agateAsMap(args[0])->members.size);
   return true;
 }
 
@@ -4492,7 +4492,7 @@ static bool agateCoreMapSubscriptSetter(AgateVM *vm, int argc, AgateValue *args)
 static bool agateCoreMapIterate(AgateVM *vm, int argc, AgateValue *args) {
   AgateMap *map = agateAsMap(args[0]);
 
-  if (map->members.count == 0) {
+  if (map->members.size == 0) {
     args[0] = agateNilValue();
     return true;
   }
@@ -4961,7 +4961,7 @@ static void agateLoadCoreUnit(AgateVM *vm) {
   agateClassBindPrimitive(vm, vm->array_class, "[_]=(_)", agateCoreArraySubscriptSetter);
   agateClassBindPrimitive(vm, vm->array_class, "append(_)", agateCoreArrayAppend);
   agateClassBindPrimitive(vm, vm->array_class, "clear()", agateCoreArrayClear);
-  agateClassBindPrimitive(vm, vm->array_class, "count", agateCoreArrayCount);
+  agateClassBindPrimitive(vm, vm->array_class, "size", agateCoreArraySize);
   agateClassBindPrimitive(vm, vm->array_class, "erase(_)", agateCoreArrayErase);
   agateClassBindPrimitive(vm, vm->array_class, "find(_)", agateCoreArrayFind);
   agateClassBindPrimitive(vm, vm->array_class, "insert(_,_)", agateCoreArrayInsert);
@@ -5063,7 +5063,7 @@ static void agateLoadCoreUnit(AgateVM *vm) {
   agateClassBindPrimitive(vm, vm->map_class, "__subscript_setter(_,_,_)", agateCoreMapSubscriptSetter);
   agateClassBindPrimitive(vm, vm->map_class, "__value_from_iterator(_)", agateCoreMapValueFromIterator);
   agateClassBindPrimitive(vm, vm->map_class, "clear()", agateCoreMapClear);
-  agateClassBindPrimitive(vm, vm->map_class, "count", agateCoreMapCount);
+  agateClassBindPrimitive(vm, vm->map_class, "size", agateCoreMapSize);
   agateClassBindPrimitive(vm, vm->map_class, "iterate(_)", agateCoreMapIterate);
 
   AgateClass *math_class = agateAsClass(agateUnitFindVariable(vm, core, "Math"));
@@ -5354,13 +5354,13 @@ void agateDeleteVM(AgateVM *vm) {
 AgateHandle *agateMakeCallHandle(AgateVM *vm, const char *signature) {
   assert(signature != NULL);
 
-  ptrdiff_t signature_length = strlen(signature);
-  assert(signature_length > 0);
+  ptrdiff_t signature_size = strlen(signature);
+  assert(signature_size > 0);
 
   int argc = 0;
 
-  if (signature[signature_length - 1] == ')') {
-    for (ptrdiff_t i = signature_length - 1; i > 0 && signature[i] != '('; --i) {
+  if (signature[signature_size - 1] == ')') {
+    for (ptrdiff_t i = signature_size - 1; i > 0 && signature[i] != '('; --i) {
       if (signature[i] == '_') {
         ++argc;
       }
@@ -5368,14 +5368,14 @@ AgateHandle *agateMakeCallHandle(AgateVM *vm, const char *signature) {
   }
 
   if (signature[0] == '[') {
-    for (ptrdiff_t i = 0; i < signature_length && signature[i] != ']'; ++i) {
+    for (ptrdiff_t i = 0; i < signature_size && signature[i] != ']'; ++i) {
       if (signature[i] == '_') {
         ++argc;
       }
     }
   }
 
-  ptrdiff_t symbol = agateSymbolTableEnsure(&vm->method_names, signature, signature_length, vm);
+  ptrdiff_t symbol = agateSymbolTableEnsure(&vm->method_names, signature, signature_size, vm);
 
   AgateFunction *function = agateFunctionNew(vm, NULL, argc + 1);
   AgateHandle *handle = agateHandleNew(vm, agateEntityValue(function));
@@ -5388,7 +5388,7 @@ AgateHandle *agateMakeCallHandle(AgateVM *vm, const char *signature) {
   agateBytecodeWrite(&function->bc, AGATE_OP_RETURN,        0, vm);
   agateBytecodeWrite(&function->bc, AGATE_OP_END,           0, vm);
 
-  agateFunctionBindName(vm, function, signature, signature_length);
+  agateFunctionBindName(vm, function, signature, signature_size);
 
   return handle;
 }
@@ -5514,7 +5514,7 @@ const char *agateSlotGetStringSize(AgateVM *vm, ptrdiff_t slot, ptrdiff_t *size)
   AgateString *string = agateAsString(vm->api_stack[slot]);
 
   if (size != NULL) {
-    *size = string->length;
+    *size = string->size;
   }
 
   return string->data;
@@ -5635,7 +5635,7 @@ ptrdiff_t agateSlotMapSize(AgateVM *vm, ptrdiff_t slot) {
   assert(agateIsSlotValid(vm, slot));
   assert(agateIsMap(vm->api_stack[slot]));
   AgateMap *map = agateAsMap(vm->api_stack[slot]);
-  return map->members.count;
+  return map->members.size;
 }
 
 bool agateSlotMapContains(AgateVM *vm, ptrdiff_t map_slot, ptrdiff_t key_slot) {
@@ -5850,7 +5850,7 @@ typedef enum {
 typedef struct {
   AgateTokenKind kind;
   const char *start;
-  ptrdiff_t length;
+  ptrdiff_t size;
   int line;
   AgateValue value;
 } AgateToken;
@@ -5877,7 +5877,7 @@ typedef struct {
 
 typedef struct {
   const char *name;
-  ptrdiff_t length;
+  ptrdiff_t size;
   int depth;
   bool is_captured;
 } AgateLocal;
@@ -5909,13 +5909,13 @@ typedef enum {
 } AgateSignatureKind;
 
 typedef struct {
-  char name[AGATE_MAX_METHOD_SIGNATURE_LENGTH];
-  ptrdiff_t length;
+  char name[AGATE_MAX_METHOD_SIGNATURE_SIZE];
+  ptrdiff_t size;
 } AgateSignatureBuilder;
 
 typedef struct {
   const char *name;
-  ptrdiff_t length;
+  ptrdiff_t size;
   AgateSignatureKind kind;
   int arity;
 } AgateSignature;
@@ -5989,9 +5989,9 @@ static void agateErrorPrint(AgateParser *parser, int line, const char *label, co
 
   #define AGATE_ERROR_MESSAGE_SIZE 512
   char message[AGATE_ERROR_MESSAGE_SIZE];
-  int length = snprintf(message, AGATE_ERROR_MESSAGE_SIZE, "%s: ", label);
-  length += vsnprintf(message + length, AGATE_ERROR_MESSAGE_SIZE - length, format, args);
-  assert(length < AGATE_ERROR_MESSAGE_SIZE);
+  int size = snprintf(message, AGATE_ERROR_MESSAGE_SIZE, "%s: ", label);
+  size += vsnprintf(message + size, AGATE_ERROR_MESSAGE_SIZE - size, format, args);
+  assert(size < AGATE_ERROR_MESSAGE_SIZE);
 
   AgateString *unit_string = parser->unit->name;
   const char *unit_name = unit_string ? unit_string->data : "<unknown>";
@@ -6025,8 +6025,8 @@ static void agateError(AgateCompiler *compiler, const char *format, ...) {
     #define AGATE_ERROR_LABEL_SIZE 256
     char label[AGATE_ERROR_LABEL_SIZE];
 
-    if (token->length < AGATE_ERROR_LABEL_SIZE) {
-      snprintf(label, AGATE_ERROR_LABEL_SIZE, "Error at '%.*s'", (int) token->length, token->start);
+    if (token->size < AGATE_ERROR_LABEL_SIZE) {
+      snprintf(label, AGATE_ERROR_LABEL_SIZE, "Error at '%.*s'", (int) token->size, token->start);
     } else {
       snprintf(label, AGATE_ERROR_LABEL_SIZE, "Error at '%.*s...'", AGATE_ERROR_LABEL_SIZE - 15, token->start);
     }
@@ -6089,10 +6089,10 @@ static void agateCompilerCreate(AgateCompiler *compiler, AgateParser *parser, Ag
 
   if (is_method) {
     local->name = "this";
-    local->length = 4;
+    local->size = 4;
   } else {
     local->name = NULL;
-    local->length = 0;
+    local->size = 0;
   }
 
   local->depth = -1;
@@ -6205,10 +6205,10 @@ static inline uint32_t agateComputeHex(char c) {
   return AGATE_INVALID_CHAR;
 }
 
-static inline uint32_t agateParserHexEscapeDecode(AgateParser *parser, int length) {
+static inline uint32_t agateParserHexEscapeDecode(AgateParser *parser, int size) {
   uint32_t res = 0;
 
-  for (int i = 0; i < length; ++i) {
+  for (int i = 0; i < size; ++i) {
     if (agateParserAtEnd(parser)) { return AGATE_INVALID_CHAR; }
     uint32_t val = agateComputeHex(agateParserAdvanceChar(parser));
     if (val == AGATE_INVALID_CHAR) { return AGATE_INVALID_CHAR; }
@@ -6262,15 +6262,15 @@ uint32_t agateParserUtf8Decode(AgateParser *parser) {
 }
 
 bool agateParserUtf8Encode(AgateParser *parser, uint32_t c, AgateCharArray *array) {
-  char buffer[AGATE_CHAR_BUFFER_LENGTH];
-  ptrdiff_t length = agateUtf8Encode(c, buffer);
-  assert(length < AGATE_CHAR_BUFFER_LENGTH);
+  char buffer[AGATE_CHAR_BUFFER_SIZE];
+  ptrdiff_t size = agateUtf8Encode(c, buffer);
+  assert(size < AGATE_CHAR_BUFFER_SIZE);
 
-  if (length == 0) {
+  if (size == 0) {
     return false;
   }
 
-  for (ptrdiff_t i = 0; i < length; ++i) {
+  for (ptrdiff_t i = 0; i < size; ++i) {
     agateCharArrayAppend(array, buffer[i], parser->vm);
   }
 
@@ -6286,7 +6286,7 @@ bool agateParserUtf8Encode(AgateParser *parser, uint32_t c, AgateCharArray *arra
 static void agateParserMakeToken(AgateParser *parser, AgateTokenKind kind) {
   parser->current.kind = kind;
   parser->current.start = parser->token_start;
-  parser->current.length = parser->token_current - parser->token_start;
+  parser->current.size = parser->token_current - parser->token_start;
   parser->current.line = parser->line;
   parser->current.value = agateNilValue();
 
@@ -6515,7 +6515,7 @@ static void agateParserReadNumberWithZero(AgateParser *parser) {
 
 typedef struct {
   const char *name;
-  ptrdiff_t length;
+  ptrdiff_t size;
   AgateTokenKind kind;
 } AgateKeyword;
 
@@ -6546,12 +6546,12 @@ static const AgateKeyword AgateKeywordArray[] = {
   { "while",      5, AGATE_TOKEN_WHILE },
 };
 
-static inline bool agateKeywordEquals(const AgateKeyword *keyword, const char *name, ptrdiff_t length) {
-  if (keyword->length != length) {
+static inline bool agateKeywordEquals(const AgateKeyword *keyword, const char *name, ptrdiff_t size) {
+  if (keyword->size != size) {
     return false;
   }
 
-  return strncmp(keyword->name, name, length) == 0;
+  return strncmp(keyword->name, name, size) == 0;
 }
 
 static void agateParserReadIdentifier(AgateParser *parser, AgateTokenKind kind) {
@@ -6562,16 +6562,16 @@ static void agateParserReadIdentifier(AgateParser *parser, AgateTokenKind kind) 
   const ptrdiff_t count = AGATE_ARRAY_SIZE(AgateKeywordArray);
 
   const char *name = parser->token_start;
-  ptrdiff_t length = parser->token_current - parser->token_start;
+  ptrdiff_t size = parser->token_current - parser->token_start;
 
   for (ptrdiff_t i = 0; i < count; ++i) {
-    if (agateKeywordEquals(AgateKeywordArray + i, name, length)) {
+    if (agateKeywordEquals(AgateKeywordArray + i, name, size)) {
       kind = AgateKeywordArray[i].kind;
     }
   }
 
   agateParserMakeToken(parser, kind);
-  parser->current.value = agateEntityValue(agateStringNew(parser->vm, parser->current.start, parser->current.length));
+  parser->current.value = agateEntityValue(agateStringNew(parser->vm, parser->current.start, parser->current.size));
 }
 
 static inline void agateParserTwoCharToken(AgateParser *parser, AgateTokenKind t1, char c2, AgateTokenKind t2) {
@@ -6881,11 +6881,11 @@ static inline void agateEmitLoopRestart(AgateCompiler *compiler) {
  * parser - scopes
  */
 
-static ptrdiff_t agateCompilerAddLocal(AgateCompiler *compiler, const char *name, ptrdiff_t length) {
+static ptrdiff_t agateCompilerAddLocal(AgateCompiler *compiler, const char *name, ptrdiff_t size) {
   assert(compiler->locals_count < AGATE_MAX_LOCAL_COUNT);
   AgateLocal *local = &compiler->locals[compiler->locals_count];
   local->name = name;
-  local->length = length;
+  local->size = size;
   local->depth = compiler->scope_depth;
   local->is_captured = false;
   return compiler->locals_count++;
@@ -6896,12 +6896,12 @@ static ptrdiff_t agateCompilerDeclareVariable(AgateCompiler *compiler, AgateToke
     token = &compiler->parser->previous;
   }
 
-  if (token->length > AGATE_MAX_VARIABLE_NAME_LENGTH) {
-    agateError(compiler, "Variable name cannot be longer than %d characters.", AGATE_MAX_VARIABLE_NAME_LENGTH);
+  if (token->size > AGATE_MAX_VARIABLE_NAME_SIZE) {
+    agateError(compiler, "Variable name cannot be longer than %d characters.", AGATE_MAX_VARIABLE_NAME_SIZE);
   }
 
   if (compiler->scope_depth == -1) {
-    ptrdiff_t symbol = agateUnitAddVariable(compiler->parser->vm, compiler->parser->unit, token->start, token->length, agateNilValue());
+    ptrdiff_t symbol = agateUnitAddVariable(compiler->parser->vm, compiler->parser->unit, token->start, token->size, agateNilValue());
 
     switch (symbol) {
       case AGATE_DEFINITION_ALREADY_DEFINED:
@@ -6924,7 +6924,7 @@ static ptrdiff_t agateCompilerDeclareVariable(AgateCompiler *compiler, AgateToke
       break;
     }
 
-    if (local->length == token->length && memcmp(local->name, token->start, token->length) == 0) {
+    if (local->size == token->size && memcmp(local->name, token->start, token->size) == 0) {
       agateError(compiler, "Variable is already declared in this scope.");
       return i;
     }
@@ -6935,7 +6935,7 @@ static ptrdiff_t agateCompilerDeclareVariable(AgateCompiler *compiler, AgateToke
     return -1;
   }
 
-  return agateCompilerAddLocal(compiler, token->start, token->length);
+  return agateCompilerAddLocal(compiler, token->start, token->size);
 }
 
 static ptrdiff_t agateCompilerDeclareNamedVariable(AgateCompiler *compiler) {
@@ -6981,9 +6981,9 @@ static void agateCompilerPopScope(AgateCompiler *compiler) {
   --compiler->scope_depth;
 }
 
-static ptrdiff_t agateCompilerResolveLocal(AgateCompiler *compiler, const char *name, ptrdiff_t length) {
+static ptrdiff_t agateCompilerResolveLocal(AgateCompiler *compiler, const char *name, ptrdiff_t size) {
   for (ptrdiff_t i = compiler->locals_count - 1; i >= 0; --i) {
-    if (compiler->locals[i].length == length && memcmp(compiler->locals[i].name, name, length) == 0) {
+    if (compiler->locals[i].size == size && memcmp(compiler->locals[i].name, name, size) == 0) {
       return i;
     }
   }
@@ -7008,19 +7008,19 @@ static ptrdiff_t agateCompilerAddUpvalue(AgateCompiler *compiler, AgateCapture c
   return compiler->function->upvalue_count++;
 }
 
-static ptrdiff_t agateCompilerFindUpvalue(AgateCompiler *compiler, const char *name, ptrdiff_t length) {
+static ptrdiff_t agateCompilerFindUpvalue(AgateCompiler *compiler, const char *name, ptrdiff_t size) {
   if (compiler->parent == NULL) {
     return -1;
   }
 
-  ptrdiff_t local = agateCompilerResolveLocal(compiler->parent, name, length);
+  ptrdiff_t local = agateCompilerResolveLocal(compiler->parent, name, size);
 
   if (local != -1) {
     compiler->parent->locals[local].is_captured = true;
     return agateCompilerAddUpvalue(compiler, AGATE_CAPTURE_LOCAL, local);
   }
 
-  ptrdiff_t upvalue = agateCompilerFindUpvalue(compiler->parent, name, length);
+  ptrdiff_t upvalue = agateCompilerFindUpvalue(compiler->parent, name, size);
 
   if (upvalue != -1) {
     return agateCompilerAddUpvalue(compiler, AGATE_CAPTURE_UPVALUE, upvalue);
@@ -7029,34 +7029,34 @@ static ptrdiff_t agateCompilerFindUpvalue(AgateCompiler *compiler, const char *n
   return -1;
 }
 
-static AgateVariable agateCompilerResolveNonGlobalName(AgateCompiler *compiler, const char *name, ptrdiff_t length) {
+static AgateVariable agateCompilerResolveNonGlobalName(AgateCompiler *compiler, const char *name, ptrdiff_t size) {
   AgateVariable variable;
 
   variable.scope = AGATE_SCOPE_LOCAL;
-  variable.index = agateCompilerResolveLocal(compiler, name, length);
+  variable.index = agateCompilerResolveLocal(compiler, name, size);
 
   if (variable.index != -1) {
     return variable;
   }
 
   variable.scope = AGATE_SCOPE_UPVALUE;
-  variable.index = agateCompilerFindUpvalue(compiler, name, length);
+  variable.index = agateCompilerFindUpvalue(compiler, name, size);
   return variable;
 }
 
-static AgateVariable agateCompilerResolveName(AgateCompiler *compiler, const char *name, ptrdiff_t length) {
-  AgateVariable variable = agateCompilerResolveNonGlobalName(compiler, name, length);
+static AgateVariable agateCompilerResolveName(AgateCompiler *compiler, const char *name, ptrdiff_t size) {
+  AgateVariable variable = agateCompilerResolveNonGlobalName(compiler, name, size);
 
   if (variable.index != -1) {
     return variable;
   }
 
   variable.scope = AGATE_SCOPE_GLOBAL;
-  variable.index = agateSymbolTableFind(&compiler->parser->unit->object_names, name, length);
+  variable.index = agateSymbolTableFind(&compiler->parser->unit->object_names, name, size);
   return variable;
 }
 
-static AgateFunction *agateCompilerEnd(AgateCompiler *compiler, const char *name, ptrdiff_t length) {
+static AgateFunction *agateCompilerEnd(AgateCompiler *compiler, const char *name, ptrdiff_t size) {
   agateTableDestroy(&compiler->constants, compiler->parser->vm);
 
   if (compiler->parser->has_error) {
@@ -7066,7 +7066,7 @@ static AgateFunction *agateCompilerEnd(AgateCompiler *compiler, const char *name
 
   agateEmitOpcode(compiler, AGATE_OP_END);
   AgateFunction *function = compiler->function;
-  agateFunctionBindName(compiler->parser->vm, function, name, length);
+  agateFunctionBindName(compiler->parser->vm, function, name, size);
 
 
 #ifdef AGATE_DEBUG_PRINT_CODE
@@ -7179,19 +7179,19 @@ static inline void agateFinishParameterList(AgateCompiler *compiler, int *arity)
   *arity = local_arity;
 }
 
-static inline ptrdiff_t agateCompilerMethodSymbol(AgateCompiler *compiler, const char *name, ptrdiff_t length) {
-  return agateSymbolTableEnsure(&compiler->parser->vm->method_names, name, length, compiler->parser->vm);
+static inline ptrdiff_t agateCompilerMethodSymbol(AgateCompiler *compiler, const char *name, ptrdiff_t size) {
+  return agateSymbolTableEnsure(&compiler->parser->vm->method_names, name, size, compiler->parser->vm);
 }
 
-static inline void agateSignatureAppend(AgateSignatureBuilder *builder, const char *name, ptrdiff_t length) {
-  assert(builder->length + length < AGATE_MAX_METHOD_SIGNATURE_LENGTH);
-  memcpy(builder->name + builder->length, name, length);
-  builder->length += length;
+static inline void agateSignatureAppend(AgateSignatureBuilder *builder, const char *name, ptrdiff_t size) {
+  assert(builder->size + size < AGATE_MAX_METHOD_SIGNATURE_SIZE);
+  memcpy(builder->name + builder->size, name, size);
+  builder->size += size;
 }
 
 static inline void agateSignatureAppendChar(AgateSignatureBuilder *builder, char c) {
-  assert(builder->length + 1 < AGATE_MAX_METHOD_SIGNATURE_LENGTH);
-  builder->name[builder->length++] = c;
+  assert(builder->size + 1 < AGATE_MAX_METHOD_SIGNATURE_SIZE);
+  builder->name[builder->size++] = c;
 }
 
 static void agateSignatureParameterList(AgateSignatureBuilder *builder, int argc, char left_bracket, char right_bracket) {
@@ -7209,8 +7209,8 @@ static void agateSignatureParameterList(AgateSignatureBuilder *builder, int argc
 }
 
 static void agateSignatureToString(AgateSignature *signature, AgateSignatureBuilder *builder) {
-  builder->length = 0;
-  agateSignatureAppend(builder, signature->name, signature->length);
+  builder->size = 0;
+  agateSignatureAppend(builder, signature->name, signature->size);
 
   switch (signature->kind) {
     case AGATE_SIG_METHOD:
@@ -7236,20 +7236,20 @@ static void agateSignatureToString(AgateSignature *signature, AgateSignatureBuil
       break;
 
     case AGATE_SIG_CONSTRUCTOR:
-      builder->length = 0;
+      builder->size = 0;
       agateSignatureAppend(builder, "init ", 5);
-      agateSignatureAppend(builder, signature->name, signature->length);
+      agateSignatureAppend(builder, signature->name, signature->size);
       agateSignatureParameterList(builder, signature->arity, '(', ')');
       break;
   }
 
-  builder->name[builder->length] = '\0';
+  builder->name[builder->size] = '\0';
 }
 
 static ptrdiff_t agateSignatureSymbol(AgateCompiler *compiler, AgateSignature *signature) {
   AgateSignatureBuilder builder;
   agateSignatureToString(signature, &builder);
-  return agateCompilerMethodSymbol(compiler, builder.name, builder.length);
+  return agateCompilerMethodSymbol(compiler, builder.name, builder.size);
 }
 
 static AgateSignature agateSignatureFromToken(AgateCompiler *compiler, AgateSignatureKind kind) {
@@ -7257,13 +7257,13 @@ static AgateSignature agateSignatureFromToken(AgateCompiler *compiler, AgateSign
 
   AgateSignature signature;
   signature.name = token->start;
-  signature.length = token->length;
+  signature.size = token->size;
   signature.kind = kind;
   signature.arity = 0;
 
-  if (signature.length > AGATE_MAX_METHOD_NAME_LENGTH) {
-    agateError(compiler, "Method names cannot be longer than %d characters.", AGATE_MAX_METHOD_NAME_LENGTH);
-    signature.length = AGATE_MAX_METHOD_NAME_LENGTH;
+  if (signature.size > AGATE_MAX_METHOD_NAME_SIZE) {
+    agateError(compiler, "Method names cannot be longer than %d characters.", AGATE_MAX_METHOD_NAME_SIZE);
+    signature.size = AGATE_MAX_METHOD_NAME_SIZE;
   }
 
   return signature;
@@ -7290,14 +7290,14 @@ static void agateCompilerCallSignature(AgateCompiler *compiler, AgateOpCode inst
   }
 }
 
-static void agateEmitInvoke(AgateCompiler *compiler, int argc, const char *name, ptrdiff_t length) {
-  ptrdiff_t symbol = agateCompilerMethodSymbol(compiler, name, length);
+static void agateEmitInvoke(AgateCompiler *compiler, int argc, const char *name, ptrdiff_t size) {
+  ptrdiff_t symbol = agateCompilerMethodSymbol(compiler, name, size);
   agateEmitByteArg(compiler, AGATE_OP_INVOKE, argc);
   agateEmitShort(compiler, symbol);
 }
 
 static void agateCompilerMethodCall(AgateCompiler *compiler, AgateOpCode instruction, AgateSignature *signature) {
-  AgateSignature called = { signature->name, signature->length, AGATE_SIG_GETTER, 0 };
+  AgateSignature called = { signature->name, signature->size, AGATE_SIG_GETTER, 0 };
 
   if (agateCompilerMatch(compiler, AGATE_TOKEN_LEFT_PAREN)) {
     called.kind = AGATE_SIG_METHOD;
@@ -7329,7 +7329,7 @@ static void agateCompilerMethodCall(AgateCompiler *compiler, AgateOpCode instruc
     AgateSignatureBuilder builder;
     agateSignatureToString(&called, &builder);
     agateSignatureAppend(&builder, " block argument", 16);
-    agateCompilerEnd(&lambda_compiler, builder.name, builder.length);
+    agateCompilerEnd(&lambda_compiler, builder.name, builder.size);
   }
 
   if (signature->kind == AGATE_SIG_CONSTRUCTOR) {
@@ -7423,7 +7423,7 @@ static bool agateMaybeSetter(AgateCompiler *compiler, AgateSignature *signature)
 
 static void agateSubscriptSignature(AgateCompiler *compiler, AgateSignature *signature) {
   signature->kind = AGATE_SIG_SUBSCRIPT_GETTER;
-  signature->length = 0;
+  signature->size = 0;
   agateFinishParameterList(compiler, &signature->arity);
   agateCompilerConsume(compiler, AGATE_TOKEN_RIGHT_BRACKET, "Expect ']' after parameters.");
   agateMaybeSetter(compiler, signature);
@@ -7599,7 +7599,7 @@ static void agateFieldExpression(AgateCompiler *compiler, bool can_assign) {
   } else if (enclosing_class->is_method_static) {
     agateError(compiler, "Cannot use an instance field in a static method.");
   } else {
-    field = agateSymbolTableEnsure(&enclosing_class->fields, compiler->parser->previous.start, compiler->parser->previous.length, compiler->parser->vm);
+    field = agateSymbolTableEnsure(&enclosing_class->fields, compiler->parser->previous.start, compiler->parser->previous.size, compiler->parser->vm);
 
     if (field >= AGATE_MAX_FIELDS_COUNT) {
       agateError(compiler, "A class can only have %d fields.", AGATE_MAX_FIELDS_COUNT);
@@ -7651,23 +7651,23 @@ static void agateStaticFieldExpression(AgateCompiler *compiler, bool can_assign)
 
   AgateToken *token = &compiler->parser->previous;
 
-  if (agateCompilerResolveLocal(class_compiler, token->start, token->length) == -1) {
+  if (agateCompilerResolveLocal(class_compiler, token->start, token->size) == -1) {
     ptrdiff_t symbol = agateCompilerDeclareVariable(class_compiler, NULL);
     agateEmitOpcode(class_compiler, AGATE_OP_NIL);
     agateCompilerDefineVariable(class_compiler, symbol);
   }
 
-  AgateVariable variable = agateCompilerResolveName(compiler, token->start, token->length);
+  AgateVariable variable = agateCompilerResolveName(compiler, token->start, token->size);
   agateBareName(compiler, can_assign, variable);
 }
 
 static void agateIdentifierExpression(AgateCompiler *compiler, bool can_assign) {
   AgateToken *token = &compiler->parser->previous;
-  AgateVariable variable = agateCompilerResolveName(compiler, token->start, token->length);
+  AgateVariable variable = agateCompilerResolveName(compiler, token->start, token->size);
 
   if (variable.index == -1) {
     variable.scope = AGATE_SCOPE_GLOBAL;
-    variable.index = agateUnitAddFutureVariable(compiler->parser->vm, compiler->parser->unit, token->start, token->length, token->line);
+    variable.index = agateUnitAddFutureVariable(compiler->parser->vm, compiler->parser->unit, token->start, token->size, token->line);
 
     if (variable.index == AGATE_DEFINITION_TOO_MANY_DEFINITIONS) {
       agateError(compiler, "Too many unit variables defined.");
@@ -8168,7 +8168,7 @@ static void agateForStatement(AgateCompiler *compiler) {
   agateCompilerConsume(compiler, AGATE_TOKEN_IDENTIFIER, "Expect for loop variable name.");
 
   const char *name = compiler->parser->previous.start;
-  ptrdiff_t length = compiler->parser->previous.length;
+  ptrdiff_t size = compiler->parser->previous.size;
 
   agateCompilerConsume(compiler, AGATE_TOKEN_IN, "Expect 'in' after loop variable.");
   agateExpression(compiler);
@@ -8199,7 +8199,7 @@ static void agateForStatement(AgateCompiler *compiler) {
   agateEmitInvoke(compiler, 1, "iterator_value(_)", 17);
 
   agateCompilerPushScope(compiler);
-  agateCompilerAddLocal(compiler, name, length);
+  agateCompilerAddLocal(compiler, name, size);
 
   agateLoopBody(compiler);
 
@@ -8331,7 +8331,7 @@ static void agateDefineMethod(AgateCompiler *compiler, AgateVariable class_varia
   agateEmitShortArg(compiler, instruction, method_symbol);
 }
 
-static ptrdiff_t agateDeclareMethod(AgateCompiler *compiler, AgateSignature *signature, const char *name, ptrdiff_t length) {
+static ptrdiff_t agateDeclareMethod(AgateCompiler *compiler, AgateSignature *signature, const char *name, ptrdiff_t size) {
   ptrdiff_t symbol = agateSignatureSymbol(compiler, signature);
 
   AgateClassContext *context = compiler->enclosing_class;
@@ -8340,9 +8340,9 @@ static ptrdiff_t agateDeclareMethod(AgateCompiler *compiler, AgateSignature *sig
   for (ptrdiff_t i = 0; i < methods->size; ++i) {
     if (methods->data[i] == symbol) {
       if (context->is_method_static) {
-        agateError(compiler, "Class %s already defines a static method '%.*s'.", &compiler->enclosing_class->name->data, (int) length, name);
+        agateError(compiler, "Class %s already defines a static method '%.*s'.", &compiler->enclosing_class->name->data, (int) size, name);
       } else {
-        agateError(compiler, "Class %s already defines a method '%.*s'.", &compiler->enclosing_class->name->data, (int) length, name);
+        agateError(compiler, "Class %s already defines a method '%.*s'.", &compiler->enclosing_class->name->data, (int) size, name);
       }
 
       return symbol;
@@ -8421,15 +8421,15 @@ static bool agateMethod(AgateCompiler *compiler, AgateVariable class_variable) {
   AgateSignatureBuilder builder;
   agateSignatureToString(&signature, &builder);
 
-  ptrdiff_t method_symbol = agateDeclareMethod(compiler, &signature, builder.name, builder.length);
+  ptrdiff_t method_symbol = agateDeclareMethod(compiler, &signature, builder.name, builder.size);
 
   if (is_foreign) {
-    agateEmitConstant(compiler, agateEntityValue(agateStringNew(compiler->parser->vm, builder.name, builder.length)));
+    agateEmitConstant(compiler, agateEntityValue(agateStringNew(compiler->parser->vm, builder.name, builder.size)));
     method_compiler.parser->vm->compiler = method_compiler.parent;
   } else {
     agateCompilerConsume(compiler, AGATE_TOKEN_LEFT_BRACE, "Expect '{' to begin method body.");
     agateFinishBody(&method_compiler);
-    agateCompilerEnd(&method_compiler, builder.name, builder.length);
+    agateCompilerEnd(&method_compiler, builder.name, builder.size);
   }
 
   agateDefineMethod(compiler, class_variable, is_static, method_symbol);
@@ -8450,7 +8450,7 @@ static void agateClassDeclaration(AgateCompiler *compiler, bool is_foreign) {
   variable.scope = compiler->scope_depth == -1 ? AGATE_SCOPE_GLOBAL : AGATE_SCOPE_LOCAL;
   variable.index = agateCompilerDeclareNamedVariable(compiler);
 
-  AgateString *class_name = agateStringNew(compiler->parser->vm, compiler->parser->previous.start, compiler->parser->previous.length);
+  AgateString *class_name = agateStringNew(compiler->parser->vm, compiler->parser->previous.start, compiler->parser->previous.size);
   AgateValue class_name_value = agateEntityValue(class_name);
   agateEmitConstant(compiler, class_name_value);
 
@@ -8494,7 +8494,7 @@ static void agateClassDeclaration(AgateCompiler *compiler, bool is_foreign) {
   }
 
   if (!is_foreign) {
-    compiler->function->bc.code.data[field_count_instruction] = (uint8_t) enclosing_class.fields.count;
+    compiler->function->bc.code.data[field_count_instruction] = (uint8_t) enclosing_class.fields.size;
   }
 
   agateSymbolArrayDestroy(&enclosing_class.class_methods, compiler->parser->vm);
@@ -8527,7 +8527,7 @@ static void agateVariableOrFunctionDeclaration(AgateCompiler *compiler) {
 
     agateCompilerConsume(&function_compiler, AGATE_TOKEN_LEFT_BRACE, "Expect '{' to begin function body.");
     agateFinishBody(&function_compiler);
-    agateCompilerEnd(&function_compiler, name.start, name.length);
+    agateCompilerEnd(&function_compiler, name.start, name.size);
   } else {
     // variable
     if (agateCompilerMatch(compiler, AGATE_TOKEN_EQUAL)) {
@@ -8557,7 +8557,7 @@ static void agateImport(AgateCompiler *compiler) {
     agateCompilerConsume(compiler, AGATE_TOKEN_IDENTIFIER, "Expect variable name.");
 
     AgateToken source = compiler->parser->previous;
-    ptrdiff_t source_constant = agateCompilerAddConstant(compiler, agateEntityValue(agateStringNew(compiler->parser->vm, source.start, source.length)));
+    ptrdiff_t source_constant = agateCompilerAddConstant(compiler, agateEntityValue(agateStringNew(compiler->parser->vm, source.start, source.size)));
 
     ptrdiff_t symbol;
 
@@ -8662,7 +8662,7 @@ static AgateFunction *agateRawCompile(AgateVM *vm, AgateUnit *unit, const char *
 
       parser.previous.kind = AGATE_TOKEN_IDENTIFIER;
       parser.previous.start = name->data;
-      parser.previous.length = name->length;
+      parser.previous.size = name->size;
       parser.previous.line = agateAsInt(unit->object_values.data[i]);
       agateError(&compiler, "Variable '%s' is used but not defined.", name->data);
     }

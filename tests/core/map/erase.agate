@@ -4,15 +4,15 @@ def map = {
   "three": 3
 }
 
-IO.println(map.count) # expect: 3
+IO.println(map.size) # expect: 3
 IO.println(map.erase("two")) # expect: 2
-IO.println(map.count) # expect: 2
+IO.println(map.size) # expect: 2
 IO.println(map.erase("three")) # expect: 3
-IO.println(map.count) # expect: 1
+IO.println(map.size) # expect: 1
 
 # Remove an already erased entry.
 IO.println(map.erase("two")) # expect: nil
-IO.println(map.count) # expect: 1
+IO.println(map.size) # expect: 1
 
 IO.println(map.erase("one")) # expect: 1
-IO.println(map.count) # expect: 0
+IO.println(map.size) # expect: 0

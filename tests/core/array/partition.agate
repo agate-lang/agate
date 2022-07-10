@@ -3,4 +3,4 @@ def a = [10, 7, 8, 9, 1, 5, 3]
 IO.println(a.partition() {|item| item % 2 == 0 })   # expect: 2
 IO.println(a.partition() {|item| item < 8 })        # expect: 4
 IO.println(a.partition() {|item| false } == 0)      # expect: true
-IO.println(a.partition() {|item| true } == a.count) # expect: true
+IO.println(a.partition() {|item| true } == a.size)  # expect: true

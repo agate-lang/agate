@@ -1,4 +1,4 @@
 def m = { 1: 'a', true: 3.14, "good": nil }
 IO.println(m[true] = 42.0) # expect: 42
 IO.println(m[nil] = []) # expect: []
-IO.println(m.count) # expect: 4
+IO.println(m.size) # expect: 4

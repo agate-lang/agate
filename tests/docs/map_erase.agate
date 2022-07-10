@@ -1,4 +1,4 @@
 def m = { 1: 'a', true: 3.14, "good": nil }
 IO.println(m.erase(1)) # expect: a
 IO.println(m.erase("bad")) # expect: nil
-IO.println(m.count) # expect: 2
+IO.println(m.size) # expect: 2

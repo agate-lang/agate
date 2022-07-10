@@ -1,7 +1,7 @@
 def a = {1: 1, 2: 2, 3: 3}
 a.clear()
 IO.println(a)       # expect: {}
-IO.println(a.count) # expect: 0
+IO.println(a.size)  # expect: 0
 
 # Returns nil.
 IO.println({1: 2}.clear()) # expect: nil

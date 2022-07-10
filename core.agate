@@ -32,7 +32,7 @@ class Sequence {
     return !.any(predicate)
   }
 
-  count {
+  size {
     def counter = 0
     for (element in this) {
       counter = counter + 1
@@ -214,11 +214,11 @@ class Array is Sequence {
     if (!(comp is Fn) || comp.arity != 2) {
       System.abort("comp must be a function with two parameters.")
     }
-    .__quicksort(0, .count - 1, comp)
+    .__quicksort(0, .size - 1, comp)
     return this
   }
 
-  partition(pred) { .__partition(0, .count - 1, pred) }
+  partition(pred) { .__partition(0, .size - 1, pred) }
 
   to_s { "[%(.join(", "))]" }
 
