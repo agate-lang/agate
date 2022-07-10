@@ -5463,13 +5463,13 @@ AgateType agateSlotType(AgateVM *vm, ptrdiff_t slot) {
         case AGATE_ENTITY_STRING:
           return AGATE_TYPE_STRING;
         default:
-          return AGATE_TYPE_UNKOWN;
+          return AGATE_TYPE_UNKNOWN;
       }
     default:
-      return AGATE_TYPE_UNKOWN;
+      return AGATE_TYPE_UNKNOWN;
   }
 
-  return AGATE_TYPE_UNKOWN;
+  return AGATE_TYPE_UNKNOWN;
 }
 
 bool agateSlotGetBool(AgateVM *vm, ptrdiff_t slot) {
@@ -5506,6 +5506,18 @@ const char *agateSlotGetString(AgateVM *vm, ptrdiff_t slot) {
   assert(agateIsSlotValid(vm, slot));
   assert(agateIsString(vm->api_stack[slot]));
   return agateAsCString(vm->api_stack[slot]);
+}
+
+const char *agateSlotGetStringSize(AgateVM *vm, ptrdiff_t slot, ptrdiff_t *size) {
+  assert(agateIsSlotValid(vm, slot));
+  assert(agateIsString(vm->api_stack[slot]));
+  AgateString *string = agateAsString(vm->api_stack[slot]);
+
+  if (size != NULL) {
+    *size = string->length;
+  }
+
+  return string->data;
 }
 
 AgateHandle *agateSlotGetHandle(AgateVM *vm, ptrdiff_t slot) {
@@ -5546,8 +5558,8 @@ void agateSlotSetString(AgateVM *vm, ptrdiff_t slot, const char *text) {
   agateSlotSetValue(vm, slot, agateEntityValue(agateStringNew(vm, text, strlen(text))));
 }
 
-void agateSlotSetStringLength(AgateVM *vm, ptrdiff_t slot, const char *text, ptrdiff_t length) {
-  agateSlotSetValue(vm, slot, agateEntityValue(agateStringNew(vm, text, length)));
+void agateSlotSetStringSize(AgateVM *vm, ptrdiff_t slot, const char *text, ptrdiff_t size) {
+  agateSlotSetValue(vm, slot, agateEntityValue(agateStringNew(vm, text, size)));
 }
 
 void agateSlotSetHandle(AgateVM *vm, ptrdiff_t slot, AgateHandle *handle) {
@@ -5619,7 +5631,7 @@ void agateSlotMapNew(AgateVM *vm, ptrdiff_t slot) {
   agateSlotSetValue(vm, slot, agateEntityValue(agateMapNew(vm)));
 }
 
-ptrdiff_t agateSlotMapCount(AgateVM *vm, ptrdiff_t slot) {
+ptrdiff_t agateSlotMapSize(AgateVM *vm, ptrdiff_t slot) {
   assert(agateIsSlotValid(vm, slot));
   assert(agateIsMap(vm->api_stack[slot]));
   AgateMap *map = agateAsMap(vm->api_stack[slot]);

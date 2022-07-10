@@ -364,9 +364,9 @@ static AgateStatus agateTestRunInterpreter(AgateTest *self) {
 
   config.user_data = self;
 
-  bool is_api_test = agateTestIsApi(self->path);
+  bool use_foreign = agateTestUseForeign(self->path);
 
-  if (is_api_test) {
+  if (use_foreign) {
     config.foreign_class_handler = agateTestForeignClassHandler;
     config.foreign_method_handler = agateTestForeignMethodHandler;
   }
@@ -374,7 +374,7 @@ static AgateStatus agateTestRunInterpreter(AgateTest *self) {
   AgateVM *vm = agateNewVM(&config);
   AgateStatus status = agateInterpret(vm, self->path, self->content.data);
 
-  if (is_api_test) {
+  if (use_foreign) {
     agateTestRunNative(vm, self->path);
   }
 

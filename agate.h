@@ -121,7 +121,7 @@ typedef enum {
 // end::status[]
 
 typedef enum {
-  AGATE_TYPE_UNKOWN,
+  AGATE_TYPE_UNKNOWN,
   AGATE_TYPE_ARRAY,
   AGATE_TYPE_BOOL,
   AGATE_TYPE_CHAR,
@@ -161,6 +161,7 @@ int64_t agateSlotGetInt(AgateVM *vm, ptrdiff_t slot);
 double agateSlotGetFloat(AgateVM *vm, ptrdiff_t slot);
 void *agateSlotGetForeign(AgateVM *vm, ptrdiff_t slot);
 const char *agateSlotGetString(AgateVM *vm, ptrdiff_t slot);
+const char *agateSlotGetStringSize(AgateVM *vm, ptrdiff_t slot, ptrdiff_t *size);
 AgateHandle *agateSlotGetHandle(AgateVM *vm, ptrdiff_t slot);
 
 void agateReleaseHandle(AgateVM *vm, AgateHandle *handle);
@@ -172,7 +173,7 @@ void agateSlotSetInt(AgateVM *vm, ptrdiff_t slot, int64_t value);
 void agateSlotSetFloat(AgateVM *vm, ptrdiff_t slot, double value);
 
 void agateSlotSetString(AgateVM *vm, ptrdiff_t slot, const char *text);
-void agateSlotSetStringLength(AgateVM *vm, ptrdiff_t slot, const char *text, ptrdiff_t length);
+void agateSlotSetStringSize(AgateVM *vm, ptrdiff_t slot, const char *text, ptrdiff_t size);
 
 void agateSlotSetHandle(AgateVM *vm, ptrdiff_t slot, AgateHandle *handle);
 
@@ -184,7 +185,7 @@ void agateSlotArrayInsert(AgateVM *vm, ptrdiff_t array_slot, ptrdiff_t index, pt
 void agateSlotArrayErase(AgateVM *vm, ptrdiff_t array_slot, ptrdiff_t index, ptrdiff_t element_slot);
 
 void agateSlotMapNew(AgateVM *vm, ptrdiff_t slot);
-ptrdiff_t agateSlotMapCount(AgateVM *vm, ptrdiff_t slot);
+ptrdiff_t agateSlotMapSize(AgateVM *vm, ptrdiff_t slot);
 bool agateSlotMapContains(AgateVM *vm, ptrdiff_t map_slot, ptrdiff_t key_slot);
 void agateSlotMapGet(AgateVM *vm, ptrdiff_t map_slot, ptrdiff_t key_slot, ptrdiff_t value_slot);
 void agateSlotMapSet(AgateVM *vm, ptrdiff_t map_slot, ptrdiff_t key_slot, ptrdiff_t value_slot);

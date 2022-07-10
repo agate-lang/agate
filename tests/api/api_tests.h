@@ -3,7 +3,7 @@
 
 #include <agate.h>
 
-bool agateTestIsApi(const char *path);
+bool agateTestUseForeign(const char *path);
 
 AgateForeignClassHandler agateTestForeignClassHandler(AgateVM *vm, const char *unit_name, const char *class_name);
 AgateForeignMethodFunc agateTestForeignMethodHandler(AgateVM *vm, const char *unit_name, const char *class_name, AgateForeignMethodKind kind, const char *signature);

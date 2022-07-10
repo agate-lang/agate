@@ -83,6 +83,7 @@ if(UNIX AND AGATE_DEV)
       tests/api/api_tests.c
       # tests
       tests/api/handle.c
+      tests/api/slots.c
     )
 
     target_compile_definitions(agate-tests
