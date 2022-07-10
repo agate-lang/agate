@@ -105,13 +105,13 @@
 
 #define AGATE_MAX_INTERPOLATION_NESTING 8
 
-#define AGATE_MAX_CONSTANT_COUNT (1 << 16)
-#define AGATE_MAX_UNIT_OBJECT_COUNT (1 << 16)
-#define AGATE_MAX_LOCAL_COUNT (1 << 8)
-#define AGATE_MAX_UPVALUE_COUNT (1 << 7)
-#define AGATE_MAX_FIELDS_COUNT UINT8_MAX
+#define AGATE_MAX_CONSTANTS (1 << 16)
+#define AGATE_MAX_UNIT_OBJECTS (1 << 16)
+#define AGATE_MAX_LOCALS (1 << 8)
+#define AGATE_MAX_UPVALUES (1 << 7)
+#define AGATE_MAX_FIELDS UINT8_MAX
 
-#define AGATE_MAX_BREAK_COUNT 32
+#define AGATE_MAX_BREAKS 32
 
 #define AGATE_MAX_VARIABLE_NAME_SIZE 64
 
@@ -1934,7 +1934,7 @@ static AgateString *agateSymbolTableReverseFind(AgateTable *self, ptrdiff_t symb
 #define AGATE_DEFINITION_TOO_MANY_DEFINITIONS (-2)
 
 static ptrdiff_t agateUnitAddFutureVariable(AgateVM *vm, AgateUnit *unit, const char *name, ptrdiff_t size, int line) { // ~wrenDeclareVariable
-  if (unit->object_values.size == AGATE_MAX_UNIT_OBJECT_COUNT) {
+  if (unit->object_values.size == AGATE_MAX_UNIT_OBJECTS) {
     return AGATE_DEFINITION_TOO_MANY_DEFINITIONS;
   }
 
@@ -1946,7 +1946,7 @@ static ptrdiff_t agateUnitAddVariable(AgateVM *vm, AgateUnit *unit, const char *
   assert(unit);
   assert(unit->object_names.size == unit->object_values.size);
 
-  if (unit->object_values.size == AGATE_MAX_UNIT_OBJECT_COUNT) {
+  if (unit->object_values.size == AGATE_MAX_UNIT_OBJECTS) {
     return AGATE_DEFINITION_TOO_MANY_DEFINITIONS;
   }
 
@@ -2663,7 +2663,7 @@ static AgateValue agateValidateSuperclass(AgateVM *vm, AgateValue name, AgateVal
     return agateEntityValue(agateStringNewFormat(vm, "Foreign class '@' cannot inherit from a class with fields.", agateAsString(name)));
   }
 
-  if (superclass->field_count + field_count > AGATE_MAX_FIELDS_COUNT) {
+  if (superclass->field_count + field_count > AGATE_MAX_FIELDS) {
     return agateEntityValue(agateStringNewFormat(vm, "Class '@' may not have more than 255 fields, including inherited ones.", agateAsString(name)));
   }
 
@@ -5891,7 +5891,7 @@ typedef struct AgateLoopContext {
   ptrdiff_t start;
   ptrdiff_t exit_jump;
 
-  ptrdiff_t breaks[AGATE_MAX_BREAK_COUNT];
+  ptrdiff_t breaks[AGATE_MAX_BREAKS];
   ptrdiff_t breaks_count;
 
   int scope_depth;
@@ -5936,10 +5936,10 @@ struct AgateCompiler {
   AgateParser *parser;
   struct AgateCompiler *parent;
 
-  AgateLocal locals[AGATE_MAX_LOCAL_COUNT];
+  AgateLocal locals[AGATE_MAX_LOCALS];
   ptrdiff_t locals_count;
 
-  AgateCompilerUpvalue upvalues[AGATE_MAX_UPVALUE_COUNT];
+  AgateCompilerUpvalue upvalues[AGATE_MAX_UPVALUES];
 
   int scope_depth;
   ptrdiff_t slot_count;
@@ -6051,7 +6051,7 @@ static ptrdiff_t agateCompilerAddConstant(AgateCompiler *compiler, AgateValue va
 
   ptrdiff_t symbol = compiler->function->bc.constants.size;
 
-  if (symbol < AGATE_MAX_CONSTANT_COUNT) {
+  if (symbol < AGATE_MAX_CONSTANTS) {
     if (agateIsEntity(value)) {
       agatePushRoot(compiler->parser->vm, agateAsEntity(value));
     }
@@ -6063,7 +6063,7 @@ static ptrdiff_t agateCompilerAddConstant(AgateCompiler *compiler, AgateValue va
       agatePopRoot(compiler->parser->vm);
     }
   } else {
-    agateError(compiler, "A function may only contain %d unique constants.", AGATE_MAX_CONSTANT_COUNT);
+    agateError(compiler, "A function may only contain %d unique constants.", AGATE_MAX_CONSTANTS);
   }
 
   return symbol;
@@ -6882,7 +6882,7 @@ static inline void agateEmitLoopRestart(AgateCompiler *compiler) {
  */
 
 static ptrdiff_t agateCompilerAddLocal(AgateCompiler *compiler, const char *name, ptrdiff_t size) {
-  assert(compiler->locals_count < AGATE_MAX_LOCAL_COUNT);
+  assert(compiler->locals_count < AGATE_MAX_LOCALS);
   AgateLocal *local = &compiler->locals[compiler->locals_count];
   local->name = name;
   local->size = size;
@@ -6930,8 +6930,8 @@ static ptrdiff_t agateCompilerDeclareVariable(AgateCompiler *compiler, AgateToke
     }
   }
 
-  if (compiler->locals_count == AGATE_MAX_LOCAL_COUNT) {
-    agateError(compiler, "Cannot declare more than %d variables in one scope.", AGATE_MAX_LOCAL_COUNT);
+  if (compiler->locals_count == AGATE_MAX_LOCALS) {
+    agateError(compiler, "Cannot declare more than %d variables in one scope.", AGATE_MAX_LOCALS);
     return -1;
   }
 
@@ -7002,7 +7002,7 @@ static ptrdiff_t agateCompilerAddUpvalue(AgateCompiler *compiler, AgateCapture c
     }
   }
 
-  assert(count < AGATE_MAX_UPVALUE_COUNT);
+  assert(count < AGATE_MAX_UPVALUES);
   compiler->upvalues[count].capture = capture;
   compiler->upvalues[count].index = index;
   return compiler->function->upvalue_count++;
@@ -7589,7 +7589,7 @@ static void agateInterpolationExpression(AgateCompiler *compiler) {
 }
 
 static void agateFieldExpression(AgateCompiler *compiler, bool can_assign) {
-  ptrdiff_t field = AGATE_MAX_FIELDS_COUNT;
+  ptrdiff_t field = AGATE_MAX_FIELDS;
   AgateClassContext *enclosing_class = agateGetEnclosingClass(compiler);
 
   if (enclosing_class == NULL) {
@@ -7601,8 +7601,8 @@ static void agateFieldExpression(AgateCompiler *compiler, bool can_assign) {
   } else {
     field = agateSymbolTableEnsure(&enclosing_class->fields, compiler->parser->previous.start, compiler->parser->previous.size, compiler->parser->vm);
 
-    if (field >= AGATE_MAX_FIELDS_COUNT) {
-      agateError(compiler, "A class can only have %d fields.", AGATE_MAX_FIELDS_COUNT);
+    if (field >= AGATE_MAX_FIELDS) {
+      agateError(compiler, "A class can only have %d fields.", AGATE_MAX_FIELDS);
     }
   }
 
@@ -8173,7 +8173,7 @@ static void agateForStatement(AgateCompiler *compiler) {
   agateCompilerConsume(compiler, AGATE_TOKEN_IN, "Expect 'in' after loop variable.");
   agateExpression(compiler);
 
-  if (compiler->locals_count + 2 > AGATE_MAX_LOCAL_COUNT) {
+  if (compiler->locals_count + 2 > AGATE_MAX_LOCALS) {
     agateError(compiler, "Cannot declare more than %d variables in one scope. (Not enough space for for-loops internal variables)");
     return;
   }
@@ -8249,7 +8249,7 @@ static void agateBreakStatement(AgateCompiler *compiler) {
     agateCompilerDiscardLocals(compiler, compiler->loop->scope_depth + 1);
     ptrdiff_t jump = agateEmitJumpForward(compiler, AGATE_OP_JUMP_FORWARD);
 
-    if (compiler->loop->breaks_count == AGATE_MAX_BREAK_COUNT) {
+    if (compiler->loop->breaks_count == AGATE_MAX_BREAKS) {
       agateError(compiler, "Too many 'break'.");
     } else {
       compiler->loop->breaks[compiler->loop->breaks_count++] = jump;
