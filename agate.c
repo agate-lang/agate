@@ -3115,7 +3115,8 @@ static AgateStatus agateRun(AgateVM *vm) {
         agateCloseUpvalue(vm, frame->stack_start);
 
         if (vm->frames_count == 0) {
-          agatePop(vm);
+          vm->stack[0] = result;
+          vm->stack_top = vm->stack + 1;
           return AGATE_STATUS_OK;
         }
 
@@ -5216,10 +5217,17 @@ AgateStatus agateInterpret(AgateVM *vm, const char *unit, const char *source) { 
     return vm->status;
   }
 
-  agatePush(vm, agateEntityValue(closure));
+  agatePushRoot(vm, (AgateEntity *) closure);
   agateClosureCall(vm, closure, 1);
+  agatePopRoot(vm);
 
-  return agateRun(vm);
+  AgateStatus status = agateRun(vm);
+
+  if (status == AGATE_STATUS_OK) {
+    agatePop(vm);
+  }
+
+  return status;
 }
 
 
@@ -5381,12 +5389,12 @@ AgateHandle *agateMakeCallHandle(AgateVM *vm, const char *signature) {
   AgateHandle *handle = agateHandleNew(vm, agateEntityValue(function));
   handle->value = agateEntityValue(agateClosureNew(vm, function));
 
-  agateBytecodeWrite(&function->bc, AGATE_OP_INVOKE,        0, vm);
-  agateBytecodeWrite(&function->bc, argc,                   0, vm);
-  agateBytecodeWrite(&function->bc, (symbol >> 8) && 0xFF,  0, vm);
-  agateBytecodeWrite(&function->bc,  symbol       && 0xFF,  0, vm);
-  agateBytecodeWrite(&function->bc, AGATE_OP_RETURN,        0, vm);
-  agateBytecodeWrite(&function->bc, AGATE_OP_END,           0, vm);
+  agateBytecodeWrite(&function->bc, AGATE_OP_INVOKE,      0, vm);
+  agateBytecodeWrite(&function->bc, argc,                 0, vm);
+  agateBytecodeWrite(&function->bc, (symbol >> 8) & 0xFF, 0, vm);
+  agateBytecodeWrite(&function->bc,  symbol       & 0xFF, 0, vm);
+  agateBytecodeWrite(&function->bc, AGATE_OP_RETURN,      0, vm);
+  agateBytecodeWrite(&function->bc, AGATE_OP_END,         0, vm);
 
   agateFunctionBindName(vm, function, signature, signature_size);
 
@@ -5397,6 +5405,7 @@ AgateStatus agateCall(AgateVM *vm, AgateHandle *method) {
   assert(method != NULL);
   assert(agateIsClosure(method->value));
   assert(vm->api_stack != NULL);
+  assert(vm->frames_count == 0); // TODO
 
   AgateClosure *closure = agateAsClosure(method->value);
   assert(vm->stack_top - vm->stack >= closure->function->arity);

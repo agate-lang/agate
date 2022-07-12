@@ -19,6 +19,8 @@ static int yyerror(const char *message) {
 %token EOM  0            "end of module file"
 %token EOL               "end of line"
 
+%token ERROR             "error"
+
 %token CHAR_LITERAL      "char literal"
 %token INT_LITERAL       "integer literal"
 %token FLOAT_LITERAL     "float literal"

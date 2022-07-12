@@ -1,0 +1,63 @@
+class ForeignClass {
+  construct new() {}
+}
+
+class Maps {
+  foreign static new_map()
+  foreign static insert()
+  foreign static contains(map, key)
+  foreign static contains()
+  foreign static contains_false()
+  foreign static size()
+  foreign static size(map)
+  foreign static erase(map)
+}
+
+# map new + get/set API
+
+def map = Maps.new_map()
+IO.println(map is Map) # expect: true
+IO.println(map.size) # expect: 0
+
+def data = Maps.insert()
+IO.println(data["England"]) # expect: London
+IO.println(data["Empty"])   # expect: []
+IO.println(data[1.0])       # expect: 42
+IO.println(data[false])     # expect: true
+IO.println(data[nil])       # expect: nil
+
+# erase API
+
+def erased = Maps.erase({ "key": "value", "other": "data" })
+IO.println(erased) # expect: value
+
+def erased_none = Maps.erase({})
+IO.println(erased_none) # expect: nil
+
+# size API
+
+def size_map = { "key": "value", "other": "data", 4: "number key" }
+IO.println(Maps.size(size_map)) # expect: 3
+Maps.erase(size_map) # erase using API
+IO.println(Maps.size(size_map)) # expect: 2
+size_map.erase("other") # erase wren side
+IO.println(Maps.size(size_map)) # expect: 1
+
+def sizeAPI = Maps.size()
+IO.println(sizeAPI) # expect: 5
+
+# contains key API
+
+def contains_map = { "key": "value", "other": "data", 4: "number key" }
+IO.println(Maps.contains(contains_map, "key")) # expect: true
+IO.println(Maps.contains(contains_map, "fake")) # expect: false
+IO.println(Maps.contains(contains_map, "other")) # expect: true
+
+Maps.erase(contains_map) # erase using API
+IO.println(Maps.contains(contains_map, "key")) # expect: false
+
+contains_map.erase("other") # erase wren side
+IO.println(Maps.contains(contains_map, "other")) # expect: false
+
+IO.println(Maps.contains()) # expect: true
+IO.println(Maps.contains_false()) # expect: false

@@ -1,0 +1,16 @@
+class Arrays {
+  foreign static new_array()
+  foreign static insert()
+  foreign static set()
+  foreign static get(array, index)
+}
+
+def array = Arrays.new_array()
+IO.println(array is Array) # expect: true
+IO.println(array.size) # expect: 0
+
+IO.println(Arrays.insert()) # expect: [4, 5, 6, 1, 2, 3, 9, 8, 7]
+
+IO.println(Arrays.set()) # expect: [1, 2, 33, 44]
+IO.println(Arrays.get([1, 2, 3, 4], -2)) # expect: 3
+IO.println(Arrays.get([1, 2, 3, 4], 1)) # expect: 2

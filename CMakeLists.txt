@@ -82,7 +82,10 @@ if(UNIX AND AGATE_DEV)
       ${FLEX_agate-lexer_OUTPUTS}
       tests/api/api_tests.c
       # tests
+      tests/api/arrays.c
+      tests/api/call.c
       tests/api/handle.c
+      tests/api/maps.c
       tests/api/slots.c
     )
 

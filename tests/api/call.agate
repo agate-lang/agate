@@ -1,0 +1,57 @@
+class Call {
+  static no_params {
+    IO.println("no params")
+  }
+
+  static zero() {
+    IO.println("zero")
+  }
+
+  static one(one) {
+    IO.println("one %(one)")
+  }
+
+  static two(one, two) {
+    # Don't print null bytes.
+    if (two is String && two.contains('\0')) {
+      two = two.map {|c| c.to_i }.to_a
+    }
+
+    IO.println("two %(one) %(two)")
+  }
+
+  static get_value() { ["a", "b"] }
+
+  static - {
+    IO.println("unary")
+  }
+
+  static -(arg) {
+    IO.println("binary %(arg)")
+  }
+
+  static [one, two] {
+    IO.println("subscript %(one) %(two)")
+  }
+
+  static [one, two]=(three) {
+    IO.println("subscript set %(one) %(two) %(three)")
+  }
+}
+
+# expect: no params
+# expect: zero
+# expect: one 1
+# expect: two 1 2
+# expect: unary
+# expect: binary 1
+# expect: subscript 1 2
+# expect: subscript set 1 2 3
+
+# expect: slots after call: 1
+# expect: two true false
+# expect: two 1.2 3.4
+# expect: two string another
+# expect: two nil [a, b]
+# expect: two str [98, 0, 121, 0, 116, 0, 101]
+# expect: one 0.1

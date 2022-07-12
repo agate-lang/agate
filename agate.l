@@ -130,8 +130,8 @@ ESC   (\\([0'"\\abefnrtv%]|u[a-fA-F0-9]{4}|U[a-fA-F0-9]{8}))
   "%("                  { parens[parens_count++] = 1; BEGIN(INITIAL); return INTERPOLATION_LITERAL; }
   ([^"\\\n%]|{ESC})     { }
   \"                    { BEGIN(INITIAL); return STRING_LITERAL; }
-  \n                    { fprintf(stderr, "No newline permitted in string.\n"); exit(EXIT_FAILURE); }
-  .                     { fprintf(stderr, "Invalid character in string: '%s'\n", yytext); exit(EXIT_FAILURE); }
+  \n                    { fprintf(stderr, "No newline permitted in string.\n"); return ERROR; }
+  .                     { fprintf(stderr, "Invalid character in string: '%s'\n", yytext); return ERROR; }
 }
 
 
@@ -141,6 +141,6 @@ ESC   (\\([0'"\\abefnrtv%]|u[a-fA-F0-9]{4}|U[a-fA-F0-9]{8}))
 
 \n                      { ++line; return EOL; }
 [\t ]*                  { /* nothing */ }
-.                       { fprintf(stderr, "Unknown token: '%s'\n", yytext); exit(EXIT_FAILURE); }
+.                       { fprintf(stderr, "Unknown token: '%s'\n", yytext); return ERROR; }
 
 %%

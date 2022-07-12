@@ -8,6 +8,6 @@ bool agateTestUseForeign(const char *path);
 AgateForeignClassHandler agateTestForeignClassHandler(AgateVM *vm, const char *unit_name, const char *class_name);
 AgateForeignMethodFunc agateTestForeignMethodHandler(AgateVM *vm, const char *unit_name, const char *class_name, AgateForeignMethodKind kind, const char *signature);
 
-bool agateTestRunNative(AgateVM *vm, const char *path);
+bool agateTestRunNative(AgateVM *vm, const char *unit_name);
 
 #endif // AGATE_TESTS_API_TESTS_H

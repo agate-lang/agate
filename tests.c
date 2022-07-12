@@ -18,10 +18,8 @@
 
 #include "tests/api/api_tests.h"
 
-// useful declaration from generated files
-extern FILE *yyin;
-int yyparse(void);
-int yylex_destroy(void);
+#include "agate-lexer.h"
+#include "agate-parser.h"
 
 #define C_OK "\033[32m"
 #define C_KO "\033[31m"
@@ -62,6 +60,9 @@ static void agateTestBufferCreate(AgateTestBuffer *self) {
 
 static void agateTestBufferDestroy(AgateTestBuffer *self) {
   free(self->data);
+  self->data = NULL;
+  self->capacity = 0;
+  self->size = 0;
 }
 
 static void agateTestBufferReset(AgateTestBuffer *self) {
@@ -99,6 +100,11 @@ static void agateTestBufferAppend(AgateTestBuffer *self, const char *buffer, siz
 /*
  * AgateTest
  */
+
+typedef enum {
+  AGATE_MODE_TEST,
+  AGATE_MODE_SINGLE,
+} AgateTestMode;
 
 typedef struct {
   AgateTestBuffer print;
@@ -178,7 +184,12 @@ static bool agateTestReadFile(AgateTest *self) {
 
 typedef AgateStatus (*AgateTestFunc)(AgateTest *self);
 
-static bool agateTestExecFile(AgateTest *self, AgateTestFunc func, AgateOutcome *outcome) {
+static bool agateTestExecFile(AgateTest *self, AgateTestFunc func, AgateOutcome *outcome, AgateTestMode mode) {
+  if (mode == AGATE_MODE_SINGLE) {
+    outcome->status = func(self);
+    return true;
+  }
+
   int ret;
 
   int out[2];
@@ -258,9 +269,13 @@ static AgateStatus agateTestRunSyntax(AgateTest *self) {
   return result == 0 ? AGATE_STATUS_OK : AGATE_STATUS_COMPILE_ERROR;
 }
 
-static bool agateTestCheckSyntax(AgateTest *self) {
-  if (!agateTestExecFile(self, agateTestRunSyntax, &self->syntax)) {
+static bool agateTestCheckSyntax(AgateTest *self, AgateTestMode mode) {
+  if (!agateTestExecFile(self, agateTestRunSyntax, &self->syntax, mode)) {
     return false;
+  }
+
+  if (mode == AGATE_MODE_SINGLE) {
+    return true;
   }
 
   const char *syntax_string = self->syntax.print.data ? self->syntax.print.data : "";
@@ -383,9 +398,13 @@ static AgateStatus agateTestRunInterpreter(AgateTest *self) {
   return status;
 }
 
-static bool agateTestCheckRuntime(AgateTest *self) {
-  if (!agateTestExecFile(self, agateTestRunInterpreter, &self->actual)) {
+static bool agateTestCheckRuntime(AgateTest *self, AgateTestMode mode) {
+  if (!agateTestExecFile(self, agateTestRunInterpreter, &self->actual, mode)) {
     return false;
+  }
+
+  if (mode == AGATE_MODE_SINGLE) {
+    return true;
   }
 
   const char *expected_string = self->expected.print.data ? self->expected.print.data : "";
@@ -405,7 +424,7 @@ static bool agateTestCheckRuntime(AgateTest *self) {
   return true;
 }
 
-static bool agateTestRunFile(AgateTest *self, const char *path) {
+static bool agateTestRunFile(AgateTest *self, const char *path, AgateTestMode mode) {
   agateTestReset(self);
 
   self->path = path;
@@ -419,8 +438,8 @@ static bool agateTestRunFile(AgateTest *self, const char *path) {
   bool result = true;
 
   result = result && agateTestReadFile(self);
-  result = result && agateTestCheckSyntax(self);
-  result = result && agateTestCheckRuntime(self);
+  result = result && agateTestCheckSyntax(self, mode);
+  result = result && agateTestCheckRuntime(self, mode);
 
   fclose(self->file);
   return result;
@@ -432,9 +451,28 @@ static bool agateTestRunFile(AgateTest *self, const char *path) {
 
 int main(int argc, char *argv[]) {
   const char **test_files = AgateTestFiles;
+  AgateTestMode mode = AGATE_MODE_TEST;
+  bool force_test= false;
+
+  if (argc > 1) {
+    if (strcmp(argv[1], "--single") == 0) {
+      --argc;
+      ++argv;
+      mode = AGATE_MODE_SINGLE;
+    } else if (strcmp(argv[1], "--test") == 0) {
+      --argc;
+      ++argv;
+      mode = AGATE_MODE_TEST;
+      force_test = true;
+    }
+  }
 
   if (argc > 1) {
     test_files = (const char **) (argv + 1);
+
+    if (argc == 2 && !force_test) {
+      mode = AGATE_MODE_SINGLE;
+    }
   }
 
   size_t i = 0;
@@ -451,7 +489,7 @@ int main(int argc, char *argv[]) {
     printf("[%3zu] %s\n", no, path);
     fflush(stdout);
 
-    if (agateTestRunFile(&test, path)) {
+    if (agateTestRunFile(&test, path, mode)) {
       printf(C_OK "[%3zu] %s OK" C_STOP "\n", no, path);
       ++success_count;
     } else {
