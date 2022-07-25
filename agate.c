@@ -3977,6 +3977,21 @@ static bool agateCoreArrayRemove(AgateVM *vm, int argc, AgateValue *args) {
   return true;
 }
 
+static bool agateCoreArrayReverse(AgateVM *vm, int argc, AgateValue *args) {
+  AgateArray *array = agateAsArray(args[0]);
+  ptrdiff_t size = array->elements.size;
+
+  for (ptrdiff_t i = 0; i < size / 2; ++i) {
+    ptrdiff_t j = size - 1 - i;
+    assert(0 <= j && j < size);
+    AgateValue tmp = array->elements.data[i];
+    array->elements.data[i] = array->elements.data[j];
+    array->elements.data[j] = tmp;
+  }
+
+  return true;
+}
+
 static bool agateCoreArrayIterate(AgateVM *vm, int argc, AgateValue *args) {
   AgateArray *array = agateAsArray(args[0]);
 
@@ -4899,6 +4914,23 @@ static bool agateCoreSystemGc(AgateVM *vm, int argc, AgateValue *args) {
   return true;
 }
 
+static bool agateCoreSystemVersion(AgateVM *vm, int argc, AgateValue *args) {
+  AgateArray *result = agateArrayNew(vm);
+  agatePushRoot(vm, (AgateEntity *) result);
+
+  agateValueArrayAppend(&result->elements, agateIntValue(AGATE_VERSION_MAJOR), vm);
+  agateValueArrayAppend(&result->elements, agateIntValue(AGATE_VERSION_MINOR), vm);
+  agateValueArrayAppend(&result->elements, agateIntValue(AGATE_VERSION_PATCH), vm);
+
+  agatePopRoot(vm);
+  args[0] = agateEntityValue(result);
+  return true;
+}
+
+static bool agateCoreSystemVersionString(AgateVM *vm, int argc, AgateValue *args) {
+  args[0] = AGATE_CONST_STRING(vm, AGATE_VERSION_STRING);
+  return true;
+}
 
 // utils
 
@@ -4969,6 +5001,7 @@ static void agateLoadCoreUnit(AgateVM *vm) {
   agateClassBindPrimitive(vm, vm->array_class, "iterate(_)", agateCoreArrayIterate);
   agateClassBindPrimitive(vm, vm->array_class, "iterator_value(_)", agateCoreArrayIteratorValue);
   agateClassBindPrimitive(vm, vm->array_class, "remove(_)", agateCoreArrayRemove);
+  agateClassBindPrimitive(vm, vm->array_class, "reverse()", agateCoreArrayReverse);
   agateClassBindPrimitive(vm, vm->array_class, "swap(_,_)", agateCoreArraySwap);
 
   vm->bool_class = agateAsClass(agateUnitFindVariable(vm, core, "Bool"));
@@ -5142,8 +5175,10 @@ static void agateLoadCoreUnit(AgateVM *vm) {
   AgateClass *system_class = agateAsClass(agateUnitFindVariable(vm, core, "System"));
   agateClassBindPrimitive(vm, system_class->base.type, "abort(_)", agateCoreSystemAbort);
   agateClassBindPrimitive(vm, system_class->base.type, "clock", agateCoreSystemClock);
-  agateClassBindPrimitive(vm, system_class->base.type, "gc()", agateCoreSystemGc);
   agateClassBindPrimitive(vm, system_class->base.type, "env(_)", agateCoreSystemEnv);
+  agateClassBindPrimitive(vm, system_class->base.type, "gc()", agateCoreSystemGc);
+  agateClassBindPrimitive(vm, system_class->base.type, "version", agateCoreSystemVersion);
+  agateClassBindPrimitive(vm, system_class->base.type, "version_string", agateCoreSystemVersionString);
 
   for (AgateEntity *entity = vm->entities; entity != NULL; entity = entity->next) {
     if (entity->kind == AGATE_ENTITY_STRING) {

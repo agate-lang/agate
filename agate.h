@@ -120,6 +120,7 @@ typedef enum {
 } AgateStatus;
 // end::status[]
 
+// tag::type[]
 typedef enum {
   AGATE_TYPE_UNKNOWN,
   AGATE_TYPE_ARRAY,
@@ -132,6 +133,7 @@ typedef enum {
   AGATE_TYPE_NIL,
   AGATE_TYPE_STRING,
 } AgateType;
+// end::type[]
 
 // tag::initialize[]
 void agateConfigInitialize(AgateConfig *config);
@@ -148,24 +150,37 @@ void agateDeleteVM(AgateVM *vm);
 AgateStatus agateInterpret(AgateVM *vm, const char *unit, const char *source);
 // end::interpret[]
 
+// tag::handle_call[]
 AgateHandle *agateMakeCallHandle(AgateVM *vm, const char *signature);
 AgateStatus agateCall(AgateVM *vm, AgateHandle *method);
+// end::handle_call[]
 
+// tag::slot_management[]
 ptrdiff_t agateSlotCount(AgateVM *vm);
 void agateEnsureSlots(AgateVM *vm, ptrdiff_t slots_count);
 AgateType agateSlotType(AgateVM *vm, ptrdiff_t slot);
+// end::slot_management[]
 
+// tag::slot_get_primitive[]
 bool agateSlotGetBool(AgateVM *vm, ptrdiff_t slot);
 uint32_t agateSlotGetChar(AgateVM *vm, ptrdiff_t slot);
 int64_t agateSlotGetInt(AgateVM *vm, ptrdiff_t slot);
 double agateSlotGetFloat(AgateVM *vm, ptrdiff_t slot);
 void *agateSlotGetForeign(AgateVM *vm, ptrdiff_t slot);
+
 const char *agateSlotGetString(AgateVM *vm, ptrdiff_t slot);
 const char *agateSlotGetStringSize(AgateVM *vm, ptrdiff_t slot, ptrdiff_t *size);
+// end::slot_get_primitive[]
+
+// tag::handle_get[]
 AgateHandle *agateSlotGetHandle(AgateVM *vm, ptrdiff_t slot);
+// end::handle_get[]
 
+// tag::handle_release[]
 void agateReleaseHandle(AgateVM *vm, AgateHandle *handle);
+// end::handle_release[]
 
+// tag::slot_set_primitive[]
 void agateSlotSetNil(AgateVM *vm, ptrdiff_t slot);
 void agateSlotSetBool(AgateVM *vm, ptrdiff_t slot, bool value);
 void agateSlotSetChar(AgateVM *vm, ptrdiff_t slot, uint32_t value);
@@ -174,31 +189,44 @@ void agateSlotSetFloat(AgateVM *vm, ptrdiff_t slot, double value);
 
 void agateSlotSetString(AgateVM *vm, ptrdiff_t slot, const char *text);
 void agateSlotSetStringSize(AgateVM *vm, ptrdiff_t slot, const char *text, ptrdiff_t size);
+// end::slot_set_primitive[]
 
+// tag::handle_set[]
 void agateSlotSetHandle(AgateVM *vm, ptrdiff_t slot, AgateHandle *handle);
+// end::handle_set[]
 
+// tag::slot_array[]
 void agateSlotArrayNew(AgateVM *vm, ptrdiff_t slot);
 ptrdiff_t agateSlotArraySize(AgateVM *vm, ptrdiff_t slot);
 void agateSlotArrayGet(AgateVM *vm, ptrdiff_t array_slot, ptrdiff_t index, ptrdiff_t element_slot);
 void agateSlotArraySet(AgateVM *vm, ptrdiff_t array_slot, ptrdiff_t index, ptrdiff_t element_slot);
 void agateSlotArrayInsert(AgateVM *vm, ptrdiff_t array_slot, ptrdiff_t index, ptrdiff_t element_slot);
 void agateSlotArrayErase(AgateVM *vm, ptrdiff_t array_slot, ptrdiff_t index, ptrdiff_t element_slot);
+// end::slot_array[]
 
+// tag::slot_map[]
 void agateSlotMapNew(AgateVM *vm, ptrdiff_t slot);
 ptrdiff_t agateSlotMapSize(AgateVM *vm, ptrdiff_t slot);
 bool agateSlotMapContains(AgateVM *vm, ptrdiff_t map_slot, ptrdiff_t key_slot);
 void agateSlotMapGet(AgateVM *vm, ptrdiff_t map_slot, ptrdiff_t key_slot, ptrdiff_t value_slot);
 void agateSlotMapSet(AgateVM *vm, ptrdiff_t map_slot, ptrdiff_t key_slot, ptrdiff_t value_slot);
 void agateSlotMapErase(AgateVM *vm, ptrdiff_t map_slot, ptrdiff_t key_slot, ptrdiff_t value_slot);
+// end::slot_map[]
 
+// tag::unit[]
 bool agateHasUnit(AgateVM *vm, const char *unit_name);
 bool agateHasVariable(AgateVM *vm, const char *unit_name, const char *variable_name);
 void agateGetVariable(AgateVM *vm, const char *unit_name, const char *variable_name, ptrdiff_t slot);
+// end::unit[]
 
+// tag::abort[]
 void agateAbort(AgateVM *vm, ptrdiff_t slot);
+// end::abort[]
 
+// tag::user_data[]
 void *agateGetUserData(AgateVM *vm);
 void agateSetUserData(AgateVM *vm, void *user_data);
+// end::user_data[]
 
 #ifdef __cplusplus
 }

@@ -1,0 +1,2 @@
+IO.println([1, 2, 3, 4].sorted()) # expect: true
+IO.println([4, 2, 3, 1].sorted {|lhs,rhs| lhs > rhs }) # expect: false

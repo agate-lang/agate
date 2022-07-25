@@ -102,6 +102,8 @@ class Sequence {
     return __TakeSequence.new(this, count)
   }
 
+  uniq() { __UniqSequence.new(this) }
+
   where(predicate) { __WhereSequence.new(this, predicate) }
 
   accumulate(val, op) {
@@ -122,6 +124,29 @@ class Sequence {
     }
     return result
   }
+
+  min { .reduce {|lhs,rhs| lhs < rhs ? lhs : rhs } }
+  max { .reduce {|lhs,rhs| lhs < rhs ? rhs : lhs } }
+  sum { .reduce {|lhs,rhs| lhs + rhs } }
+  product { .reduce {|lhs,rhs| lhs * rhs } }
+
+  sorted(comp) {
+    def iter = .iterate(nil)
+    if (iter == nil) {
+      return true
+    }
+    def prev = .iterator_value(iter)
+    while (iter = .iterate(iter)) {
+      def curr = .iterator_value(iter)
+      if (!comp(prev, curr)) {
+        return false
+      }
+      prev = curr
+    }
+    return true
+  }
+
+  sorted() { .sorted {|lhs,rhs| lhs < rhs } }
 
   to_a {
     def array = Array.new()
@@ -182,6 +207,32 @@ class __TakeSequence is Sequence {
   iterator_value(iterator) { @seq.iterator_value(iterator) }
 }
 
+class __UniqSequence is Sequence {
+  construct new(seq) {
+    @seq = seq
+  }
+
+  iterate(iterator) {
+    if (iterator == nil) {
+      iterator = @seq.iterate(iterator)
+      if (iterator != nil) {
+        @prev = @seq.iterator_value(iterator)
+      }
+    } else {
+      while (iterator = @seq.iterate(iterator)) {
+        def curr = @seq.iterator_value(iterator)
+        if (curr != @prev) {
+          @prev = curr
+          break
+        }
+      }
+    }
+    return iterator
+  }
+
+  iterator_value(iterator) { @seq.iterator_value(iterator) }
+}
+
 class __WhereSequence is Sequence {
   construct new(seq, fn) {
     @seq = seq
@@ -208,7 +259,7 @@ class Array is Sequence {
     return seq
   }
 
-  sort() { .sort() {|lhs,rhs| lhs < rhs } }
+  sort() { .sort {|lhs,rhs| lhs < rhs } }
 
   sort(comp) {
     if (!(comp is Fn) || comp.arity != 2) {

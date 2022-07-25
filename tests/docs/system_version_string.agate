@@ -1,0 +1,2 @@
+IO.println(System.version_string) # expect: 0.1.0
+IO.println(System.version_string.split('.')) # expect: [0, 1, 0]
