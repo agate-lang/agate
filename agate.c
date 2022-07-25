@@ -1183,6 +1183,10 @@ static uint64_t agateStringHash(const char *data, ptrdiff_t size) {
   return hash;
 }
 
+static inline bool agateIsPowerOfTwo(ptrdiff_t x) {
+  return x > 0 && (x & (x - 1)) == 0;
+}
+
 static void agateTableCreate(AgateTable *self) {
   assert(self);
   self->capacity = 0;
@@ -1215,7 +1219,9 @@ static bool agateEntriesSearch(AgateTableEntry *entries, ptrdiff_t capacity, Aga
     return false;
   }
 
-  ptrdiff_t start = hash % capacity;
+  assert(agateIsPowerOfTwo(capacity));
+
+  ptrdiff_t start = hash & (capacity - 1);
   ptrdiff_t index = start;
 
   AgateTableEntry *tombstone = NULL;
@@ -1241,7 +1247,7 @@ static bool agateEntriesSearch(AgateTableEntry *entries, ptrdiff_t capacity, Aga
       return true;
     }
 
-    index = (index + 1) % capacity;
+    index = (index + 1) & (capacity - 1);
   } while (index != start);
 
   assert(tombstone != NULL);
@@ -1864,10 +1870,11 @@ static ptrdiff_t agateSymbolTableFind(AgateTable *self, const char *name, ptrdif
 
   uint64_t hash = agateStringHash(name, size);
 
-  ptrdiff_t start = hash % self->capacity;
+  ptrdiff_t start = hash & (self->capacity - 1);
   ptrdiff_t index = start;
 
   do {
+    assert(0 <= index && index < self->capacity);
     AgateTableEntry *entry = &self->entries[index];
 
     if (agateIsUndefined(entry->key)) {
@@ -1881,7 +1888,7 @@ static ptrdiff_t agateSymbolTableFind(AgateTable *self, const char *name, ptrdif
       return agateAsInt(entry->value);
     }
 
-    index = (index + 1) % self->capacity;
+    index = (index + 1) & (self->capacity - 1);
   } while (index != start);
 
   return -1;
