@@ -1,0 +1,4 @@
+def anakin
+IO.println(anakin) # expect: nil
+def luke = 5.4
+IO.println(luke) # expect: 5.4

@@ -1,0 +1,6 @@
+def x = 42
+if (x % 2 == 0) {
+  IO.println("%(x) is even") # expect: 42 is even
+} else {
+  IO.println("%(x) is odd")
+}

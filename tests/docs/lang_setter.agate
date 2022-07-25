@@ -1,0 +1,9 @@
+class Entity {
+  construct new() { }
+  alive=(value) {
+    IO.println("setter: %(value)")
+  }
+}
+
+def a = Entity.new()
+a.alive = false # expect: setter: false

@@ -1,0 +1,9 @@
+class Matrix {
+  construct new() { }
+  [x,y]=(value) {
+    IO.println("Set element at %(x),%(y) to %(value)")
+  }
+}
+
+def m = Matrix.new()
+m[1, 2] = 3 # expect: Set element at 1,2 to 3

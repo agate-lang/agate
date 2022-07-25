@@ -1,0 +1,7 @@
+class Entity {
+  static opening() {
+    IO.println("All your base are belong to us")
+  }
+}
+
+Entity.opening() # expect: All your base are belong to us

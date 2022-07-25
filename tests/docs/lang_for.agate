@@ -1,0 +1,7 @@
+for (direction in [ "north", "east", "south", "west" ]) {
+  IO.println(direction)
+}
+# expect: north
+# expect: east
+# expect: south
+# expect: west

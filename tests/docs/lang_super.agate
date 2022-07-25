@@ -1,0 +1,20 @@
+class Entity {
+  construct new() {
+    IO.println("Entity.new")
+  }
+  print() {
+    IO.println("Entity.print")
+  }
+}
+
+class Hero is Entity {
+  construct new() {
+    super()
+  }
+  print() {
+    super.print()
+  }
+}
+
+def h = Hero.new() # expect: Entity.new
+h.print() # expect: Entity.print

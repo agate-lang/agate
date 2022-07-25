@@ -1,0 +1,14 @@
+def name = "variable"
+
+class Entity {
+  construct new() { }
+  name { "getter" }
+  who_am_i() {
+    IO.println(name)      # expect: variable
+    IO.println(this.name) # expect: getter
+    IO.println(.name)     # expect: getter
+  }
+}
+
+def e = Entity.new()
+e.who_am_i()

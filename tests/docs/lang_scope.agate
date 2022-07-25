@@ -1,0 +1,6 @@
+def a = 42
+once {
+  def a = 69
+  IO.println(a) # expect: 69
+}
+IO.println(a) # expect: 42

@@ -1,0 +1,5 @@
+once {
+  IO.println("Hello") # expect: Hello
+  break
+  IO.println("World")
+}

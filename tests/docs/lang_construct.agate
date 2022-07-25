@@ -1,0 +1,7 @@
+class Entity {
+  construct new() {
+    IO.println("Born to be alive")
+  }
+}
+
+def e = Entity.new() # expect: Born to be alive

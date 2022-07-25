@@ -1,0 +1,9 @@
+class Vec {
+  construct new() { }
+  +(other) {
+    IO.println("Add two vectors")
+  }
+}
+def a = Vec.new()
+def b = Vec.new()
+def c = a + b # expect: Add two vectors

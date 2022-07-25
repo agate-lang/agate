@@ -8285,7 +8285,10 @@ static void agateReturnStatement(AgateCompiler *compiler) {
 }
 
 static void agateOnceStatement(AgateCompiler *compiler) {
+  AgateLoopContext loop;
+  agateLoopStart(compiler, &loop);
   agateLoopBody(compiler);
+  agateLoopEnd(compiler);
 }
 
 static void agateExpressionStatement(AgateCompiler *compiler) {

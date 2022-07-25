@@ -1,0 +1,6 @@
+if (!false) {
+  IO.println("This is true") # expect: This is true
+}
+if (0) {
+  IO.println("This is also true") # expect: This is also true
+}

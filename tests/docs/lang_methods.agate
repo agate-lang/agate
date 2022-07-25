@@ -1,0 +1,8 @@
+class Entity {
+  update(dt) {
+    IO.println("Update the state of the entity")
+  }
+  render(target, state) {
+    IO.println("Render to target using state")
+  }
+}

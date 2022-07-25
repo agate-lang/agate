@@ -1,0 +1,8 @@
+class Entity {
+  render(target) {
+    IO.println("Render to target using default state")
+  }
+  render(target, state) {
+    IO.println("Render to target using state")
+  }
+}

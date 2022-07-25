@@ -4,6 +4,7 @@
 
 #include "arrays.h"
 #include "call.h"
+#include "call_foreign.h"
 #include "handle.h"
 #include "maps.h"
 #include "slots.h"
@@ -31,6 +32,10 @@ AgateForeignMethodFunc agateTestForeignMethodHandler(AgateVM *vm, const char *un
     return agateTestArraysForeignMethodHandler(class_name, kind, signature);
   }
 
+  if (strcmp(unit_name, "tests/api/call_foreign.agate") == 0) {
+    return agateTestCallForeignForeignMethodHandler(class_name, kind, signature);
+  }
+
   if (strcmp(unit_name, "tests/api/handle.agate") == 0) {
     return agateTestHandleForeignMethodHandler(class_name, kind, signature);
   }
@@ -49,6 +54,10 @@ AgateForeignMethodFunc agateTestForeignMethodHandler(AgateVM *vm, const char *un
 bool agateTestRunNative(AgateVM *vm, const char *unit_name) {
   if (strcmp(unit_name, "tests/api/call.agate") == 0) {
     return agateTestCallRunNative(vm);
+  }
+
+  if (strcmp(unit_name, "tests/api/call_foreign.agate") == 0) {
+    return agateTestCallForeignRunNative(vm);
   }
 
   return true;

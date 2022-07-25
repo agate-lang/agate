@@ -1,0 +1,9 @@
+class Entity {
+  construct new(name) {
+    @name = name
+  }
+  name { @name }
+}
+
+def hero = Entity.new("Mario")
+IO.println(hero.name) # expect: Mario

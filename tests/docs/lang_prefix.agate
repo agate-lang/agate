@@ -1,0 +1,8 @@
+class Vec {
+  construct new() { }
+  - {
+    IO.println("Negate a vector")
+  }
+}
+def a = Vec.new()
+def b = -a # expect: Negate a vector

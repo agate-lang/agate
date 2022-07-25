@@ -1,0 +1,6 @@
+class Entity {
+  # no superclass = superclass is Object
+}
+class Hero is Entity {
+  # superclass is Entity
+}

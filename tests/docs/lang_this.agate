@@ -1,0 +1,14 @@
+class Entity {
+  construct new() { }
+  name { "Mario" }
+  name_twice() {
+    (1..2).each {
+      IO.println(this.name)
+    }
+    # expect: Mario
+    # expect: Mario
+  }
+}
+
+def e = Entity.new()
+e.name_twice()

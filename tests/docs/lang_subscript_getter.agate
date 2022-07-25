@@ -1,0 +1,9 @@
+class Matrix {
+  construct new() { }
+  [x,y] {
+    IO.println("Get element at %(x),%(y)")
+  }
+}
+
+def m = Matrix.new()
+m[1, 2] # expect: Get element at 1,2

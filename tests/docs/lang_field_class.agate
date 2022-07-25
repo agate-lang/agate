@@ -1,0 +1,16 @@
+class Entity {
+  static count { @@count }
+  construct new() {
+    if (@@count == nil) {
+      @@count = 1
+    } else {
+      @@count = @@count + 1
+    }
+  }
+}
+
+IO.println(Entity.count) # expect: nil
+def e1 = Entity.new()
+IO.println(Entity.count) # expect: 1
+def e2 = Entity.new()
+IO.println(Entity.count) # expect: 2
