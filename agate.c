@@ -8734,7 +8734,7 @@ static void agateMarkCompilerRoots(AgateVM *vm, AgateCompiler *compiler) {
 
   do {
     agateMarkEntity(vm, (AgateEntity *) compiler->function);
-    agateMarkTable(vm, & compiler->constants);
+    agateMarkTable(vm, &compiler->constants);
 
     if (compiler->enclosing_class != NULL) {
       agateMarkTable(vm, &compiler->enclosing_class->fields);

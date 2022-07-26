@@ -107,4 +107,7 @@ if(UNIX AND AGATE_DEV)
     )
   endif()
 
+  add_executable(xembed
+    xembed.c
+  )
 endif()
