@@ -36,6 +36,24 @@ set_target_properties(agate0
     SOVERSION ${PROJECT_VERSION_MAJOR}
 )
 
+# support
+
+add_library(agate-support0
+  support.c
+)
+
+target_link_libraries(agate-support0
+  PUBLIC
+    agate0
+)
+
+target_include_directories(agate-support0
+  PUBLIC
+    ${CMAKE_CURRENT_SOURCE_DIR}
+)
+
+# cli
+
 add_executable(agate-cli
   agate-cli.c
 )
