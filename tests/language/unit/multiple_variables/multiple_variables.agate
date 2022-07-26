@@ -1,4 +1,4 @@
-import "unit" for unit_1, unit_2, unit_3, unit_4, unit_5
+import "multiple_variables/unit" for unit_1, unit_2, unit_3, unit_4, unit_5
 
 # Only execute unit body once:
 # expect: ran unit

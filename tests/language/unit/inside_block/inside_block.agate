@@ -1,7 +1,7 @@
 def unit = "outer"
 
 if (true) {
-  import "unit" for unit
+  import "inside_block/unit" for unit
   # expect: ran unit
 
   IO.println(unit) # expect: from unit

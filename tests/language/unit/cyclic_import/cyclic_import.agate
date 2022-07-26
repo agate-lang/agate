@@ -1,4 +1,4 @@
-import "a"
+import "cyclic_import/a"
 
 # Shared unit should only run once:
 # expect: start a

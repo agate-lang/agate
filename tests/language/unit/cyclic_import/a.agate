@@ -3,7 +3,7 @@ IO.println("start a")
 
 def A = "a value"
 IO.println("a defined %(A)")
-import "b" for B
+import "cyclic_import/b" for B
 IO.println("a imported %(B)")
 
 IO.println("end a")

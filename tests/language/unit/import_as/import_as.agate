@@ -1,7 +1,7 @@
 def unit = "from here"
 def value_c = "value C"
-import "unit" for value_a, unit as another, value_b # expect: ran unit
-import "unit" for value_c as other_c
+import "import_as/unit" for value_a, unit as another, value_b # expect: ran unit
+import "import_as/unit" for value_c as other_c
 
 IO.println(unit)  # expect: from here
 IO.println(another) # expect: from unit

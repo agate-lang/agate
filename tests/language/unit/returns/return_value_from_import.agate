@@ -1,4 +1,4 @@
-import "unit_return_value"
+import "returns/unit_return_value"
 
 IO.println("baz") 
 # expect: foo

@@ -1,2 +1,2 @@
-import "unit"
+import "no_variable/unit"
 # expect: ran unit

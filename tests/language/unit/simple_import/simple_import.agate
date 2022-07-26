@@ -1,4 +1,4 @@
-import "unit" for unit
+import "simple_import/unit" for unit
 # expect: ran unit
 
 IO.println(unit) # expect: from unit

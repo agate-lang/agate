@@ -122,6 +122,7 @@ if(UNIX AND AGATE_DEV)
     target_link_libraries(agate-tests
       PRIVATE
         agate0
+        agate-support0
     )
   endif()
 endif()

@@ -1,4 +1,4 @@
-import "unit"
+import "implicitly_imports_core/unit"
 # expect: Array
 # expect: Bool
 # expect: Char

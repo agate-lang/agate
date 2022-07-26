@@ -15,6 +15,7 @@
 #include "tests.inc"
 
 #include "agate.h"
+#include "support.h"
 
 #include "tests/api/api_tests.h"
 
@@ -309,68 +310,12 @@ static void agateTestError(AgateVM *vm, AgateErrorKind kind, const char *unit_na
   }
 }
 
-static const char *agateTestUnitLoadFile(const char *path) {
-  FILE *file = fopen(path, "rb");
-
-  if (file == NULL) {
-    return NULL;
-  }
-
-  AgateTestBuffer content;
-  agateTestBufferCreate(&content);
-
-  char buffer[BUFFER_SIZE];
-
-  while (!feof(file)) {
-    size_t count = fread(buffer, sizeof(char), BUFFER_SIZE, file);
-    agateTestBufferAppend(&content, buffer, count);
-  }
-
-  fclose(file);
-
-  return content.data;
-}
-
-static const char *agateTestUnitLoad(const char *name, void *user_data) {
-  AgateTest *test = user_data;
-
-  AgateTestBuffer buffer;
-  agateTestBufferCreate(&buffer);
-
-  const char *slash = strrchr(test->path, '/');
-
-  if (slash != NULL) {
-    agateTestBufferAppend(&buffer, test->path, slash - test->path + 1);
-  }
-
-  agateTestBufferAppend(&buffer, name, strlen(name));
-  agateTestBufferAppend(&buffer, ".agate", 6);
-
-  const char *source = agateTestUnitLoadFile(buffer.data);
-
-  agateTestBufferDestroy(&buffer);
-
-  return source;
-}
-
-static void agateTestUnitRelease(const char *source, void *user_data) {
-  free((void *) source);
-}
-
-static AgateUnitHandler agateTestUnitHandler(AgateVM *vm, const char *name) {
-  AgateUnitHandler unit_handler;
-  unit_handler.load = agateTestUnitLoad;
-  unit_handler.release = agateTestUnitRelease;
-  unit_handler.user_data = agateGetUserData(vm);
-  return unit_handler;
-}
-
 static AgateStatus agateTestRunInterpreter(AgateTest *self) {
   // run the file with the interpreter
   AgateConfig config;
   agateConfigInitialize(&config);
 
-  config.unit_handler = agateTestUnitHandler;
+  config.unit_handler = agateExUnitHandler;
 
   config.assert_handling = AGATE_ASSERT_ABORT;
 
@@ -386,14 +331,15 @@ static AgateStatus agateTestRunInterpreter(AgateTest *self) {
     config.foreign_method_handler = agateTestForeignMethodHandler;
   }
 
-  AgateVM *vm = agateNewVM(&config);
+  AgateVM *vm = agateExNewVM(&config);
+  agateExUnitAddIncludePath(vm, "tests/language/unit");
   AgateStatus status = agateInterpret(vm, self->path, self->content.data);
 
   if (use_foreign) {
     agateTestRunNative(vm, self->path);
   }
 
-  agateDeleteVM(vm);
+  agateExDeleteVM(vm);
 
   return status;
 }
