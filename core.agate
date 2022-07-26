@@ -373,9 +373,7 @@ class Map is Sequence {
   __put(key, value) { .__put(key, value, key.hash) }
 }
 
-class Range is Sequence {
-  to_s { "%(.from)%(.inclusive ? ".." : "...")%(.to)" }
-}
+class Range is Sequence { }
 
 class IO {
   static print(obj) {

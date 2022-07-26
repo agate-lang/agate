@@ -4678,6 +4678,31 @@ static bool agateCoreRangeHash(AgateVM *vm, int argc, AgateValue *args) {
   return true;
 }
 
+static bool agateCoreRangeToS(AgateVM *vm, int argc, AgateValue *args) {
+  AgateRange *range = agateAsRange(args[0]);
+
+  AgateCharArray chars;
+  agateCharArrayCreate(&chars);
+
+  #define AGATE_RANGE_BUFFER_SIZE 32
+  char buffer[AGATE_RANGE_BUFFER_SIZE];
+
+  ptrdiff_t from_size = snprintf(buffer, AGATE_RANGE_BUFFER_SIZE, "%" PRIi64, range->from);
+  agateCharArrayAppendMultiple(&chars, buffer, from_size, vm);
+
+  if (range->kind == AGATE_RANGE_INCLUSIVE) {
+    agateCharArrayAppendMultiple(&chars, "..", 2, vm);
+  } else {
+    agateCharArrayAppendMultiple(&chars, "...", 3, vm);
+  }
+
+  ptrdiff_t to_size = snprintf(buffer, AGATE_RANGE_BUFFER_SIZE, "%" PRIi64, range->to);
+  agateCharArrayAppendMultiple(&chars, buffer, to_size, vm);
+
+  args[0] = agateEntityValue(agateStringNew(vm, chars.data, chars.size));
+  agateCharArrayDestroy(&chars, vm);
+  return true;
+}
 
 // Math
 
@@ -5160,6 +5185,7 @@ static void agateLoadCoreUnit(AgateVM *vm) {
   agateClassBindPrimitive(vm, vm->range_class, "max", agateCoreRangeMax);
   agateClassBindPrimitive(vm, vm->range_class, "min", agateCoreRangeMin);
   agateClassBindPrimitive(vm, vm->range_class, "to", agateCoreRangeTo);
+  agateClassBindPrimitive(vm, vm->range_class, "to_s", agateCoreRangeToS);
 
   vm->string_class = agateAsClass(agateUnitFindVariable(vm, core, "String"));
   agateClassBindPrimitive(vm, vm->string_class, "__trim(_,_,_)", agateCoreStringTrim);
