@@ -30,7 +30,7 @@
  *     - unit
  *     - function, native, upvalue and closure
  *     - class, instance and foreign
- *     - array, map and range
+ *     - array, map, range and random
  *   - opcodes
  *   - vm
  *   - misc
@@ -212,6 +212,7 @@ typedef enum {
   AGATE_ENTITY_FUNCTION,
   AGATE_ENTITY_INSTANCE,
   AGATE_ENTITY_MAP,
+  AGATE_ENTITY_RANDOM,
   AGATE_ENTITY_RANGE,
   AGATE_ENTITY_STRING,
   AGATE_ENTITY_UNIT,
@@ -337,7 +338,7 @@ typedef struct {
 } AgateForeign;
 
 /*
- * types - entities - array, map and range
+ * types - entities - array, map, range and random
  */
 
 typedef struct {
@@ -361,6 +362,11 @@ typedef struct {
   int64_t to;
   AgateRangeKind kind;
 } AgateRange;
+
+typedef struct {
+  AgateEntity base;
+  uint64_t state[4];
+} AgateRandom;
 
 /*
  * types - opcodes
@@ -454,6 +460,7 @@ struct AgateVM {
   AgateClass *map_class;
   AgateClass *nil_class;
   AgateClass *object_class;
+  AgateClass *random_class;
   AgateClass *range_class;
   AgateClass *string_class;
 
@@ -807,6 +814,7 @@ static inline bool agateIsForeign(AgateValue value) { return agateIsEntityKind(v
 static inline bool agateIsFunction(AgateValue value) { return agateIsEntityKind(value, AGATE_ENTITY_FUNCTION); }
 static inline bool agateIsInstance(AgateValue value) { return agateIsEntityKind(value, AGATE_ENTITY_INSTANCE); }
 static inline bool agateIsMap(AgateValue value) { return agateIsEntityKind(value, AGATE_ENTITY_MAP); }
+static inline bool agateIsRandom(AgateValue value) { return agateIsEntityKind(value, AGATE_ENTITY_RANDOM); }
 static inline bool agateIsRange(AgateValue value) { return agateIsEntityKind(value, AGATE_ENTITY_RANGE); }
 static inline bool agateIsString(AgateValue value) { return agateIsEntityKind(value, AGATE_ENTITY_STRING); }
 static inline bool agateIsUnit(AgateValue value) { return agateIsEntityKind(value, AGATE_ENTITY_UNIT); }
@@ -819,6 +827,7 @@ static inline AgateForeign *agateAsForeign(AgateValue value) { return (AgateFore
 static inline AgateFunction *agateAsFunction(AgateValue value) { return (AgateFunction *) agateAsEntity(value); }
 static inline AgateInstance *agateAsInstance(AgateValue value) { return (AgateInstance *) agateAsEntity(value); }
 static inline AgateMap *agateAsMap(AgateValue value) { return (AgateMap *) agateAsEntity(value); }
+static inline AgateRandom *agateAsRandom(AgateValue value) { return (AgateRandom *) agateAsEntity(value); }
 static inline AgateRange *agateAsRange(AgateValue value) { return (AgateRange *) agateAsEntity(value); }
 static inline AgateString *agateAsString(AgateValue value) { return (AgateString *) agateAsEntity(value); }
 static inline AgateUnit *agateAsUnit(AgateValue value) { return (AgateUnit *) agateAsEntity(value); }
@@ -959,11 +968,15 @@ static inline bool agateHasNativeHash(AgateValue value) {
 }
 
 // based on https://xorshift.di.unimi.it/splitmix64.c
+static inline uint64_t agateSplitMix64P(uint64_t *state) {
+  uint64_t z = (*state += UINT64_C(0x9e3779b97f4a7c15));
+  z = (z ^ (z >> 30)) * UINT64_C(0xbf58476d1ce4e5b9);
+  z = (z ^ (z >> 27)) * UINT64_C(0x94d049bb133111eb);
+  return z ^ (z >> 31);
+}
+
 static inline uint64_t agateSplitMix64(uint64_t hash) {
-  hash += UINT64_C(0x9e3779b97f4a7c15);
-  hash = (hash ^ (hash >> 30)) * UINT64_C(0xbf58476d1ce4e5b9);
-  hash = (hash ^ (hash >> 27)) * UINT64_C(0x94d049bb133111eb);
-  return hash ^ (hash >> 31);
+  return agateSplitMix64P(&hash);
 }
 
 static inline uint64_t agateRangeHash(const AgateRange *range) {
@@ -977,6 +990,7 @@ static uint64_t agateEntityHash(const AgateEntity *entity) {
     case AGATE_ENTITY_FOREIGN:
     case AGATE_ENTITY_INSTANCE:
     case AGATE_ENTITY_MAP:
+    case AGATE_ENTITY_RANDOM:
     case AGATE_ENTITY_UNIT:
     case AGATE_ENTITY_UPVALUE:
       assert(false);
@@ -1748,14 +1762,51 @@ static AgateMap *agateMapNew(AgateVM *vm) {
   return map;
 }
 
-// Unit
+// Random
 
-static AgateUnit *agateUnitNew(AgateVM *vm, AgateString *name) {
-  AgateUnit *unit = agateAllocateEntity(vm, AgateUnit, AGATE_ENTITY_UNIT, NULL);
-  agateValueArrayCreate(&unit->object_values);
-  agateTableCreate(&unit->object_names);
-  unit->name = name;
-  return unit;
+static AgateRandom *agateRandomNew(AgateVM *vm, uint64_t seed) {
+  AgateRandom *random = agateAllocateEntity(vm, AgateRandom, AGATE_ENTITY_RANDOM, vm->random_class);
+
+  for (int i = 0; i < 4; ++i) {
+    random->state[i] = agateSplitMix64P(&seed);
+  }
+
+  return random;
+}
+
+// https://prng.di.unimi.it/xoshiro256plusplus.c
+
+static inline uint64_t agateRotl(const uint64_t x, int k) {
+  return (x << k) | (x >> (64 - k));
+}
+
+static uint64_t agateRandomNext(AgateRandom *random) {
+  uint64_t *state = random->state;
+  const uint64_t result = agateRotl(state[0] + state[3], 23) + state[0];
+  const uint64_t t = state[1] << 17;
+
+  state[2] ^= state[0];
+  state[3] ^= state[1];
+  state[1] ^= state[2];
+  state[0] ^= state[3];
+
+  state[2] ^= t;
+
+  state[3] = agateRotl(state[3], 45);
+
+  return result;
+}
+
+static uint64_t agateRandomRange(AgateRandom *random, uint64_t end) {
+  uint64_t x;
+  uint64_t r;
+
+  do {
+    x = agateRandomNext(random);
+    r = x % end;
+  } while (x - r > (-end));
+
+  return r;
 }
 
 // Range
@@ -1766,6 +1817,16 @@ static AgateRange *agateRangeNew(AgateVM *vm, int64_t from, int64_t to, AgateRan
   range->to = to;
   range->kind = kind;
   return range;
+}
+
+// Unit
+
+static AgateUnit *agateUnitNew(AgateVM *vm, AgateString *name) {
+  AgateUnit *unit = agateAllocateEntity(vm, AgateUnit, AGATE_ENTITY_UNIT, NULL);
+  agateValueArrayCreate(&unit->object_values);
+  agateTableCreate(&unit->object_names);
+  unit->name = name;
+  return unit;
 }
 
 // Upvalue
@@ -1837,6 +1898,11 @@ static void agateEntityDelete(AgateEntity *entity, AgateVM *vm) {
       agateValueArrayDestroy(&unit->object_values, vm);
       agateTableDestroy(&unit->object_names, vm);
       agateFree(vm, AgateUnit, unit);
+      break;
+    }
+
+    case AGATE_ENTITY_RANDOM: {
+      agateFree(vm, AgateRandom, entity);
       break;
     }
 
@@ -2175,6 +2241,10 @@ static void agateBlackenObject(AgateVM *vm, AgateEntity *entity) {
       agateMarkArray(vm, &unit->object_values);
       agateMarkTable(vm, &unit->object_names);
       agateMarkEntity(vm, (AgateEntity *) unit->name);
+      break;
+    }
+
+    case AGATE_ENTITY_RANDOM: {
       break;
     }
 
@@ -4964,6 +5034,78 @@ static bool agateCoreSystemVersionString(AgateVM *vm, int argc, AgateValue *args
   return true;
 }
 
+// random
+
+static bool agateCoreRandomNew(AgateVM *vm, int argc, AgateValue *args) {
+  if (!agateValidateInt(vm, args[1], "Seed")) {
+    return false;
+  }
+
+  int64_t seed = agateAsInt(args[1]);
+  args[0] = agateEntityValue(agateRandomNew(vm, seed));
+  return true;
+}
+
+static bool agateCoreRandomFloat(AgateVM *vm, int argc, AgateValue *args) {
+  AgateRandom *random = agateAsRandom(args[0]);
+  uint64_t next = agateRandomNext(random);
+  args[0] = agateFloatValue((next >> 11) * 0x1.0p-53);
+  return true;
+}
+
+static bool agateCoreRandomInt0(AgateVM *vm, int argc, AgateValue *args) {
+  AgateRandom *random = agateAsRandom(args[0]);
+  uint64_t next = agateRandomNext(random);
+  args[0] = agateIntValue(next);
+  return true;
+}
+
+static bool agateCoreRandomInt1(AgateVM *vm, int argc, AgateValue *args) {
+  AgateRandom *random = agateAsRandom(args[0]);
+
+  if (!agateValidateInt(vm, args[1], "End")) {
+    return false;
+  }
+
+  int64_t end = agateAsInt(args[1]);
+
+  if (end <= 0) {
+    vm->error = AGATE_CONST_STRING(vm, "The range [0, end) is invalid.");
+    return false;
+  }
+
+  uint64_t next = agateRandomRange(random, end);
+  args[0] = agateIntValue(next);
+  return true;
+}
+
+static bool agateCoreRandomInt2(AgateVM *vm, int argc, AgateValue *args) {
+  AgateRandom *random = agateAsRandom(args[0]);
+
+  if (!agateValidateInt(vm, args[1], "Start")) {
+    return false;
+  }
+
+  int64_t start = agateAsInt(args[1]);
+
+  if (!agateValidateInt(vm, args[2], "End")) {
+    return false;
+  }
+
+  int64_t end = agateAsInt(args[2]);
+
+  if (end <= start) {
+    vm->error = AGATE_CONST_STRING(vm, "The range [start, end) is invalid.");
+    return false;
+  }
+
+  uint64_t range = (uint64_t) end - (uint64_t) start;
+
+  uint64_t next = agateRandomRange(random, range) + start;
+  args[0] = agateIntValue(next);
+  return true;
+}
+
 // utils
 
 static AgateClass *agateClassNewBasic(AgateVM *vm, AgateUnit *unit, const char *name) {
@@ -5175,6 +5317,13 @@ static void agateLoadCoreUnit(AgateVM *vm) {
   agateClassBindPrimitive(vm, vm->nil_class, "!", agateCoreNilNot);
   agateClassBindPrimitive(vm, vm->nil_class, "hash", agateCoreNilHash);
   agateClassBindPrimitive(vm, vm->nil_class, "to_s", agateCoreNilToS);
+
+  vm->random_class = agateAsClass(agateUnitFindVariable(vm, core, "Random"));
+  agateClassBindPrimitive(vm, vm->random_class->base.type, "new(_)", agateCoreRandomNew);
+  agateClassBindPrimitive(vm, vm->random_class, "float()", agateCoreRandomFloat);
+  agateClassBindPrimitive(vm, vm->random_class, "int()", agateCoreRandomInt0);
+  agateClassBindPrimitive(vm, vm->random_class, "int(_)", agateCoreRandomInt1);
+  agateClassBindPrimitive(vm, vm->random_class, "int(_,_)", agateCoreRandomInt2);
 
   vm->range_class = agateAsClass(agateUnitFindVariable(vm, core, "Range"));
   agateClassBindPrimitive(vm, vm->range_class, "from", agateCoreRangeFrom);

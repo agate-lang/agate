@@ -1,0 +1,2 @@
+def r = Random.new(42)
+IO.println(r.float()) # expect: 0.81430514512291

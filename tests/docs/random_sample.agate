@@ -1,0 +1,2 @@
+def r = Random.new(42)
+IO.println(r.sample([ 1, 'a', 3.14, "good" ])) # expect: good

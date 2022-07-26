@@ -1,0 +1,2 @@
+def r = Random.new(42)
+IO.println(r.int(69)) # expect: 55

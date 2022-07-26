@@ -1,0 +1,2 @@
+def r = Random.new(42)
+IO.println(r.int()) # expect: -3425465463722317665
