@@ -5010,6 +5010,11 @@ static bool agateCoreSystemEnv(AgateVM *vm, int argc, AgateValue *args) {
   return true;
 }
 
+static bool agateCoreSystemTime(AgateVM *vm, int argc, AgateValue *args) {
+  args[0] = agateIntValue(time(NULL));
+  return true;
+}
+
 static bool agateCoreSystemGc(AgateVM *vm, int argc, AgateValue *args) {
   agateCollectGarbage(vm);
   args[0] = agateNilValue();
@@ -5359,6 +5364,7 @@ static void agateLoadCoreUnit(AgateVM *vm) {
   agateClassBindPrimitive(vm, system_class->base.type, "clock", agateCoreSystemClock);
   agateClassBindPrimitive(vm, system_class->base.type, "env(_)", agateCoreSystemEnv);
   agateClassBindPrimitive(vm, system_class->base.type, "gc()", agateCoreSystemGc);
+  agateClassBindPrimitive(vm, system_class->base.type, "time", agateCoreSystemTime);
   agateClassBindPrimitive(vm, system_class->base.type, "version", agateCoreSystemVersion);
   agateClassBindPrimitive(vm, system_class->base.type, "version_string", agateCoreSystemVersionString);
 

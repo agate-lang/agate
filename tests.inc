@@ -546,6 +546,7 @@ static const char *AgateTestFiles[] = {
   "tests/docs/system_clock.agate",
   "tests/docs/system_env.agate",
   "tests/docs/system_gc.agate",
+  "tests/docs/system_time.agate",
   "tests/docs/system_version.agate",
   "tests/docs/system_version_string.agate",
   "tests/language/array/duplicate_comma.agate",

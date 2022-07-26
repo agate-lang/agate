@@ -1,0 +1,2 @@
+def now = System.time
+IO.println(now is Int) # expect: true
