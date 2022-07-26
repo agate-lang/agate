@@ -106,8 +106,4 @@ if(UNIX AND AGATE_DEV)
         agate0
     )
   endif()
-
-  add_executable(xembed
-    xembed.c
-  )
 endif()
