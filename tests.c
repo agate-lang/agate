@@ -293,8 +293,8 @@ static bool agateTestCheckSyntax(AgateTest *self, AgateTestMode mode) {
   return true;
 }
 
-static void agateTestPrint(AgateVM *vm, const char* text) {
-  printf("%s", text);
+static void agateTestPrint(AgateVM *vm, const char* text, ptrdiff_t size) {
+  printf("%.*s", (int) size, text);
 }
 
 static void agateTestError(AgateVM *vm, AgateErrorKind kind, const char *unit_name, int line, const char *message) {

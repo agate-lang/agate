@@ -4975,7 +4975,29 @@ static bool agateCoreIoPrint(AgateVM *vm, int argc, AgateValue *args) {
   }
 
   if (vm->config.print != NULL) {
-    vm->config.print(vm, agateAsCString(args[1]));
+    AgateString *string = agateAsString(args[1]);
+    vm->config.print(vm, string->data, string->size);
+  }
+
+  args[0] = args[1];
+  return true;
+}
+
+static bool agateCoreIoWrite(AgateVM *vm, int argc, AgateValue *args) {
+  if (!agateValidateInt(vm, args[1], "Value")) {
+    return false;
+  }
+
+  int64_t value = agateAsInt(args[1]);
+
+  if (value < 0 || value >= 256) {
+    vm->error = AGATE_CONST_STRING(vm, "Value is not a byte.");
+    return false;
+  }
+
+  if (vm->config.print != NULL) {
+    char c = value;
+    vm->config.print(vm, &c, 1);
   }
 
   args[0] = args[1];
@@ -5264,6 +5286,7 @@ static void agateLoadCoreUnit(AgateVM *vm) {
 
   AgateClass *io_class = agateAsClass(agateUnitFindVariable(vm, core, "IO"));
   agateClassBindPrimitive(vm, io_class->base.type, "__print(_)", agateCoreIoPrint);
+  agateClassBindPrimitive(vm, io_class->base.type, "write(_)", agateCoreIoWrite);
 
   vm->map_class = agateAsClass(agateUnitFindVariable(vm, core, "Map"));
   agateClassBindPrimitive(vm, vm->map_class->base.type, "new()", agateCoreMapNew);

@@ -42,7 +42,7 @@ typedef bool (*AgateParseFloatFunc)(const char *text, ptrdiff_t size, double *re
 // end::number_parsing[]
 
 // tag::print[]
-typedef void (*AgatePrintFunc)(AgateVM *vm, const char* text);
+typedef void (*AgatePrintFunc)(AgateVM *vm, const char* text, ptrdiff_t size);
 // end::print[]
 
 // tag::error[]

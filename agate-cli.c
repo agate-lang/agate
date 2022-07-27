@@ -63,8 +63,23 @@ static void run(AgateVM *vm, const char *path) {
   }
 }
 
-static void print(AgateVM *vm, const char* text) {
-  printf("%s", text);
+static void print(AgateVM *vm, const char* text, ptrdiff_t size) {
+  bool has_zero = false;
+
+  for (ptrdiff_t i = 0; i < size; ++i) {
+    if (text[i] == '\0') {
+      has_zero = true;
+      break;
+    }
+  }
+
+  if (!has_zero) {
+    printf("%.*s", (int) size, text);
+  } else {
+    for (ptrdiff_t i = 0; i < size; ++i) {
+      putchar(text[i]);
+    }
+  }
 }
 
 static void error(AgateVM *vm, AgateErrorKind kind, const char *module_name, int line, const char *message) {
