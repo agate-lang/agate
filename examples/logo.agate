@@ -1,0 +1,296 @@
+def SIZE = 512
+def SIZE2 = SIZE / 2
+
+def lerp(a, b, ratio) { a * (1.0 - ratio) + b * ratio }
+
+class Color {
+  construct new(rgba32) {
+    @r = ((rgba32 >> 24) & 0xFF).to_f / 255.0
+    @g = ((rgba32 >> 16) & 0xFF).to_f / 255.0
+    @b = ((rgba32 >>  8) & 0xFF).to_f / 255.0
+    @a = ((rgba32 >>  0) & 0xFF).to_f / 255.0
+  }
+  construct new(r, g, b, a) {
+    @r = r
+    @g = g
+    @b = b
+    @a = a
+  }
+  r { @r }
+  g { @g }
+  b { @b }
+  a { @a }
+  +(other) { Color.new(@r + other.r, @g + other.g, @b + other.b, @a + other.a) }
+  *(factor) { Color.new(@r * factor, @g * factor, @b * factor, @a * factor) }
+  static TRANSPARENT { Color.new(1.0, 1.0, 1.0, 0.0) }
+}
+
+
+class ColorRampItem {
+  construct new(value, color) {
+    @value = value
+    @color = color
+  }
+  value { @value }
+  color { @color }
+}
+
+class ColorRamp {
+  construct new() {
+    @data = []
+    @min = nil
+    @max = nil
+  }
+
+  append(value, color) {
+    if (@data.empty) {
+      @min = value
+      @max = value
+    } else {
+      if (value < @min) { @min = value }
+      if (value > @max) { @max = value }
+    }
+    @data.append(ColorRampItem.new(value, color))
+    @data.sort {|lhs,rhs| lhs.value < rhs.value }
+  }
+
+  color(value) {
+    if (@data.empty) {
+      return Color.TRANSPARENT
+    }
+    if (value <= @min) {
+      return @data[0].color
+    }
+    if (value >= @max) {
+      return @data[-1].color
+    }
+    for (i in 0...(@data.size - 1)) {
+      if (@data[i].value <= value && value < @data[i+1].value) {
+        def ratio = (value - @data[i].value) / (@data[i+1].value - @data[i].value)
+        return lerp(@data[i].color, @data[i+1].color, ratio)
+      }
+    }
+    return Color.TRANSPARENT
+  }
+}
+
+class Array2D {
+  construct new(size, value) {
+    @size = size
+    @data = []
+    for (i in 0...(size * size)) {
+      @data.append(value)
+    }
+  }
+  size { @size }
+  [x,y] { @data[.__linearize(x, y)] }
+  [x,y]=(val) { @data[.__linearize(x, y)] = val }
+  __linearize(x, y) {
+    assert(0 <= x && x < @size, "x out of bounds.")
+    assert(0 <= y && y < @size, "x out of bounds.")
+    return x + y * @size
+  }
+}
+
+class Heightmap is Array2D {
+  construct new(size) {
+    super(size, 0.0)
+  }
+
+  normalize(lower, upper) {
+    assert(lower < upper, "Bounds are invalid")
+    def min = this[0,0]
+    def max = this[0,0]
+    def size = .size
+
+    for (y in 0...size) {
+      for (x in 0...size) {
+        def val = this[x, y]
+        if (val < min) { min = val }
+        if (val > max) { max = val }
+      }
+    }
+
+    def factor = 0.0
+
+    if (!Float.almost_equals(min, max)) {
+      factor = (upper - lower) / (max - min)
+    }
+
+    for (y in 0...size) {
+      for (x in 0...size) {
+        def val = this[x, y]
+        this[x, y] = lower + (val - min) * factor
+      }
+    }
+  }
+
+}
+
+class Image is Array2D {
+  construct new(size) {
+    super(size, Color.TRANSPARENT)
+  }
+
+  dump() {
+    def size = .size
+    IO.println("P7\nWIDTH %(size)\nHEIGHT %(size)\nDEPTH 4\nMAXVAL 255\nTUPLTYPE RGB_ALPHA\nENDHDR") # header
+    for (y in 0...size) {
+      for(x in 0...size) {
+        def color = this[x, y]
+        for (channel in [ color.r, color.g, color.b, color.a ]) {
+          IO.write((channel * 255.0).to_i)
+        }
+      }
+    }
+  }
+
+}
+
+
+class Vec3 {
+  construct new(x, y, z) {
+    @x = x
+    @y = y
+    @z = z
+  }
+  x { @x }
+  y { @y }
+  z { @z }
+}
+
+def dot(a, b) { a.x * b.x + a.y * b.y + a.z * b.z }
+
+class GradientNoise {
+  construct new(random, step) {
+    @step = step
+
+    @perm = []
+    for (i in 0..255) {
+      @perm.append(i)
+    }
+    random.shuffle(@perm)
+
+    @grad = []
+    for (i in 0..255) {
+      def phi = random.float(Math.PI * 2.0)
+      def theta = random.float(Math.PI)
+      @grad.append(Vec3.new(Math.cos(phi) * Math.sin(theta), Math.sin(phi) * Math.sin(theta), Math.cos(theta)))
+    }
+  }
+
+  [x,y,z] {
+    def qx = (x % 256.0).to_i
+    def rx = x % 1.0
+    def qy = (y % 256.0).to_i
+    def ry = y % 1.0
+    def qz = (z % 256.0).to_i
+    def rz = z % 1.0
+    def p000 = dot(.at(qx    , qy    , qz    ), Vec3.new(rx      , ry      , rz      ))
+    def p100 = dot(.at(qx + 1, qy    , qz    ), Vec3.new(rx - 1.0, ry      , rz      ))
+    def p010 = dot(.at(qx    , qy + 1, qz    ), Vec3.new(rx      , ry - 1.0, rz      ))
+    def p110 = dot(.at(qx + 1, qy + 1, qz    ), Vec3.new(rx - 1.0, ry - 1.0, rz      ))
+    def p001 = dot(.at(qx    , qy    , qz + 1), Vec3.new(rx      , ry      , rz - 1.0))
+    def p101 = dot(.at(qx + 1, qy    , qz + 1), Vec3.new(rx - 1.0, ry      , rz - 1.0))
+    def p011 = dot(.at(qx    , qy + 1, qz + 1), Vec3.new(rx      , ry - 1.0, rz - 1.0))
+    def p111 = dot(.at(qx + 1, qy + 1, qz + 1), Vec3.new(rx - 1.0, ry - 1.0, rz - 1.0))
+    def u = @step(rx)
+    def p00 = lerp(p000, p100, u)
+    def p10 = lerp(p010, p110, u)
+    def p01 = lerp(p001, p101, u)
+    def p11 = lerp(p011, p111, u)
+    def v = @step(ry)
+    def p0 = lerp(p00, p10, v)
+    def p1 = lerp(p01, p11, v)
+    def w = @step(rz)
+    return lerp(p0, p1, w)
+  }
+
+  at(i,j,k) {
+    def index = i % 256
+    index = (@perm[index] + j) % 256
+    index = (@perm[index] + k) % 256
+    return @grad[@perm[index]]
+  }
+
+}
+
+class FractalNoise {
+  construct new(noise, scale, octaves, lacunarity, persistence, dimension) {
+    @noise = noise
+    @scale = scale
+    @octaves = octaves
+    @lacunarity = lacunarity
+    @persistence = persistence
+    @dimension = dimension
+  }
+
+  [x,y,z] {
+    def value = 0.0
+    def frequency = 1.0
+    def amplitude = 1.0
+    x = x * @scale
+    y = y * @scale
+    z = z * @scale
+    for (i in 1..@octaves) {
+      value = value + @noise[x * frequency, y * frequency, z * frequency] * Math.pow(amplitude, @dimension)
+      frequency = frequency * @lacunarity
+      amplitude = amplitude * @persistence
+    }
+    return value
+  }
+
+}
+
+class PerlinNoise {
+  construct new(random, scale, octaves) {
+    def gradient = GradientNoise.new(random, Fn.new {|t| ((6.0 * t - 15.0) * t + 10.0) * t * t * t })
+    @noise = FractalNoise.new(gradient, scale, octaves, 2.0, 0.5, 1.0)
+  }
+  [x, y, z] { @noise[x, y, z] }
+}
+
+def to_f(value) { ((value.to_f + 0.5) - SIZE2.to_f) / SIZE2.to_f }
+def to_01(value) { (value + 1.0) / 2.0 }
+
+def random = Random.new(42)
+def perlin = PerlinNoise.new(random, 5.0, 8)
+def heightmap = Heightmap.new(SIZE)
+
+for (y in 0...SIZE) {
+  def yf = to_f(y)
+  for (x in 0...SIZE) {
+    def xf = to_f(x)
+    if (xf * xf + yf * yf < 1.0) {
+      def zf = Math.sqrt(1.0 - xf * xf - yf * yf)
+      heightmap[x, y] = perlin[to_01(xf), to_01(yf), to_01(zf)]
+    } else {
+      heightmap[x, y] = 0.0
+    }
+  }
+}
+
+heightmap.normalize(0.0, 1.0)
+
+def ramp = ColorRamp.new()
+ramp.append(0.00, Color.new(0xf9f9ebFF))
+ramp.append(0.25, Color.new(0xd1eed5FF))
+ramp.append(0.50, Color.new(0x3c7a58FF))
+ramp.append(0.75, Color.new(0x0e3815FF))
+ramp.append(1.00, Color.new(0x031103FF))
+
+def image = Image.new(SIZE)
+
+for (y in 0...SIZE) {
+  def yf = to_f(y)
+  for (x in 0...SIZE) {
+    def xf = to_f(x)
+    if (xf * xf + yf * yf < 1.0) {
+      image[x, y] = ramp.color(heightmap[x, y])
+    } else {
+      image[x, y] = Color.TRANSPARENT
+    }
+  }
+}
+
+image.dump()
