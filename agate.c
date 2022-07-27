@@ -3761,6 +3761,14 @@ AGATE_FLOAT_INFIX(Divide,   /)
 
 #undef AGATE_FLOAT_INFIX
 
+static bool agateCoreFloatModulo(AgateVM *vm, int argc, AgateValue *args) {
+  if (!agateValidateFloat(vm, args[1], "Right operand")) {
+    return false;
+  }
+  args[0] = agateFloatValue(fmod(agateAsFloat(args[0]), agateAsFloat(args[1])));
+  return true;
+}
+
 #define AGATE_FLOAT_CMP(name, op)                                             \
 static bool agateCoreFloat ## name(AgateVM *vm, int argc, AgateValue *args) { \
   if (!agateValidateFloat(vm, args[1], "Right operand")) {                    \
@@ -5236,6 +5244,7 @@ static void agateLoadCoreUnit(AgateVM *vm) {
   agateClassBindPrimitive(vm, vm->float_class, "-(_)", agateCoreFloatMinus);
   agateClassBindPrimitive(vm, vm->float_class, "*(_)", agateCoreFloatMultiply);
   agateClassBindPrimitive(vm, vm->float_class, "/(_)", agateCoreFloatDivide);
+  agateClassBindPrimitive(vm, vm->float_class, "%(_)", agateCoreFloatModulo);
   agateClassBindPrimitive(vm, vm->float_class, "==(_)", agateCoreFloatEqual);
   agateClassBindPrimitive(vm, vm->float_class, "!=(_)", agateCoreFloatNotEqual);
   agateClassBindPrimitive(vm, vm->float_class, "<(_)", agateCoreFloatLt);
