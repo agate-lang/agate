@@ -424,7 +424,14 @@ typedef enum {
 
 typedef struct AgateCompiler AgateCompiler;
 
+typedef enum {
+  AGATE_CALL_FRAME_EXTERNAL,
+  AGATE_CALL_FRAME_FOREIGN,
+  AGATE_CALL_FRAME_INTERNAL,
+} AgateCallFrameKind;
+
 typedef struct {
+  AgateCallFrameKind kind;
   AgateClosure *closure;
   uint8_t *ip;
   AgateValue *stack_start;
@@ -2839,7 +2846,7 @@ static void agateMethodNotFound(AgateVM *vm, AgateClass *klass, ptrdiff_t symbol
   vm->error = agateEntityValue(agateStringNewFormat(vm, "@ does not implement '@'.", klass->name, method));
 }
 
-static inline void agateClosureCall(AgateVM *vm, AgateClosure *closure, int argc) {
+static inline void agateClosureCall(AgateVM *vm, AgateClosure *closure, int argc, AgateCallFrameKind kind) {
   if (vm->frames_count >= vm->frames_capacity) {
     ptrdiff_t capacity = agateGrowCapacity(vm->frames_capacity);
     vm->frames = agateGrowArray(vm, AgateCallFrame, vm->frames, vm->frames_capacity, capacity);
@@ -2851,6 +2858,7 @@ static inline void agateClosureCall(AgateVM *vm, AgateClosure *closure, int argc
   agateEnsureStack(vm, needed);
 
   AgateCallFrame *frame = &vm->frames[vm->frames_count++];
+  frame->kind = kind;
   frame->stack_start = vm->stack_top - argc;
   frame->closure = closure;
   frame->ip = closure->function->bc.code.data;
@@ -2893,7 +2901,7 @@ static inline bool agateMethodCall(AgateVM *vm, AgateClass *klass, ptrdiff_t sym
       return agateIsNil(vm->error);
 
     case AGATE_METHOD_CLOSURE:
-      agateClosureCall(vm, method->as.closure, argc);
+      agateClosureCall(vm, method->as.closure, argc, AGATE_CALL_FRAME_INTERNAL);
       return true;
 
     default:
@@ -2914,7 +2922,7 @@ static bool agateFunctionCall(AgateVM *vm, AgateValue value, int argc) {
     return false;
   }
 
-  agateClosureCall(vm, agateAsClosure(value), argc);
+  agateClosureCall(vm, agateAsClosure(value), argc, AGATE_CALL_FRAME_INTERNAL);
   return true;
 }
 
@@ -3267,7 +3275,7 @@ static AgateStatus agateRun(AgateVM *vm) {
 
         if (agateIsClosure(agatePeek(vm, 0))) {
           AgateClosure *closure = agateAsClosure(agatePeek(vm, 0));
-          agateClosureCall(vm, closure, 1);
+          agateClosureCall(vm, closure, 1, AGATE_CALL_FRAME_INTERNAL);
           AGATE_LOAD_FRAME();
         } else {
           vm->last_unit = agateAsUnit(agatePeek(vm, 0));
@@ -5473,7 +5481,7 @@ AgateStatus agateInterpret(AgateVM *vm, const char *unit, const char *source) { 
   }
 
   agatePushRoot(vm, (AgateEntity *) closure);
-  agateClosureCall(vm, closure, 1);
+  agateClosureCall(vm, closure, 1, AGATE_CALL_FRAME_EXTERNAL);
   agatePopRoot(vm);
 
   AgateStatus status = agateRun(vm);
@@ -5668,7 +5676,7 @@ AgateStatus agateCall(AgateVM *vm, AgateHandle *method) {
   vm->api_stack = NULL; // XXX
   vm->stack_top = &vm->stack[closure->function->slot_count]; // XXX
 
-  agateClosureCall(vm, closure, 0);
+  agateClosureCall(vm, closure, 0, AGATE_CALL_FRAME_EXTERNAL);
   AgateStatus status = agateRun(vm);
 
   vm->api_stack = vm->stack;
