@@ -1,0 +1,12 @@
+# notest
+# does not work for now, but the test is ready
+class Reentrancy {
+  foreign static call(a)
+  foreign static interpret()
+  static print(a) {
+    IO.print(a)
+  }
+}
+
+Reentrancy.call("Call\n") #> Call
+Reentrancy.interpret() #> Interpret

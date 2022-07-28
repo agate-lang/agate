@@ -34,6 +34,9 @@ static void agateEntityPrint(AgateValue value) {
     case AGATE_ENTITY_MAP:
       printf("map");
       break;
+    case AGATE_ENTITY_RANDOM:
+      printf("random");
+      break;
     case AGATE_ENTITY_RANGE:
       printf("range");
       break;

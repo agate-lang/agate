@@ -105,6 +105,7 @@ if(UNIX AND AGATE_DEV)
       tests/api/call_foreign.c
       tests/api/handle.c
       tests/api/maps.c
+      tests/api/reentrancy.c
       tests/api/slots.c
     )
 
