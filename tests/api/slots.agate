@@ -29,7 +29,7 @@ IO.println(Slots.slot_types(false, ForeignType.new(), [], {}, nil, 1.2, "str", 1
 # expect: true
 
 IO.println(Slots.ensure())
-# expect: 1 -> 20 (190)
+# expect: 1 -> 21 (190)
 
 IO.println(Slots.ensure_outside_foreign())
 # expect: 0 -> 20 (190)

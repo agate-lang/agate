@@ -4,39 +4,41 @@
 #include <stdio.h>
 #include <string.h>
 
-static void reentrancyCall(AgateVM *vm) {
-  printf("reentrancyCall Begin\n");
-  assert(agateSlotType(vm, 1) == AGATE_TYPE_STRING);
-  AgateHandle *param_handle = agateSlotGetHandle(vm, 1);
+static void reentrancyCallHandle(AgateVM *vm) {
+  ptrdiff_t param_slot = agateSlotForArg(vm, 1);
+  assert(agateSlotType(vm, param_slot) == AGATE_TYPE_STRING);
+  AgateHandle *param_handle = agateSlotGetHandle(vm, param_slot);
   AgateHandle *print_handle = agateMakeCallHandle(vm, "print(_)");
 
-  agateEnsureSlots(vm, 2);
+  agateStackStart(vm);
+  ptrdiff_t arg0 = agateSlotAllocate(vm);
   assert(agateHasVariable(vm, "tests/api/reentrancy.agate", "Reentrancy"));
-  agateGetVariable(vm, "tests/api/reentrancy.agate", "Reentrancy", 0);
-  agateSlotSetHandle(vm, 1, param_handle);
-  agateCall(vm, print_handle);
+  agateGetVariable(vm, "tests/api/reentrancy.agate", "Reentrancy", arg0);
+
+  ptrdiff_t arg1 = agateSlotAllocate(vm);
+  agateSlotSetHandle(vm, arg1, param_handle);
+
+  agateCallHandle(vm, print_handle);
+  agateStackFinish(vm);
 
   agateReleaseHandle(vm, print_handle);
   agateReleaseHandle(vm, param_handle);
-  printf("reentrancyCall End\n");
 }
 
-static void reentrancyInterpret(AgateVM *vm) {
-  printf("reentrancyInterpret Begin\n");
-  agateInterpret(vm, "tests/api/reentrancy.agate", "Reentrancy.print(\"Interpret\\n\")\n");
-  printf("reentrancyInterpret End\n");
+static void reentrancyCallString(AgateVM *vm) {
+  agateCallString(vm, "tests/api/reentrancy.agate", "Reentrancy.print(\"String\\n\")\n");
 }
 
 AgateForeignMethodFunc agateTestReentrancyForeignMethodHandler(const char *class_name, AgateForeignMethodKind kind, const char *signature) {
   assert(strcmp(class_name, "Reentrancy") == 0);
   assert(kind == AGATE_FOREIGN_METHOD_CLASS);
 
-  if (strcmp(signature, "call(_)") == 0) {
-    return reentrancyCall;
+  if (strcmp(signature, "call_handle(_)") == 0) {
+    return reentrancyCallHandle;
   }
 
-  if (strcmp(signature, "interpret()") == 0) {
-    return reentrancyInterpret;
+  if (strcmp(signature, "call_string()") == 0) {
+    return reentrancyCallString;
   }
 
   return NULL;

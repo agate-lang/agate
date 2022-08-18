@@ -5,6 +5,7 @@ static const char *AgateTestFiles[] = {
   "tests/api/call_foreign.agate",
   "tests/api/handle.agate",
   "tests/api/maps.agate",
+  "tests/api/reentrancy.agate",
   "tests/api/slots.agate",
   "tests/core/array/accumulate.agate",
   "tests/core/array/accumulate_empty.agate",

@@ -5,12 +5,13 @@
 #include <string.h>
 
 static void callForeignApi(AgateVM *vm) {
-  agateEnsureSlots(vm, 10);
-  agateSlotArrayNew(vm, 0);
+  ptrdiff_t array_slot = agateSlotForReturn(vm);
+  agateSlotArrayNew(vm, array_slot);
 
   for (int64_t i = 1; i < 10; ++i) {
-    agateSlotSetInt(vm, i, i);
-    agateSlotArrayInsert(vm, 0, -1, i);
+    ptrdiff_t slot = agateSlotAllocate(vm);
+    agateSlotSetInt(vm, slot, i);
+    agateSlotArrayInsert(vm, array_slot, -1, slot);
   }
 }
 
@@ -27,19 +28,26 @@ AgateForeignMethodFunc agateTestCallForeignForeignMethodHandler(const char *clas
 }
 
 bool agateTestCallForeignRunNative(AgateVM *vm) {
-  agateEnsureSlots(vm, 1);
-  agateGetVariable(vm, "tests/api/call_foreign.agate", "CallForeign", 0);
+  agateStackStart(vm);
+  ptrdiff_t call_slot = agateSlotAllocate(vm);
+  agateGetVariable(vm, "tests/api/call_foreign.agate", "CallForeign", call_slot);
 
-  AgateHandle *call_foreign_class_handle = agateSlotGetHandle(vm, 0);
+  AgateHandle *call_foreign_class_handle = agateSlotGetHandle(vm, call_slot);
+  agateStackFinish(vm);
+
   AgateHandle *call_handle = agateMakeCallHandle(vm, "call(_)");
 
-  agateEnsureSlots(vm, 2);
-  agateSlotSetHandle(vm, 0, call_foreign_class_handle);
-  agateSlotSetString(vm, 1, "parameter");
+  agateStackStart(vm);
+  ptrdiff_t arg0 = agateSlotAllocate(vm);
+  agateSlotSetHandle(vm, arg0, call_foreign_class_handle);
+  ptrdiff_t arg1 = agateSlotAllocate(vm);
+  agateSlotSetString(vm, arg1, "parameter");
 
   printf("slots before %td\n", agateSlotCount(vm));
-  agateCall(vm, call_handle);
+  agateCallHandle(vm, call_handle);
   printf("slots after %td\n", agateSlotCount(vm));
+
+  agateStackFinish(vm);
 
   agateReleaseHandle(vm, call_handle);
   agateReleaseHandle(vm, call_foreign_class_handle);

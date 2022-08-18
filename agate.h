@@ -146,19 +146,25 @@ AgateVM *agateNewVM(const AgateConfig *config);
 void agateDeleteVM(AgateVM *vm);
 // end::vm_delete[]
 
-// tag::interpret[]
-AgateStatus agateInterpret(AgateVM *vm, const char *unit, const char *source);
-// end::interpret[]
-
 // tag::handle_call[]
 AgateHandle *agateMakeCallHandle(AgateVM *vm, const char *signature);
-AgateStatus agateCall(AgateVM *vm, AgateHandle *method);
+
+void agateStackStart(AgateVM *vm);
+void agateStackFinish(AgateVM *vm);
+
+AgateStatus agateCallHandle(AgateVM *vm, AgateHandle *method);
+AgateStatus agateCallString(AgateVM *vm, const char *unit, const char *source);
 // end::handle_call[]
 
 // tag::slot_management[]
 ptrdiff_t agateSlotCount(AgateVM *vm);
-void agateEnsureSlots(AgateVM *vm, ptrdiff_t slots_count);
+ptrdiff_t agateSlotAllocate(AgateVM *vm);
 AgateType agateSlotType(AgateVM *vm, ptrdiff_t slot);
+
+ptrdiff_t agateSlotForArg(AgateVM *vm, ptrdiff_t i);
+ptrdiff_t agateSlotForReturn(AgateVM *vm);
+
+void agateSlotCopy(AgateVM *vm, ptrdiff_t dest, ptrdiff_t orig);
 // end::slot_management[]
 
 // tag::slot_get_primitive[]

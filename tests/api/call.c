@@ -5,11 +5,13 @@
 #include <stdio.h>
 
 bool agateTestCallRunNative(AgateVM *vm) {
-  agateEnsureSlots(vm, 1);
+  agateStackStart(vm);
+  ptrdiff_t call_slot = agateSlotAllocate(vm);
 
   assert(agateHasVariable(vm, "tests/api/call.agate", "Call"));
-  agateGetVariable(vm, "tests/api/call.agate", "Call", 0);
-  AgateHandle *call_class_handle = agateSlotGetHandle(vm, 0);
+  agateGetVariable(vm, "tests/api/call.agate", "Call", call_slot);
+  AgateHandle *call_class_handle = agateSlotGetHandle(vm, call_slot);
+  agateStackFinish(vm);
 
   AgateHandle *no_params_handle = agateMakeCallHandle(vm, "no_params");
   AgateHandle *zero_handle = agateMakeCallHandle(vm, "zero()");
@@ -21,91 +23,175 @@ bool agateTestCallRunNative(AgateVM *vm) {
   AgateHandle *subscript_getter_handle = agateMakeCallHandle(vm, "[_,_]");
   AgateHandle *subscript_setter_handle = agateMakeCallHandle(vm, "[_,_]=(_)");
 
-  agateEnsureSlots(vm, 1);
-  agateSlotSetHandle(vm, 0, call_class_handle);
-  agateCall(vm, no_params_handle);
-
-  agateEnsureSlots(vm, 1);
-  agateSlotSetHandle(vm, 0, call_class_handle);
-  agateCall(vm, zero_handle);
-
-  agateEnsureSlots(vm, 2);
-  agateSlotSetHandle(vm, 0, call_class_handle);
-  agateSlotSetFloat(vm, 1, 1.0);
-  agateCall(vm, one_handle);
-
-  agateEnsureSlots(vm, 3);
-  agateSlotSetHandle(vm, 0, call_class_handle);
-  agateSlotSetFloat(vm, 1, 1.0);
-  agateSlotSetFloat(vm, 2, 2.0);
-  agateCall(vm, two_handle);
-
-  agateEnsureSlots(vm, 1);
-  agateSlotSetHandle(vm, 0, call_class_handle);
-  agateCall(vm, unary_handle);
-
-  agateEnsureSlots(vm, 2);
-  agateSlotSetHandle(vm, 0, call_class_handle);
-  agateSlotSetFloat(vm, 1, 1.0);
-  agateCall(vm, binary_handle);
-
-  agateEnsureSlots(vm, 3);
-  agateSlotSetHandle(vm, 0, call_class_handle);
-  agateSlotSetFloat(vm, 1, 1.0);
-  agateSlotSetFloat(vm, 2, 2.0);
-  agateCall(vm, subscript_getter_handle);
-
-  agateEnsureSlots(vm, 4);
-  agateSlotSetHandle(vm, 0, call_class_handle);
-  agateSlotSetFloat(vm, 1, 1.0);
-  agateSlotSetFloat(vm, 2, 2.0);
-  agateSlotSetFloat(vm, 3, 3.0);
-  agateCall(vm, subscript_setter_handle);
-
-  agateEnsureSlots(vm, 1);
-  agateSlotSetHandle(vm, 0, call_class_handle);
-  agateCall(vm, get_value_handle);
-  printf("slots after call: %td\n", agateSlotCount(vm));
-  AgateHandle *handle = agateSlotGetHandle(vm, 0);
-
-  agateEnsureSlots(vm, 3);
-  agateSlotSetHandle(vm, 0, call_class_handle);
-  agateSlotSetBool(vm, 1, true);
-  agateSlotSetBool(vm, 2, false);
-  agateCall(vm, two_handle);
-
-  agateEnsureSlots(vm, 3);
-  agateSlotSetHandle(vm, 0, call_class_handle);
-  agateSlotSetFloat(vm, 1, 1.2);
-  agateSlotSetFloat(vm, 2, 3.4);
-  agateCall(vm, two_handle);
-
-  agateEnsureSlots(vm, 3);
-  agateSlotSetHandle(vm, 0, call_class_handle);
-  agateSlotSetString(vm, 1, "string");
-  agateSlotSetString(vm, 2, "another");
-  agateCall(vm, two_handle);
-
-  agateEnsureSlots(vm, 3);
-  agateSlotSetHandle(vm, 0, call_class_handle);
-  agateSlotSetNil(vm, 1);
-  agateSlotSetHandle(vm, 2, handle);
-  agateCall(vm, two_handle);
-
-  agateEnsureSlots(vm, 3);
-  agateSlotSetHandle(vm, 0, call_class_handle);
-  agateSlotSetStringSize(vm, 1, "string", 3);
-  agateSlotSetStringSize(vm, 2, "b\0y\0t\0e", 7);
-  agateCall(vm, two_handle);
-
-  agateEnsureSlots(vm, 10);
-  agateSlotSetHandle(vm, 0, call_class_handle);
-
-  for (int i = 1; i < 10; ++i) {
-    agateSlotSetFloat(vm, i, i * 0.1);
+  {
+    agateStackStart(vm);
+    ptrdiff_t arg0 = agateSlotAllocate(vm);
+    agateSlotSetHandle(vm, arg0, call_class_handle);
+    agateCallHandle(vm, no_params_handle);
+    agateStackFinish(vm);
   }
 
-  agateCall(vm, one_handle);
+  {
+    agateStackStart(vm);
+    ptrdiff_t arg0 = agateSlotAllocate(vm);
+    agateSlotSetHandle(vm, arg0, call_class_handle);
+    agateCallHandle(vm, zero_handle);
+    agateStackFinish(vm);
+  }
+
+  {
+    agateStackStart(vm);
+    ptrdiff_t arg0 = agateSlotAllocate(vm);
+    agateSlotSetHandle(vm, arg0, call_class_handle);
+    ptrdiff_t arg1 = agateSlotAllocate(vm);
+    agateSlotSetFloat(vm, arg1, 1.0);
+    agateCallHandle(vm, one_handle);
+    agateStackFinish(vm);
+  }
+
+  {
+    agateStackStart(vm);
+    ptrdiff_t arg0 = agateSlotAllocate(vm);
+    agateSlotSetHandle(vm, arg0, call_class_handle);
+    ptrdiff_t arg1 = agateSlotAllocate(vm);
+    agateSlotSetFloat(vm, arg1, 1.0);
+    ptrdiff_t arg2 = agateSlotAllocate(vm);
+    agateSlotSetFloat(vm, arg2, 2.0);
+    agateCallHandle(vm, two_handle);
+    agateStackFinish(vm);
+  }
+
+  {
+    agateStackStart(vm);
+    ptrdiff_t arg0 = agateSlotAllocate(vm);
+    agateSlotSetHandle(vm, arg0, call_class_handle);
+    agateCallHandle(vm, unary_handle);
+    agateStackFinish(vm);
+  }
+
+  {
+    agateStackStart(vm);
+    ptrdiff_t arg0 = agateSlotAllocate(vm);
+    agateSlotSetHandle(vm, arg0, call_class_handle);
+    ptrdiff_t arg1 = agateSlotAllocate(vm);
+    agateSlotSetFloat(vm, arg1, 1.0);
+    agateCallHandle(vm, binary_handle);
+    agateStackFinish(vm);
+  }
+
+  {
+    agateStackStart(vm);
+    ptrdiff_t arg0 = agateSlotAllocate(vm);
+    agateSlotSetHandle(vm, arg0, call_class_handle);
+    ptrdiff_t arg1 = agateSlotAllocate(vm);
+    agateSlotSetFloat(vm, arg1, 1.0);
+    ptrdiff_t arg2 = agateSlotAllocate(vm);
+    agateSlotSetFloat(vm, arg2, 2.0);
+    agateCallHandle(vm, subscript_getter_handle);
+    agateStackFinish(vm);
+  }
+
+  {
+    agateStackStart(vm);
+    ptrdiff_t arg0 = agateSlotAllocate(vm);
+    agateSlotSetHandle(vm, arg0, call_class_handle);
+    ptrdiff_t arg1 = agateSlotAllocate(vm);
+    agateSlotSetFloat(vm, arg1, 1.0);
+    ptrdiff_t arg2 = agateSlotAllocate(vm);
+    agateSlotSetFloat(vm, arg2, 2.0);
+    ptrdiff_t arg3 = agateSlotAllocate(vm);
+    agateSlotSetFloat(vm, arg3, 3.0);
+    agateCallHandle(vm, subscript_setter_handle);
+    agateStackFinish(vm);
+  }
+
+  AgateHandle *handle = NULL;
+
+  {
+    agateStackStart(vm);
+    ptrdiff_t arg0 = agateSlotAllocate(vm);
+    agateSlotSetHandle(vm, arg0, call_class_handle);
+    agateCallHandle(vm, get_value_handle);
+    printf("slots after call: %td\n", agateSlotCount(vm));
+    ptrdiff_t ret = agateSlotForReturn(vm);
+    handle = agateSlotGetHandle(vm, ret);
+    agateStackFinish(vm);
+  }
+
+  {
+    agateStackStart(vm);
+    ptrdiff_t arg0 = agateSlotAllocate(vm);
+    agateSlotSetHandle(vm, arg0, call_class_handle);
+    ptrdiff_t arg1 = agateSlotAllocate(vm);
+    agateSlotSetBool(vm, arg1, true);
+    ptrdiff_t arg2 = agateSlotAllocate(vm);
+    agateSlotSetBool(vm, arg2, false);
+    agateCallHandle(vm, two_handle);
+    agateStackFinish(vm);
+  }
+
+  {
+    agateStackStart(vm);
+    ptrdiff_t arg0 = agateSlotAllocate(vm);
+    agateSlotSetHandle(vm, arg0, call_class_handle);
+    ptrdiff_t arg1 = agateSlotAllocate(vm);
+    agateSlotSetFloat(vm, arg1, 1.2);
+    ptrdiff_t arg2 = agateSlotAllocate(vm);
+    agateSlotSetFloat(vm, arg2, 3.4);
+    agateCallHandle(vm, two_handle);
+    agateStackFinish(vm);
+  }
+
+  {
+    agateStackStart(vm);
+    ptrdiff_t arg0 = agateSlotAllocate(vm);
+    agateSlotSetHandle(vm, arg0, call_class_handle);
+    ptrdiff_t arg1 = agateSlotAllocate(vm);
+    agateSlotSetString(vm, arg1, "string");
+    ptrdiff_t arg2 = agateSlotAllocate(vm);
+    agateSlotSetString(vm, arg2, "another");
+    agateCallHandle(vm, two_handle);
+    agateStackFinish(vm);
+  }
+
+  {
+    agateStackStart(vm);
+    ptrdiff_t arg0 = agateSlotAllocate(vm);
+    agateSlotSetHandle(vm, arg0, call_class_handle);
+    ptrdiff_t arg1 = agateSlotAllocate(vm);
+    agateSlotSetNil(vm, arg1);
+    ptrdiff_t arg2 = agateSlotAllocate(vm);
+    agateSlotSetHandle(vm, arg2, handle);
+    agateCallHandle(vm, two_handle);
+    agateStackFinish(vm);
+  }
+
+  {
+    agateStackStart(vm);
+    ptrdiff_t arg0 = agateSlotAllocate(vm);
+    agateSlotSetHandle(vm, arg0, call_class_handle);
+    ptrdiff_t arg1 = agateSlotAllocate(vm);
+    agateSlotSetStringSize(vm, arg1, "string", 3);
+    ptrdiff_t arg2 = agateSlotAllocate(vm);
+    agateSlotSetStringSize(vm, arg2, "b\0y\0t\0e", 7);
+    agateCallHandle(vm, two_handle);
+    agateStackFinish(vm);
+  }
+
+//   {
+//     agateStackStart(vm);
+//
+//     ptrdiff_t arg0 = agateSlotAllocate(vm);
+//     agateSlotSetHandle(vm, arg0, call_class_handle);
+//
+//     for (ptrdiff_t i = 1; i < 10; ++i) {
+//       ptrdiff_t arg = agateSlotAllocate(vm);
+//       agateSlotSetFloat(vm, arg, i * 0.1);
+//     }
+//
+//     agateCallHandle(vm, one_handle);
+//     agateStackFinish(vm);
+//   }
 
   agateReleaseHandle(vm, handle);
   agateReleaseHandle(vm, subscript_setter_handle);

@@ -16,7 +16,7 @@ static void repl(AgateVM *vm) {
       break;
     }
 
-    agateInterpret(vm, "script", line);
+    agateCallString(vm, "script", line);
   }
 }
 
@@ -55,7 +55,7 @@ static char *dump(const char *path) {
 
 static void run(AgateVM *vm, const char *path) {
   char *source = dump(path);
-  AgateStatus status = agateInterpret(vm, "script", source);
+  AgateStatus status = agateCallString(vm, "script", source);
   free(source);
 
   if (status != AGATE_STATUS_OK) {

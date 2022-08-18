@@ -10,5 +10,5 @@ class CallForeign {
     IO.println(param) # expect: parameter
     return "result"
   }
-  # expect: slots after 1
+  # expect: slots after 2
 }

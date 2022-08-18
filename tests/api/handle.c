@@ -7,7 +7,7 @@ static AgateHandle *handle = NULL;
 
 static void handleValueGetter(AgateVM *vm) {
   if (handle != NULL) {
-    agateSlotSetHandle(vm, 0, handle);
+    agateSlotSetHandle(vm, agateSlotForReturn(vm), handle);
     agateReleaseHandle(vm, handle);
     handle = NULL;
   }
@@ -18,7 +18,7 @@ static void handleValueSetter(AgateVM *vm) {
     agateReleaseHandle(vm, handle);
   }
 
-  handle = agateSlotGetHandle(vm, 1);
+  handle = agateSlotGetHandle(vm, agateSlotForArg(vm, 1));
 }
 
 AgateForeignMethodFunc agateTestHandleForeignMethodHandler(const char *class_name, AgateForeignMethodKind kind, const char *signature) {

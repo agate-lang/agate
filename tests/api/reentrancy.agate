@@ -1,12 +1,18 @@
-# notest
-# does not work for now, but the test is ready
 class Reentrancy {
-  foreign static call(a)
-  foreign static interpret()
+  foreign static call_handle(a)
+  foreign static call_string()
   static print(a) {
     IO.print(a)
   }
+  static proxy_call_handle(a) {
+    .call_handle(a)
+  }
+  static proxy_call_string() {
+    .call_string()
+  }
 }
 
-Reentrancy.call("Call\n") #> Call
-Reentrancy.interpret() #> Interpret
+Reentrancy.call_handle("Handle\n") # expect: Handle
+Reentrancy.call_string() # expect: String
+Reentrancy.proxy_call_handle("Handle\n") # expect: Handle
+Reentrancy.proxy_call_string() # expect: String

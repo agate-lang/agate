@@ -4,59 +4,62 @@
 #include <string.h>
 
 static void arraysNewArray(AgateVM *vm) {
-  agateSlotArrayNew(vm, 0);
+  agateSlotArrayNew(vm, agateSlotForReturn(vm));
 }
 
-static inline void arraysHelperInsertFloat(AgateVM *vm, ptrdiff_t index, double value) {
-  agateSlotSetFloat(vm, 1, value);
-  agateSlotArrayInsert(vm, 0, index, 1);
+static inline void arraysHelperInsertFloat(AgateVM *vm, ptrdiff_t array_slot, ptrdiff_t index, ptrdiff_t value_slot, double value) {
+  agateSlotSetFloat(vm, value_slot, value);
+  agateSlotArrayInsert(vm, array_slot, index, value_slot);
 }
 
-static inline void arraysHelperAppendFloat(AgateVM *vm, double value) {
-  agateSlotSetFloat(vm, 1, value);
-  agateSlotArrayInsert(vm, 0, -1, 1);
+static inline void arraysHelperAppendFloat(AgateVM *vm, ptrdiff_t array_slot, ptrdiff_t value_slot, double value) {
+  agateSlotSetFloat(vm, value_slot, value);
+  agateSlotArrayInsert(vm, array_slot, -1, value_slot);
 }
 
 static void arraysInsert(AgateVM *vm) {
-  agateSlotArrayNew(vm, 0);
-  agateEnsureSlots(vm, 2);
+  ptrdiff_t array_slot = agateSlotForReturn(vm);
+  agateSlotArrayNew(vm, array_slot);
+  ptrdiff_t value_slot = agateSlotAllocate(vm);
 
   // appending
-  arraysHelperInsertFloat(vm, 0, 1.0);
-  arraysHelperInsertFloat(vm, 1, 2.0);
-  arraysHelperInsertFloat(vm, 2, 3.0);
+  arraysHelperInsertFloat(vm, array_slot, 0, value_slot, 1.0);
+  arraysHelperInsertFloat(vm, array_slot, 1, value_slot, 2.0);
+  arraysHelperInsertFloat(vm, array_slot, 2, value_slot, 3.0);
 
   // inserting
-  arraysHelperInsertFloat(vm, 0, 4.0);
-  arraysHelperInsertFloat(vm, 1, 5.0);
-  arraysHelperInsertFloat(vm, 2, 6.0);
+  arraysHelperInsertFloat(vm, array_slot, 0, value_slot, 4.0);
+  arraysHelperInsertFloat(vm, array_slot, 1, value_slot, 5.0);
+  arraysHelperInsertFloat(vm, array_slot, 2, value_slot, 6.0);
 
   // negative indices
-  arraysHelperInsertFloat(vm, -1, 7.0);
-  arraysHelperInsertFloat(vm, -2, 8.0);
-  arraysHelperInsertFloat(vm, -3, 9.0);
+  arraysHelperInsertFloat(vm, array_slot, -1, value_slot, 7.0);
+  arraysHelperInsertFloat(vm, array_slot, -2, value_slot, 8.0);
+  arraysHelperInsertFloat(vm, array_slot, -3, value_slot, 9.0);
 }
 
 static void arraysSet(AgateVM *vm) {
-  agateSlotArrayNew(vm, 0);
-  agateEnsureSlots(vm, 2);
+  ptrdiff_t array_slot = agateSlotForReturn(vm);
+  agateSlotArrayNew(vm, array_slot);
+  ptrdiff_t value_slot = agateSlotAllocate(vm);
 
-  arraysHelperAppendFloat(vm, 1.0);
-  arraysHelperAppendFloat(vm, 2.0);
-  arraysHelperAppendFloat(vm, 3.0);
-  arraysHelperAppendFloat(vm, 4.0);
+  arraysHelperAppendFloat(vm, array_slot, value_slot, 1.0);
+  arraysHelperAppendFloat(vm, array_slot, value_slot, 2.0);
+  arraysHelperAppendFloat(vm, array_slot, value_slot, 3.0);
+  arraysHelperAppendFloat(vm, array_slot, value_slot, 4.0);
 
   // array[2] = 33
-  agateSlotSetFloat(vm, 1, 33);
-  agateSlotArraySet(vm, 0, 2, 1);
+  agateSlotSetFloat(vm, value_slot, 33);
+  agateSlotArraySet(vm, array_slot, 2, value_slot);
 
   // array[-1] = 44
-  agateSlotSetFloat(vm, 1, 44);
-  agateSlotArraySet(vm, 0, -1, 1);
+  agateSlotSetFloat(vm, value_slot, 44);
+  agateSlotArraySet(vm, array_slot, -1, value_slot);
 }
 
 static void arraysGet(AgateVM *vm) {
-  agateSlotArrayGet(vm, 1, agateSlotGetInt(vm, 2), 0);
+  ptrdiff_t index = agateSlotGetInt(vm, agateSlotForArg(vm, 2));
+  agateSlotArrayGet(vm, agateSlotForArg(vm, 1), index, agateSlotForReturn(vm));
 }
 
 AgateForeignMethodFunc agateTestArraysForeignMethodHandler(const char *class_name, AgateForeignMethodKind kind, const char *signature) {

@@ -12,77 +12,88 @@ AgateForeignClassHandler agateTestMapsForeignClassHandler(const char *class_name
   return handler;
 }
 
+static ptrdiff_t mapsPopulate(AgateVM *vm) {
+  ptrdiff_t map_slot = agateSlotAllocate(vm);
+  agateSlotMapNew(vm, map_slot);
+
+  ptrdiff_t key_slot = agateSlotAllocate(vm);
+  ptrdiff_t value_slot = agateSlotAllocate(vm);
+
+  // Insert String
+  agateSlotSetString(vm, key_slot, "England");
+  agateSlotSetString(vm, value_slot, "London");
+  agateSlotMapSet(vm, map_slot, key_slot, value_slot);
+
+  // Insert Double
+  agateSlotSetFloat(vm, key_slot, 1.0);
+  agateSlotSetFloat(vm, value_slot, 42.0);
+  agateSlotMapSet(vm, map_slot, key_slot, value_slot);
+
+  // Insert Boolean
+  agateSlotSetBool(vm, key_slot, false);
+  agateSlotSetBool(vm, value_slot, true);
+  agateSlotMapSet(vm, map_slot, key_slot, value_slot);
+
+  // Insert Nil
+  agateSlotSetNil(vm, key_slot);
+  agateSlotSetNil(vm, value_slot);
+  agateSlotMapSet(vm, map_slot, key_slot, value_slot);
+
+  // Insert List
+  agateSlotSetString(vm, key_slot, "Empty");
+  agateSlotArrayNew(vm, value_slot);
+  agateSlotMapSet(vm, map_slot, key_slot, value_slot);
+
+  return map_slot;
+}
+
 static void mapsNewMap(AgateVM *vm) {
-  agateSlotMapNew(vm, 0);
+  agateSlotMapNew(vm, agateSlotForReturn(vm));
 }
 
 static void mapsInsert(AgateVM *vm) {
-  agateSlotMapNew(vm, 0);
-
-  agateEnsureSlots(vm, 3);
-
-  // Insert String
-  agateSlotSetString(vm, 1, "England");
-  agateSlotSetString(vm, 2, "London");
-  agateSlotMapSet(vm, 0, 1, 2);
-
-  // Insert Double
-  agateSlotSetFloat(vm, 1, 1.0);
-  agateSlotSetFloat(vm, 2, 42.0);
-  agateSlotMapSet(vm, 0, 1, 2);
-
-  // Insert Boolean
-  agateSlotSetBool(vm, 1, false);
-  agateSlotSetBool(vm, 2, true);
-  agateSlotMapSet(vm, 0, 1, 2);
-
-  // Insert Null
-  agateSlotSetNil(vm, 1);
-  agateSlotSetNil(vm, 2);
-  agateSlotMapSet(vm, 0, 1, 2);
-
-  // Insert List
-  agateSlotSetString(vm, 1, "Empty");
-  agateSlotArrayNew(vm, 2);
-  agateSlotMapSet(vm, 0, 1, 2);
+  ptrdiff_t map_slot = mapsPopulate(vm);
+  agateSlotCopy(vm, agateSlotForReturn(vm), map_slot);
 }
 
 static void mapsContains2(AgateVM *vm) {
-  agateSlotSetBool(vm, 0, agateSlotMapContains(vm, 1, 2));
+  bool result = agateSlotMapContains(vm, agateSlotForArg(vm, 1), agateSlotForArg(vm, 2));
+  agateSlotSetBool(vm, agateSlotForReturn(vm), result);
 }
 
 static void mapsContains(AgateVM *vm) {
-  mapsInsert(vm);
+  ptrdiff_t map_slot = mapsPopulate(vm);
 
-  agateEnsureSlots(vm, 2);
-  agateSlotSetString(vm, 1, "England");
+  ptrdiff_t key_slot = agateSlotAllocate(vm);
+  agateSlotSetString(vm, key_slot, "England");
 
-  agateSlotSetBool(vm, 0, agateSlotMapContains(vm, 0, 1));
+  bool result = agateSlotMapContains(vm, map_slot, key_slot);
+  agateSlotSetBool(vm, agateSlotForReturn(vm), result);
 }
 
 static void mapsContainsFalse(AgateVM *vm) {
-  mapsInsert(vm);
+  ptrdiff_t map_slot = mapsPopulate(vm);
 
-  agateEnsureSlots(vm, 2);
-  agateSlotSetString(vm, 1, "UnknownKey");
+  ptrdiff_t key_slot = agateSlotAllocate(vm);
+  agateSlotSetString(vm, key_slot, "UnknownKey");
 
-  agateSlotSetBool(vm, 0, agateSlotMapContains(vm, 0, 1));
+  bool result = agateSlotMapContains(vm, map_slot, key_slot);
+  agateSlotSetBool(vm, agateSlotForReturn(vm), result);
 }
 
 static void mapsSize(AgateVM *vm) {
-  mapsInsert(vm);
-
-  agateSlotSetInt(vm, 0, agateSlotMapSize(vm, 0));
+  ptrdiff_t map_slot = mapsPopulate(vm);
+  agateSlotSetInt(vm, agateSlotForReturn(vm), agateSlotMapSize(vm, map_slot));
 }
 
 static void mapsSize1(AgateVM *vm) {
-  agateSlotSetInt(vm, 0, agateSlotMapSize(vm, 1));
+  agateSlotSetInt(vm, agateSlotForReturn(vm), agateSlotMapSize(vm, agateSlotForArg(vm, 1)));
 }
 
 static void mapsErase(AgateVM *vm) {
-  agateEnsureSlots(vm, 3);
-  agateSlotSetString(vm, 2, "key");
-  agateSlotMapErase(vm, 1, 2, 0);
+  ptrdiff_t key_slot = agateSlotAllocate(vm);
+  agateSlotSetString(vm, key_slot, "key");
+  agateSlotMapErase(vm, agateSlotForArg(vm, 1), key_slot, agateSlotForReturn(vm));
 }
 
 AgateForeignMethodFunc agateTestMapsForeignMethodHandler(const char *class_name, AgateForeignMethodKind kind, const char *signature) {

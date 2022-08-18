@@ -272,3 +272,41 @@ static void agateDisassemble(AgateVM *vm, AgateFunction *function) {
   }
 }
 #endif
+
+static void agateDump(AgateVM *vm, const char *context) {
+  static const char *AgateCallFrameKindString[] = {
+    "EXTERNAL",
+    "FOREIGN",
+    "INTERNAL",
+  };
+
+  printf("--- VM (%s) ---\n", context);
+
+  printf("------ Runtime\n");
+  printf("\tstack:           %p\n", (void *) vm->stack);
+  printf("\tstack_top:       %p (%td)\n", (void *) vm->stack_top, vm->stack_top - vm->stack);
+  printf("\tstack_capacity:  %td\n", vm->stack_capacity);
+  printf("\t------ Stack\n\t\t");
+
+  for (AgateValue *ptr = vm->stack; ptr < vm->stack_top; ++ptr) {
+    printf("[");
+    agateValuePrint(*ptr);
+    printf("]");
+  }
+  printf("\n");
+
+  printf("\tframes:          %p\n", (void *) vm->frames);
+  printf("\tframes_count:    %td\n", vm->frames_count);
+  printf("\tframes_capacity: %td\n", vm->frames_capacity);
+
+  for (ptrdiff_t i = 0; i < vm->frames_count; ++i) {
+    AgateCallFrame *frame = &vm->frames[i];
+    printf("\t------ Frame #%td\n", i);
+    printf("\t\tkind:        %s\n", AgateCallFrameKindString[frame->kind]);
+    printf("\t\tclosure:     %p\n", (void *) frame->closure);
+    printf("\t\tip:          %p\n", (void *) frame->ip);
+    printf("\t\tstack_start: %p (%td)\n", (void *) frame->stack_start, frame->stack_start - vm->stack);
+  }
+
+  printf("--- End ---\n");
+}
