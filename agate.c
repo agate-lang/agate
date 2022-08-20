@@ -5010,13 +5010,13 @@ static bool agateCoreMathPow(AgateVM *vm, int argc, AgateValue *args) {
 // IO
 
 static bool agateCoreIoPrint(AgateVM *vm, int argc, AgateValue *args) {
-  if (!agateValidateString(vm, args[1], "obj")) {
-    return false;
-  }
-
   if (vm->config.print != NULL) {
-    AgateString *string = agateAsString(args[1]);
-    vm->config.print(vm, string->data, string->size);
+    if (agateIsString(args[1])) {
+      AgateString *string = agateAsString(args[1]);
+      vm->config.print(vm, string->data);
+    } else {
+      vm->config.print(vm, "[invalid to_s]");
+    }
   }
 
   args[0] = args[1];
@@ -5035,9 +5035,9 @@ static bool agateCoreIoWrite(AgateVM *vm, int argc, AgateValue *args) {
     return false;
   }
 
-  if (vm->config.print != NULL) {
-    char c = value;
-    vm->config.print(vm, &c, 1);
+  if (vm->config.write != NULL) {
+    uint8_t byte = value;
+    vm->config.write(vm, byte);
   }
 
   args[0] = args[1];
@@ -5969,6 +5969,7 @@ void agateConfigInitialize(AgateConfig *config) {
   config->parse_float = NULL;
   config->assert_handling = AGATE_ASSERT_ABORT;
   config->print = NULL;
+  config->write = NULL;
   config->error = NULL;
   config->user_data = NULL;
 }

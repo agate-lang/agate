@@ -42,8 +42,12 @@ typedef bool (*AgateParseFloatFunc)(const char *text, ptrdiff_t size, double *re
 // end::number_parsing[]
 
 // tag::print[]
-typedef void (*AgatePrintFunc)(AgateVM *vm, const char* text, ptrdiff_t size);
+typedef void (*AgatePrintFunc)(AgateVM *vm, const char* text);
 // end::print[]
+
+// tag::write[]
+typedef void (*AgateWriteFunc)(AgateVM *vm, uint8_t byte);
+// end::write[]
 
 // tag::error[]
 typedef enum {
@@ -55,7 +59,7 @@ typedef enum {
 typedef void (*AgateErrorFunc)(AgateVM *vm, AgateErrorKind kind, const char *unit_name, int line, const char *message);
 // end::error[]
 
-// tag::unit[]
+// tag::unit_handler[]
 typedef const char *(*AgateUnitLoadFunc)(const char *name, void *user_data);
 typedef void (*AgateUnitReleaseFunc)(const char *source, void *user_data);
 
@@ -66,9 +70,9 @@ typedef struct {
 } AgateUnitHandler;
 
 typedef AgateUnitHandler (*AgateUnitHandlerFunc)(AgateVM *vm, const char *name);
-// end::unit[]
+// end::unit_handler[]
 
-// tag::foreign_class[]
+// tag::foreign_class_handler[]
 typedef ptrdiff_t (*AgateForeignAllocateFunc)(AgateVM *vm, const char *unit_name, const char *class_name);
 typedef void (*AgateForeignDestroyFunc)(AgateVM *vm, const char *unit_name, const char *class_name, void *data);
 
@@ -79,9 +83,9 @@ typedef struct {
 } AgateForeignClassHandler;
 
 typedef AgateForeignClassHandler (*AgateForeignClassHandlerFunc)(AgateVM *vm, const char *unit_name, const char *class_name);
-// end::foreign_class[]
+// end::foreign_class_handler[]
 
-// tag::foreign_method[]
+// tag::foreign_method_handler[]
 typedef void (*AgateForeignMethodFunc)(AgateVM *vm);
 
 typedef enum {
@@ -90,7 +94,7 @@ typedef enum {
 } AgateForeignMethodKind;
 
 typedef AgateForeignMethodFunc (*AgateForeignMethodHandlerFunc)(AgateVM *vm, const char *unit_name, const char *class_name, AgateForeignMethodKind kind, const char *signature);
-// end::foreign_method[]
+// end::foreign_method_handler[]
 
 // tag::config[]
 typedef struct {
@@ -106,6 +110,7 @@ typedef struct {
 
   AgateAssertHandling assert_handling;
   AgatePrintFunc print;
+  AgateWriteFunc write;
   AgateErrorFunc error;
 
   void *user_data;
@@ -148,24 +153,31 @@ void agateDeleteVM(AgateVM *vm);
 
 // tag::handle_call[]
 AgateHandle *agateMakeCallHandle(AgateVM *vm, const char *signature);
+// end::handle_call[]
 
+// tag::stack[]
 void agateStackStart(AgateVM *vm);
 void agateStackFinish(AgateVM *vm);
+// end::stack[]
 
+// tag::call_handle[]
 AgateStatus agateCallHandle(AgateVM *vm, AgateHandle *method);
+// end::call_handle[]
+// tag::call_string[]
 AgateStatus agateCallString(AgateVM *vm, const char *unit, const char *source);
-// end::handle_call[]
+// end::call_string[]
 
 // tag::slot_management[]
 ptrdiff_t agateSlotCount(AgateVM *vm);
-ptrdiff_t agateSlotAllocate(AgateVM *vm);
 AgateType agateSlotType(AgateVM *vm, ptrdiff_t slot);
-
-ptrdiff_t agateSlotForArg(AgateVM *vm, ptrdiff_t i);
-ptrdiff_t agateSlotForReturn(AgateVM *vm);
-
 void agateSlotCopy(AgateVM *vm, ptrdiff_t dest, ptrdiff_t orig);
 // end::slot_management[]
+
+// tag::slot_for_call[]
+ptrdiff_t agateSlotAllocate(AgateVM *vm);
+ptrdiff_t agateSlotForArg(AgateVM *vm, ptrdiff_t i);
+ptrdiff_t agateSlotForReturn(AgateVM *vm);
+// end::slot_for_call[]
 
 // tag::slot_get_primitive[]
 bool agateSlotGetBool(AgateVM *vm, ptrdiff_t slot);
@@ -219,11 +231,15 @@ void agateSlotMapSet(AgateVM *vm, ptrdiff_t map_slot, ptrdiff_t key_slot, ptrdif
 void agateSlotMapErase(AgateVM *vm, ptrdiff_t map_slot, ptrdiff_t key_slot, ptrdiff_t value_slot);
 // end::slot_map[]
 
-// tag::unit[]
+// tag::has_unit[]
 bool agateHasUnit(AgateVM *vm, const char *unit_name);
+// end::has_unit[]
+// tag::has_variable[]
 bool agateHasVariable(AgateVM *vm, const char *unit_name, const char *variable_name);
+// end::has_variable[]
+// tag::get_variable[]
 void agateGetVariable(AgateVM *vm, const char *unit_name, const char *variable_name, ptrdiff_t slot);
-// end::unit[]
+// end::get_variable[]
 
 // tag::abort[]
 void agateAbort(AgateVM *vm, ptrdiff_t slot);

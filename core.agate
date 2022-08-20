@@ -377,7 +377,7 @@ class Range is Sequence { }
 
 class IO {
   static print(obj) {
-    .__print_object(obj)
+    .__print(obj.to_s)
     return obj
   }
 
@@ -386,18 +386,9 @@ class IO {
   }
 
   static println(obj) {
-    .__print_object(obj)
+    .__print(obj.to_s)
     .__print("\n")
     return obj
-  }
-
-  static __print_object(obj) {
-    def str = obj.to_s
-    if (str is String) {
-      .__print(str)
-    } else {
-      .__print("[invalid to_s]")
-    }
   }
 }
 

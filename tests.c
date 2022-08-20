@@ -293,8 +293,12 @@ static bool agateTestCheckSyntax(AgateTest *self, AgateTestMode mode) {
   return true;
 }
 
-static void agateTestPrint(AgateVM *vm, const char* text, ptrdiff_t size) {
-  printf("%.*s", (int) size, text);
+static void agateTestPrint(AgateVM *vm, const char* text) {
+  fputs(text, stdout);
+}
+
+static void agateTestWrite(AgateVM *vm, uint8_t byte) {
+  fputc(byte, stdout);
 }
 
 static void agateTestError(AgateVM *vm, AgateErrorKind kind, const char *unit_name, int line, const char *message) {
@@ -320,6 +324,7 @@ static AgateStatus agateTestRunInterpreter(AgateTest *self) {
   config.assert_handling = AGATE_ASSERT_ABORT;
 
   config.print = agateTestPrint;
+  config.write = agateTestWrite;
   config.error = agateTestError;
 
   config.user_data = self;
