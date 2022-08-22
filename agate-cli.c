@@ -71,18 +71,22 @@ static void write(AgateVM *vm, uint8_t byte) {
   fputc(byte, stdout);
 }
 
-static void error(AgateVM *vm, AgateErrorKind kind, const char *module_name, int line, const char *message) {
+static void error(AgateVM *vm, AgateErrorKind kind, const char *unit_name, int line, const char *message) {
   switch (kind) {
     case AGATE_ERROR_COMPILE:
-      printf("%s:%d: error: %s\n", module_name, line, message);
+      printf("%s:%d: error: %s\n", unit_name, line, message);
       break;
     case AGATE_ERROR_RUNTIME:
       printf("error: %s\n", message);
       break;
     case AGATE_ERROR_STACKTRACE:
-      printf("%s:%d: in %s\n", module_name, line, message);
+      printf("%s:%d: in %s\n", unit_name, line, message);
       break;
   }
+}
+
+static void input(AgateVM *vm, char *buffer, size_t size) {
+  fgets(buffer, size, stdin);
 }
 
 int main(int argc, const char *argv[]) {
@@ -91,6 +95,7 @@ int main(int argc, const char *argv[]) {
   config.print = print;
   config.write = write;
   config.error = error;
+  config.input = input;
 
   AgateVM *vm = agateNewVM(&config);
 

@@ -125,6 +125,18 @@ class Heightmap is Array2D {
     }
   }
 
+  quantize(n) {
+    assert(n is Int, "n should an integer")
+    def nf = n.to_f
+    def size = .size
+    for (y in 0...size) {
+      for (x in 0...size) {
+        def val = this[x, y]
+        this[x, y] = Math.floor(val * nf) / nf
+      }
+    }
+  }
+
 }
 
 class Image is Array2D {
@@ -271,6 +283,7 @@ for (y in 0...SIZE) {
 }
 
 heightmap.normalize(0.0, 1.0)
+# heightmap.quantize(7)
 
 def ramp = ColorRamp.new()
 ramp.append(0.00, Color.new(0xf9f9ebFF))

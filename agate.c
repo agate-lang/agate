@@ -1769,13 +1769,22 @@ static AgateMap *agateMapNew(AgateVM *vm) {
 
 // Random
 
-static AgateRandom *agateRandomNew(AgateVM *vm, uint64_t seed) {
+static AgateRandom *agateRandomNew1(AgateVM *vm, uint64_t seed) {
   AgateRandom *random = agateAllocateEntity(vm, AgateRandom, AGATE_ENTITY_RANDOM, vm->random_class);
 
   for (int i = 0; i < 4; ++i) {
     random->state[i] = agateSplitMix64P(&seed);
   }
 
+  return random;
+}
+
+static AgateRandom *agateRandomNew4(AgateVM *vm, uint64_t seed0, uint64_t seed1, uint64_t seed2, uint64_t seed3) {
+  AgateRandom *random = agateAllocateEntity(vm, AgateRandom, AGATE_ENTITY_RANDOM, vm->random_class);
+  random->state[0] = seed0;
+  random->state[1] = seed1;
+  random->state[2] = seed2;
+  random->state[3] = seed3;
   return random;
 }
 
@@ -5044,6 +5053,18 @@ static bool agateCoreIoWrite(AgateVM *vm, int argc, AgateValue *args) {
   return true;
 }
 
+static bool agateCoreIoInput(AgateVM *vm, int argc, AgateValue *args) {
+#define AGATE_INPUT_SIZE 1024
+  char buffer[AGATE_INPUT_SIZE] = { '\0' };
+
+  if (vm->config.input != NULL) {
+    vm->config.input(vm, buffer, AGATE_INPUT_SIZE);
+  }
+
+  args[0] = agateEntityValue(agateStringNew(vm, buffer, strlen(buffer)));
+  return true;
+}
+
 // System
 
 static bool agateCoreSystemAbort(AgateVM *vm, int argc, AgateValue *args) {
@@ -5103,13 +5124,38 @@ static bool agateCoreSystemVersionString(AgateVM *vm, int argc, AgateValue *args
 
 // random
 
-static bool agateCoreRandomNew(AgateVM *vm, int argc, AgateValue *args) {
+static bool agateCoreRandomNew1(AgateVM *vm, int argc, AgateValue *args) {
   if (!agateValidateInt(vm, args[1], "Seed")) {
     return false;
   }
 
   int64_t seed = agateAsInt(args[1]);
-  args[0] = agateEntityValue(agateRandomNew(vm, seed));
+  args[0] = agateEntityValue(agateRandomNew1(vm, seed));
+  return true;
+}
+
+static bool agateCoreRandomNew4(AgateVM *vm, int argc, AgateValue *args) {
+  if (!agateValidateInt(vm, args[1], "Seed0")) {
+    return false;
+  }
+
+  if (!agateValidateInt(vm, args[2], "Seed1")) {
+    return false;
+  }
+
+  if (!agateValidateInt(vm, args[3], "Seed2")) {
+    return false;
+  }
+
+  if (!agateValidateInt(vm, args[4], "Seed3")) {
+    return false;
+  }
+
+  int64_t seed0 = agateAsInt(args[1]);
+  int64_t seed1 = agateAsInt(args[2]);
+  int64_t seed2 = agateAsInt(args[3]);
+  int64_t seed3 = agateAsInt(args[4]);
+  args[0] = agateEntityValue(agateRandomNew4(vm, seed0, seed1, seed2, seed3));
   return true;
 }
 
@@ -5328,6 +5374,7 @@ static void agateLoadCoreUnit(AgateVM *vm) {
   AgateClass *io_class = agateAsClass(agateUnitFindVariable(vm, core, "IO"));
   agateClassBindPrimitive(vm, io_class->base.type, "__print(_)", agateCoreIoPrint);
   agateClassBindPrimitive(vm, io_class->base.type, "write(_)", agateCoreIoWrite);
+  agateClassBindPrimitive(vm, io_class->base.type, "input()", agateCoreIoInput);
 
   vm->map_class = agateAsClass(agateUnitFindVariable(vm, core, "Map"));
   agateClassBindPrimitive(vm, vm->map_class->base.type, "new()", agateCoreMapNew);
@@ -5388,7 +5435,8 @@ static void agateLoadCoreUnit(AgateVM *vm) {
   agateClassBindPrimitive(vm, vm->nil_class, "to_s", agateCoreNilToS);
 
   vm->random_class = agateAsClass(agateUnitFindVariable(vm, core, "Random"));
-  agateClassBindPrimitive(vm, vm->random_class->base.type, "new(_)", agateCoreRandomNew);
+  agateClassBindPrimitive(vm, vm->random_class->base.type, "new(_)", agateCoreRandomNew1);
+  agateClassBindPrimitive(vm, vm->random_class->base.type, "new(_,_,_,_)", agateCoreRandomNew4);
   agateClassBindPrimitive(vm, vm->random_class, "float()", agateCoreRandomFloat);
   agateClassBindPrimitive(vm, vm->random_class, "int()", agateCoreRandomInt0);
   agateClassBindPrimitive(vm, vm->random_class, "int(_)", agateCoreRandomInt1);
@@ -5971,6 +6019,7 @@ void agateConfigInitialize(AgateConfig *config) {
   config->print = NULL;
   config->write = NULL;
   config->error = NULL;
+  config->input = NULL;
   config->user_data = NULL;
 }
 

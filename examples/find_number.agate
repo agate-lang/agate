@@ -1,0 +1,36 @@
+def rand = Random.new(System.time)
+def NUMBER_MAX = 100
+def ATTEMPT_MAX = 7
+
+IO.println("Find the number!")
+IO.println("You have %(ATTEMPT_MAX) attempts to find a number between 0 and %(NUMBER_MAX) (included).")
+
+def attempt = 0
+def number = rand.int(NUMBER_MAX + 1)
+def min = 0
+def max = NUMBER_MAX
+
+while (attempt < ATTEMPT_MAX) {
+  IO.println("The number is between %(min) and %(max)")
+  def guess = IO.input("What is your guess #%(attempt + 1)? ").trim().to_i
+
+  if (guess == number) {
+    break
+  }
+
+  if (guess < number) {
+    IO.println("The number is greater than %(guess)")
+    min = Math.max(min, guess)
+  } else {
+    IO.println("The number is less than %(guess)")
+    max = Math.min(max, guess)
+  }
+
+  attempt = attempt + 1
+}
+
+if (attempt < ATTEMPT_MAX) {
+  IO.println("You win!")
+} else {
+  IO.println("The number was %(number). Try again!")
+}

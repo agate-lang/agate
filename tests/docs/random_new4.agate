@@ -1,0 +1,1 @@
+def r = Random.new(42, 69, 666, -1)

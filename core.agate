@@ -376,10 +376,7 @@ class Map is Sequence {
 class Range is Sequence { }
 
 class IO {
-  static print(obj) {
-    .__print(obj.to_s)
-    return obj
-  }
+  static print(obj) { .__print(obj.to_s) }
 
   static println() {
     .__print("\n")
@@ -389,6 +386,11 @@ class IO {
     .__print(obj.to_s)
     .__print("\n")
     return obj
+  }
+
+  static input(message) {
+    .__print(message.to_s)
+    return .input()
   }
 }
 

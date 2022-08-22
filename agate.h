@@ -59,6 +59,10 @@ typedef enum {
 typedef void (*AgateErrorFunc)(AgateVM *vm, AgateErrorKind kind, const char *unit_name, int line, const char *message);
 // end::error[]
 
+// tag::input[]
+typedef void (*AgateInputFunc)(AgateVM *vm, char *buffer, size_t size);
+// end::input[]
+
 // tag::unit_handler[]
 typedef const char *(*AgateUnitLoadFunc)(const char *name, void *user_data);
 typedef void (*AgateUnitReleaseFunc)(const char *source, void *user_data);
@@ -112,6 +116,7 @@ typedef struct {
   AgatePrintFunc print;
   AgateWriteFunc write;
   AgateErrorFunc error;
+  AgateInputFunc input;
 
   void *user_data;
 } AgateConfig;
