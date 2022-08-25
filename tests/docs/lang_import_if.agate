@@ -1,0 +1,4 @@
+def in_the_forest = true
+if (in_the_forest) {
+  import "entities" for Orc, Troll
+}

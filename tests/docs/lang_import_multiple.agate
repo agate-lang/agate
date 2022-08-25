@@ -1,0 +1,2 @@
+import "tools" for Debug  # expect: Tools are loaded
+import "tools" for Log    # no output, the unit is alreay loaded

@@ -1,0 +1,2 @@
+IO.println((42..69).contains(55)) # expect: true
+IO.println((42..69).contains(12)) # expect: false

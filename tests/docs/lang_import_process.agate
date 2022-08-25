@@ -1,0 +1,3 @@
+IO.println("Before import") # expect: Before import
+import "tools" for Debug    # expect: Tools are loaded
+IO.println("After import")  # expect: After import

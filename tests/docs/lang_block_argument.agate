@@ -1,0 +1,10 @@
+def apply(x, fn) {
+  return fn(x)
+}
+
+def print(str) {
+  IO.println(str)
+}
+
+apply("Hello") {|str| IO.println(str) } # expect: Hello
+apply("World", print) # expect: World

@@ -1,0 +1,9 @@
+def counter() {
+  def i = 0
+  return Fn.new { i = i + 1 } # i is captured
+}
+
+def f = counter()
+IO.println(f()) # expect: 1
+IO.println(f()) # expect: 2
+IO.println(f()) # expect: 3

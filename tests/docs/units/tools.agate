@@ -1,0 +1,6 @@
+# nontest
+
+class Debug { }
+class Log { }
+
+IO.println("Tools are loaded")

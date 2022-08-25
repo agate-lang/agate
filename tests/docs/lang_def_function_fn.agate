@@ -1,0 +1,5 @@
+def is_even = Fn.new {|n|
+  return n % 2 == 0
+}
+
+def is_odd = Fn.new {|n| !is_even(n) }

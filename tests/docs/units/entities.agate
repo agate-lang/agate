@@ -1,0 +1,7 @@
+# nontest
+
+class Hero { }
+class Villain { }
+class Orc { }
+class Troll { }
+class Tree { }

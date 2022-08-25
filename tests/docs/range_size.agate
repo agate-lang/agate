@@ -1,0 +1,2 @@
+IO.println((42..69).size)   # expect: 28
+IO.println((42...69).size)  # expect: 27

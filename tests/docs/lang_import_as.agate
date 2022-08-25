@@ -1,0 +1,2 @@
+import "scenery" for Tree
+import "entities" for Tree as Ent

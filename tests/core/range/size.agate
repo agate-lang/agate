@@ -1,0 +1,14 @@
+# Ordered range.
+IO.println((2..5).size) # expect: 4
+
+# Backwards range.
+IO.println((5..2).size) # expect: 4
+
+# Exclusive ordered range.
+IO.println((2...5).size) # expect: 3
+
+# Exclusive backwards range.
+IO.println((5...2).size) # expect: 3
+
+# Empty range
+IO.println((2...2).size) # expect: 0

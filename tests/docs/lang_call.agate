@@ -1,0 +1,4 @@
+def double(n) { 2 * n }
+
+IO.println(double(2))     # expect: 4
+IO.println(double(2, 3))  # expect: 4
