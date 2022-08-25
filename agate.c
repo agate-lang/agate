@@ -4742,6 +4742,51 @@ static bool agateCoreRangeMax(AgateVM *vm, int argc, AgateValue *args) {
   return true;
 }
 
+static bool agateCoreRangeContains(AgateVM *vm, int argc, AgateValue *args) {
+  AgateRange *range = agateAsRange(args[0]);
+
+  if (!agateIsInt(args[1])) {
+    args[0] = agateBoolValue(false);
+    return true;
+  }
+
+  int64_t value = agateAsInt(args[1]);
+
+  if (range->from == range->to && range->kind == AGATE_RANGE_EXCLUSIVE) {
+    args[0] = agateBoolValue(false);
+    return true;
+  }
+
+  if (range->kind == AGATE_RANGE_INCLUSIVE && value == range->to) {
+    args[0] = agateBoolValue(true);
+    return true;
+  }
+
+  if (value == range->from) {
+    args[0] = agateBoolValue(true);
+    return true;
+  }
+
+  int64_t min = agateMin(range->from, range->to);
+  int64_t max = agateMax(range->from, range->to);
+  args[0] = agateBoolValue(min < value && value < max);
+  return true;
+}
+
+static bool agateCoreRangeSize(AgateVM *vm, int argc, AgateValue *args) {
+  AgateRange *range = agateAsRange(args[0]);
+  int64_t min = agateMin(range->from, range->to);
+  int64_t max = agateMax(range->from, range->to);
+  int64_t size = max - min;
+
+  if (range->kind == AGATE_RANGE_INCLUSIVE) {
+    ++size;
+  }
+
+  args[0] = agateIntValue(size);
+  return true;
+}
+
 static bool agateCoreRangeIterate(AgateVM *vm, int argc, AgateValue *args) {
   assert(agateIsRange(args[0]));
   AgateRange *range = agateAsRange(args[0]);
@@ -5443,6 +5488,7 @@ static void agateLoadCoreUnit(AgateVM *vm) {
   agateClassBindPrimitive(vm, vm->random_class, "int(_,_)", agateCoreRandomInt2);
 
   vm->range_class = agateAsClass(agateUnitFindVariable(vm, core, "Range"));
+  agateClassBindPrimitive(vm, vm->range_class, "contains(_)", agateCoreRangeContains);
   agateClassBindPrimitive(vm, vm->range_class, "from", agateCoreRangeFrom);
   agateClassBindPrimitive(vm, vm->range_class, "hash", agateCoreRangeHash);
   agateClassBindPrimitive(vm, vm->range_class, "inclusive", agateCoreRangeInclusive);
@@ -5450,6 +5496,7 @@ static void agateLoadCoreUnit(AgateVM *vm) {
   agateClassBindPrimitive(vm, vm->range_class, "iterator_value(_)", agateCoreRangeIteratorValue);
   agateClassBindPrimitive(vm, vm->range_class, "max", agateCoreRangeMax);
   agateClassBindPrimitive(vm, vm->range_class, "min", agateCoreRangeMin);
+  agateClassBindPrimitive(vm, vm->range_class, "size", agateCoreRangeSize);
   agateClassBindPrimitive(vm, vm->range_class, "to", agateCoreRangeTo);
   agateClassBindPrimitive(vm, vm->range_class, "to_s", agateCoreRangeToS);
 

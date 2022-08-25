@@ -1,23 +1,30 @@
 # Ordered range.
 IO.println((2..5).contains(1)) # expect: false
 IO.println((2..5).contains(2)) # expect: true
+IO.println((2..5).contains(3)) # expect: true
 IO.println((2..5).contains(5)) # expect: true
 IO.println((2..5).contains(6)) # expect: false
 
 # Backwards range.
 IO.println((5..2).contains(1)) # expect: false
 IO.println((5..2).contains(2)) # expect: true
+IO.println((5..2).contains(3)) # expect: true
 IO.println((5..2).contains(5)) # expect: true
 IO.println((5..2).contains(6)) # expect: false
 
 # Exclusive ordered range.
 IO.println((2...5).contains(1)) # expect: false
 IO.println((2...5).contains(2)) # expect: true
+IO.println((2...5).contains(3)) # expect: true
 IO.println((2...5).contains(5)) # expect: false
 IO.println((2...5).contains(6)) # expect: false
 
 # Exclusive backwards range.
 IO.println((5...2).contains(1)) # expect: false
 IO.println((5...2).contains(2)) # expect: false
+IO.println((5...2).contains(3)) # expect: true
 IO.println((5...2).contains(5)) # expect: true
 IO.println((5...2).contains(6)) # expect: false
+
+# Empty range
+IO.println((2...2).contains(2)) # expect: false

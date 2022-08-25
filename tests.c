@@ -338,6 +338,7 @@ static AgateStatus agateTestRunInterpreter(AgateTest *self) {
 
   AgateVM *vm = agateExNewVM(&config);
   agateExUnitAddIncludePath(vm, "tests/language/unit");
+  agateExUnitAddIncludePath(vm, "tests/docs/units");
   AgateStatus status = agateCallString(vm, self->path, self->content.data);
 
   if (use_foreign) {

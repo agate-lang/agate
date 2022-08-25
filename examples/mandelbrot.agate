@@ -6,7 +6,7 @@ for (screen_y in 0...24) {
     def x0 = x
     def y0 = y
     def iter = 0
-    while (iter < colors.count - 1 && x0 * x0 + y0 * y0 <= 4.0) {
+    while (iter < colors.size - 1 && x0 * x0 + y0 * y0 <= 4.0) {
       def x1 = (x0 * x0) - (y0 * y0) + x
       def y1 = 2.0 * x0 * y0 + y
       x0 = x1
