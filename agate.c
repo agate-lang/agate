@@ -2433,12 +2433,6 @@ static bool AgateParseFloatDefault(const char *text, ptrdiff_t size, double *res
  * vm - run
  */
 
-static void agateResetStack(AgateVM *vm) {
-  vm->stack_top = vm->stack;
-  vm->frames_count = 0;
-  vm->open_upvalues = NULL;
-}
-
 static void agateEnsureStack(AgateVM *vm, ptrdiff_t needed) {
   if (vm->stack_capacity >= needed) {
     return;
@@ -6135,11 +6129,13 @@ AgateVM *agateNewVM(const AgateConfig *config) {
 
   vm->stack_capacity = AGATE_INITIAL_STACK_CAPACITY;
   vm->stack = agateAllocate(vm, AgateValue, vm->stack_capacity);
+  vm->stack_top = vm->stack;
 
   vm->frames_capacity = AGATE_INITIAL_FRAMES_CAPACITY;
   vm->frames = agateAllocate(vm, AgateCallFrame, vm->frames_capacity);
+  vm->frames_count = 0;
 
-  agateResetStack(vm);
+  vm->open_upvalues = NULL;
 
   vm->error = agateNilValue();
 
