@@ -734,6 +734,7 @@ static const char *AgateTestFiles[] = {
   "tests/language/map/trailing_comma.agate",
   "tests/language/method/arity.agate",
   "tests/language/method/call_name_too_long.agate",
+  "tests/language/method/call_operator.agate",
   "tests/language/method/duplicate_methods.agate",
   "tests/language/method/duplicate_static_methods.agate",
   "tests/language/method/empty_block.agate",

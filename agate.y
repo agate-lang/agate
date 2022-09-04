@@ -167,6 +167,7 @@ method_signature:
   | unary_operator
   | '[' subscript_parameters ']'
   | '[' subscript_parameters ']' '=' '(' IDENTIFIER ')'
+  | '(' parameters ')'
   ;
 
 decorator:

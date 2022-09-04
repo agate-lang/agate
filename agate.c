@@ -2931,18 +2931,38 @@ static inline bool agateMethodCall(AgateVM *vm, AgateClass *klass, ptrdiff_t sym
   return false;
 }
 
-static bool agateFunctionCall(AgateVM *vm, AgateValue value, int argc) {
-  if (!agateIsClosure(value)) {
-    vm->error = agateEntityValue(agateStringNewFormat(vm, "Can only call functions."));
-    return false;
+static bool agateFunctionCall(AgateVM *vm, AgateValue *args, int argc) {
+  if (agateIsClosure(args[0])) {
+    if (!agateCheckArity(vm, args[0], argc)) {
+      return false;
+    }
+
+    agateClosureCall(vm, agateAsClosure(args[0]), argc, AGATE_CALL_FRAME_INTERNAL);
+    return true;
   }
 
-  if (!agateCheckArity(vm, value, argc)) {
-    return false;
-  }
+  static const char *call_signatures[] = {
+    "()",
+    "(_)",
+    "(_,_)",
+    "(_,_,_)",
+    "(_,_,_,_)",
+    "(_,_,_,_,_)",
+    "(_,_,_,_,_,_)",
+    "(_,_,_,_,_,_,_)",
+    "(_,_,_,_,_,_,_,_)",
+    "(_,_,_,_,_,_,_,_,_)",
+    "(_,_,_,_,_,_,_,_,_,_)",
+    "(_,_,_,_,_,_,_,_,_,_,_)",
+    "(_,_,_,_,_,_,_,_,_,_,_,_)",
+    "(_,_,_,_,_,_,_,_,_,_,_,_,_)",
+    "(_,_,_,_,_,_,_,_,_,_,_,_,_,_)",
+    "(_,_,_,_,_,_,_,_,_,_,_,_,_,_,_)",
+  };
 
-  agateClosureCall(vm, agateAsClosure(value), argc, AGATE_CALL_FRAME_INTERNAL);
-  return true;
+  ptrdiff_t symbol = agateSymbolTableEnsure(&vm->method_names, call_signatures[argc - 1], strlen(call_signatures[argc - 1]), vm);
+  AgateClass *klass = agateValueGetClass(args[0], vm);
+  return agateMethodCall(vm, klass, symbol, argc, args);
 }
 
 static AgateStatus agateRun(AgateVM *vm) {
@@ -3143,7 +3163,7 @@ static AgateStatus agateRun(AgateVM *vm) {
         int argc = agateReadByte(frame);
         AgateValue *args = vm->stack_top - argc;
 
-        if (!agateFunctionCall(vm, args[0], argc)) {
+        if (!agateFunctionCall(vm, args, argc)) {
           AGATE_RUNTIME_ERROR();
         }
 
@@ -7839,6 +7859,18 @@ static void agateSubscriptSignature(AgateCompiler *compiler, AgateSignature *sig
   agateMaybeSetter(compiler, signature);
 }
 
+static void agateCallSignature(AgateCompiler *compiler, AgateSignature *signature) {
+  signature->kind = AGATE_SIG_METHOD;
+  signature->size = 0;
+
+  if (agateCompilerMatch(compiler, AGATE_TOKEN_RIGHT_PAREN)) {
+    return;
+  }
+
+  agateFinishParameterList(compiler, &signature->arity);
+  agateCompilerConsume(compiler, AGATE_TOKEN_RIGHT_PAREN, "Expect ')' after parameters.");
+}
+
 static void agateParameterList(AgateCompiler *compiler, AgateSignature *signature) {
   if (!agateCompilerMatch(compiler, AGATE_TOKEN_LEFT_PAREN)) {
     return;
@@ -8818,6 +8850,9 @@ static bool agateMethod(AgateCompiler *compiler, AgateVariable class_variable) {
       break;
     case AGATE_TOKEN_LEFT_BRACKET:
       agateSubscriptSignature(&method_compiler, &signature);
+      break;
+    case AGATE_TOKEN_LEFT_PAREN:
+      agateCallSignature(&method_compiler, &signature);
       break;
     default:
       agateError(compiler, "Expect method definition.");

@@ -1,2 +1,2 @@
 # result: runtime error
-[1, 2, 3].each("string") # expect: Can only call functions.
+[1, 2, 3].each("string") # expect: String does not implement '(_)'.

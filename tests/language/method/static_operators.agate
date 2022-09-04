@@ -30,6 +30,11 @@ class Foo {
   static [a]=(value) { "%(this) 1-subscript setter %(a) = %(value)" }
   static [a, b]=(value) { "%(this) 2-subscript setter %(a) %(b) = %(value)" }
   static [a, b, c]=(value) { "%(this) 3-subscript setter %(a) %(b) %(c) = %(value)" }
+
+  static () { "0 parameter" }
+  static (a) { "1 parameter %(a)" }
+  static (a, b) { "2 parameters %(a) %(b)" }
+  static (a, b, c) { "3 parameters %(a) %(b) %(c)" }
 }
 
 IO.println(Foo + "a") # expect: infix Foo + a
@@ -62,3 +67,8 @@ IO.println(Foo["a", "b", "c"]) # expect: Foo 3-subscript a b c
 IO.println(Foo["a"] = "value") # expect: Foo 1-subscript setter a = value
 IO.println(Foo["a", "b"] = "value") # expect: Foo 2-subscript setter a b = value
 IO.println(Foo["a", "b", "c"] = "value") # expect: Foo 3-subscript setter a b c = value
+
+IO.println(Foo()) # expect: 0 parameter
+IO.println(Foo("a")) # expect: 1 parameter a
+IO.println(Foo("a", "b")) # expect: 2 parameters a b
+IO.println(Foo("a", "b", "c")) # expect: 3 parameters a b c

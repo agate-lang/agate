@@ -1,0 +1,14 @@
+class Foo {
+  construct new() {}
+  () { "0 parameter" }
+  (a) { "1 parameter %(a)" }
+  (a, b) { "2 parameters %(a) %(b)" }
+  (a, b, c) { "3 parameters %(a) %(b) %(c)" }
+}
+
+def foo = Foo.new()
+IO.println(foo()) # expect: 0 parameter
+IO.println(foo("a")) # expect: 1 parameter a
+IO.println(foo("a", "b")) # expect: 2 parameters a b
+IO.println(foo("a", "b", "c")) # expect: 3 parameters a b c
+
