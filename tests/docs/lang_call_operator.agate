@@ -1,0 +1,9 @@
+class Callable {
+  construct new() { }
+  (a) {
+    IO.println("Call with %(a)")
+  }
+}
+
+def c = Callable.new()
+c(1) # expect: Call with 1

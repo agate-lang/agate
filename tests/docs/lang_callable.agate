@@ -1,0 +1,14 @@
+def regular(x) {
+  IO.println(x)
+}
+
+class Callable {
+  static (x) {
+    IO.println(x)
+  }
+}
+
+def invoke(fn, arg) { fn(arg) }
+
+invoke(regular, "regular")    # expect: regular
+invoke(Callable, "callable")  # expect: callable
