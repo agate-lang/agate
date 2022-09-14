@@ -245,6 +245,14 @@ AgateUnitHandler agateExUnitHandler(AgateVM *vm, const char *name) {
   return handler;
 }
 
+const char *agateExUnitLoad(AgateVM *vm, const char *unit_name) {
+  return agateUnitLoad(unit_name, agateGetUserData(vm));
+}
+
+void agateExUnitRelease(AgateVM *vm, const char *unit_text) {
+  agateUnitRelease(unit_text, agateGetUserData(vm));
+}
+
 // foreign class
 
 void agateExForeignClassAddHandler(AgateVM *vm, AgateForeignClassHandlerFunc func, const char *unit_name) {

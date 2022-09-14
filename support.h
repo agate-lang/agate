@@ -9,6 +9,9 @@
 bool agateExUnitAddIncludePath(AgateVM *vm, const char *path);
 AgateUnitHandler agateExUnitHandler(AgateVM *vm, const char *name);
 
+const char *agateExUnitLoad(AgateVM *vm, const char *unit_name);
+void agateExUnitRelease(AgateVM *vm, const char *unit_text);
+
 // foreign class
 
 void agateExForeignClassAddHandler(AgateVM *vm, AgateForeignClassHandlerFunc func, const char *unit_name);
