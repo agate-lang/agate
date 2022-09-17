@@ -1,0 +1,72 @@
+class ForeignClass {
+  foreign static finalized
+}
+
+# Class with a default constructor.
+foreign class Counter {
+  construct new() {}
+  foreign increment(amount)
+  foreign value
+}
+
+def counter = Counter.new()
+IO.println(counter.value) # expect: 0
+counter.increment(3.1)
+IO.println(counter.value) # expect: 3.1
+counter.increment(1.2)
+IO.println(counter.value) # expect: 4.3
+
+# Foreign classes can inherit a class as long as it has no fields.
+class PointBase {
+  inherited() {
+    IO.println("inherited method")
+  }
+}
+
+# Class with non-default constructor.
+foreign class Point is PointBase {
+  construct new() {
+    IO.println("default")
+  }
+
+  construct new(x, y, z) {
+    IO.println("%(x), %(y), %(z)")
+  }
+
+  foreign translate(x, y, z)
+  foreign to_s
+}
+
+def p = Point.new(1.0, 2.0, 3.0) # expect: 1, 2, 3
+IO.println(p) # expect: (1, 2, 3)
+p.translate(3.0, 4.0, 5.0)
+IO.println(p) # expect: (4, 6, 8)
+
+p = Point.new() # expect: default
+IO.println(p) # expect: (0, 0, 0)
+
+p.inherited() # expect: inherited method
+
+# Class with a finalizer.
+foreign class Resource {
+  construct new() {}
+}
+
+def resources = [
+  Resource.new(),
+  Resource.new(),
+  Resource.new()
+]
+
+System.gc()
+IO.println(ForeignClass.finalized) # expect: 0
+
+resources.erase(-1)
+
+System.gc()
+IO.println(ForeignClass.finalized) # expect: 1
+
+resources.clear()
+
+System.gc()
+IO.println(ForeignClass.finalized) # expect: 3

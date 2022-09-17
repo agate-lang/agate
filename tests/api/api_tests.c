@@ -5,6 +5,7 @@
 #include "arrays.h"
 #include "call.h"
 #include "call_foreign.h"
+#include "foreign_class.h"
 #include "handle.h"
 #include "maps.h"
 #include "reentrancy.h"
@@ -16,6 +17,10 @@ bool agateTestUseForeign(const char *path) {
 
 AgateForeignClassHandler agateTestForeignClassHandler(AgateVM *vm, const char *unit_name, const char *class_name) {
   AgateForeignClassHandler handler = { NULL, NULL };
+
+  if (strcmp(unit_name, "tests/api/foreign_class.agate") == 0) {
+    return agateTestForeignClassForeignClassHandler(class_name);
+  }
 
   if (strcmp(unit_name, "tests/api/maps.agate") == 0) {
     return agateTestMapsForeignClassHandler(class_name);
@@ -35,6 +40,10 @@ AgateForeignMethodFunc agateTestForeignMethodHandler(AgateVM *vm, const char *un
 
   if (strcmp(unit_name, "tests/api/call_foreign.agate") == 0) {
     return agateTestCallForeignForeignMethodHandler(class_name, kind, signature);
+  }
+
+  if (strcmp(unit_name, "tests/api/foreign_class.agate") == 0) {
+    return agateTestForeignClassForeignMethodHandler(class_name, kind, signature);
   }
 
   if (strcmp(unit_name, "tests/api/handle.agate") == 0) {
