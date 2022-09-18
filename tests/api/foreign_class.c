@@ -24,6 +24,13 @@ static ptrdiff_t agateTestCounterForeignAllocate(AgateVM *vm, const char *unit_n
   return sizeof(double);
 }
 
+static void counterInitNew(AgateVM *vm) {
+  ptrdiff_t counter_slot = agateSlotForArg(vm, 0);
+  double *value = agateSlotGetForeign(vm, counter_slot);
+
+  *value = 0.0;
+}
+
 static void counterIncrement(AgateVM *vm) {
   ptrdiff_t counter_slot = agateSlotForArg(vm, 0);
   double *value = agateSlotGetForeign(vm, counter_slot);
@@ -54,6 +61,15 @@ struct Point {
 
 static ptrdiff_t agateTestPointForeignAllocate(AgateVM *vm, const char *unit_name, const char *class_name) {
   return sizeof(struct Point);
+}
+
+static void pointConstruct(AgateVM *vm) {
+  ptrdiff_t point_slot = agateSlotForArg(vm, 0);
+  struct Point *point = agateSlotGetForeign(vm, point_slot);
+
+  point->x = agateSlotGetFloat(vm, agateSlotForArg(vm, 1));
+  point->y = agateSlotGetFloat(vm, agateSlotForArg(vm, 2));
+  point->z = agateSlotGetFloat(vm, agateSlotForArg(vm, 3));
 }
 
 static void pointTranslate(AgateVM *vm) {
@@ -132,6 +148,10 @@ AgateForeignMethodFunc agateTestForeignClassForeignMethodHandler(const char *cla
   if (strcmp(class_name, "Counter") == 0) {
     assert(kind == AGATE_FOREIGN_METHOD_INSTANCE);
 
+    if (strcmp(signature, "init new()") == 0) {
+      return counterInitNew;
+    }
+
     if (strcmp(signature, "increment(_)") == 0) {
       return counterIncrement;
     }
@@ -143,6 +163,10 @@ AgateForeignMethodFunc agateTestForeignClassForeignMethodHandler(const char *cla
 
   if (strcmp(class_name, "Point") == 0) {
     assert(kind == AGATE_FOREIGN_METHOD_INSTANCE);
+
+    if (strcmp(signature, "__construct(_,_,_)") == 0) {
+      return pointConstruct;
+    }
 
     if (strcmp(signature, "translate(_,_,_)") == 0) {
       return pointTranslate;

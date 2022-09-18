@@ -4,7 +4,7 @@ class ForeignClass {
 
 # Class with a default constructor.
 foreign class Counter {
-  construct new() {}
+  foreign construct new()
   foreign increment(amount)
   foreign value
 }
@@ -26,12 +26,16 @@ class PointBase {
 # Class with non-default constructor.
 foreign class Point is PointBase {
   construct new() {
+    .__construct(0.0, 0.0, 0.0)
     IO.println("default")
   }
 
   construct new(x, y, z) {
+    .__construct(x, y, z)
     IO.println("%(x), %(y), %(z)")
   }
+
+  foreign __construct(x, y, z)
 
   foreign translate(x, y, z)
   foreign to_s

@@ -155,6 +155,7 @@ methods:
 
 method:
     KW_CONSTRUCT IDENTIFIER '(' parameters ')' block
+  | KW_FOREIGN KW_CONSTRUCT IDENTIFIER '(' parameters ')'
   | decorator method_signature block
   | KW_FOREIGN decorator method_signature
   ;
