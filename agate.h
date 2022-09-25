@@ -210,6 +210,8 @@ void agateSlotSetChar(AgateVM *vm, ptrdiff_t slot, uint32_t value);
 void agateSlotSetInt(AgateVM *vm, ptrdiff_t slot, int64_t value);
 void agateSlotSetFloat(AgateVM *vm, ptrdiff_t slot, double value);
 
+void *agateSlotSetForeign(AgateVM *vm, ptrdiff_t slot, ptrdiff_t class_slot);
+
 void agateSlotSetString(AgateVM *vm, ptrdiff_t slot, const char *text);
 void agateSlotSetStringSize(AgateVM *vm, ptrdiff_t slot, const char *text, ptrdiff_t size);
 // end::slot_set_primitive[]

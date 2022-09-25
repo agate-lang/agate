@@ -298,8 +298,8 @@ typedef enum {
   AGATE_METHOD_NONE,
   AGATE_METHOD_NATIVE,
   AGATE_METHOD_FOREIGN,
-  AGATE_METHOD_FOREIN_ALLOCATE,
-  AGATE_METHOD_FOREIN_DESTROY,
+  AGATE_METHOD_FOREIGN_ALLOCATE,
+  AGATE_METHOD_FOREIGN_DESTROY,
   AGATE_METHOD_CLOSURE,
 } AgateMethodKind;
 
@@ -1696,7 +1696,7 @@ static AgateForeign *agateForeignNew(AgateVM *vm, AgateClass *klass) {
 
   assert(symbol < klass->methods.size);
   AgateMethod *method = &klass->methods.data[symbol];
-  assert(method->kind == AGATE_METHOD_FOREIN_ALLOCATE);
+  assert(method->kind == AGATE_METHOD_FOREIGN_ALLOCATE);
 
   ptrdiff_t data_size = method->as.foreign_allocate(vm, klass->unit->name->data, klass->name->data);
 
@@ -1725,7 +1725,7 @@ static void agateForeignDestroy(AgateVM *vm, AgateForeign *foreign) {
     return;
   }
 
-  assert(method->kind == AGATE_METHOD_FOREIN_DESTROY);
+  assert(method->kind == AGATE_METHOD_FOREIGN_DESTROY);
   method->as.foreign_destroy(vm, klass->unit->name->data, klass->name->data, foreign->data);
 }
 
@@ -2758,7 +2758,7 @@ static void agateBindForeignClass(AgateVM *vm, AgateClass *klass, AgateUnit *uni
 
   if (handler.allocate != NULL) {
     AgateMethod method;
-    method.kind = AGATE_METHOD_FOREIN_ALLOCATE;
+    method.kind = AGATE_METHOD_FOREIGN_ALLOCATE;
     method.as.foreign_allocate = handler.allocate;
     agateClassBindMethod(vm, klass, allocate_symbol, method);
   }
@@ -2767,7 +2767,7 @@ static void agateBindForeignClass(AgateVM *vm, AgateClass *klass, AgateUnit *uni
 
   if (handler.destroy != NULL) {
     AgateMethod method;
-    method.kind = AGATE_METHOD_FOREIN_DESTROY;
+    method.kind = AGATE_METHOD_FOREIGN_DESTROY;
     method.as.foreign_destroy = handler.destroy;
     agateClassBindMethod(vm, klass, destroy_symbol, method);
   }
@@ -5853,6 +5853,19 @@ void agateSlotSetInt(AgateVM *vm, ptrdiff_t slot, int64_t value) {
 
 void agateSlotSetFloat(AgateVM *vm, ptrdiff_t slot, double value) {
   agateSlotSetValue(vm, slot, agateFloatValue(value));
+}
+
+void *agateSlotSetForeign(AgateVM *vm, ptrdiff_t slot, ptrdiff_t class_slot) {
+  assert(agateIsSlotValid(vm, slot));
+  assert(agateIsSlotValid(vm, class_slot));
+  assert(agateIsClass(vm->stack[class_slot]));
+
+  AgateClass *klass = agateAsClass(vm->stack[class_slot]);
+  assert(klass->field_count == -1);
+
+  AgateForeign *foreign = agateForeignNew(vm, klass);
+  vm->stack[slot] = agateEntityValue(foreign);
+  return foreign->data;
 }
 
 void agateSlotSetString(AgateVM *vm, ptrdiff_t slot, const char *text) {
