@@ -4064,7 +4064,14 @@ static bool agateCoreArrayNewWithSize(AgateVM *vm, int argc, AgateValue *args) {
     return false;
   }
 
-  args[0] = agateEntityValue(agateArrayNewWithSize(vm, agateAsInt(args[1]), args[2]));
+  ptrdiff_t size = agateAsInt(args[1]);
+
+  if (size < 0) {
+    vm->error = AGATE_CONST_STRING(vm, "Size cannot be negative.");
+    return false;
+  }
+
+  args[0] = agateEntityValue(agateArrayNewWithSize(vm, size, args[2]));
   return true;
 }
 
