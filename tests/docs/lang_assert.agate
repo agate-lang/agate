@@ -1,0 +1,2 @@
+def n = 3
+assert(n is Int, "%(n) should be an Int")
