@@ -1602,6 +1602,15 @@ static AgateArray *agateArrayNew(AgateVM *vm) {
   return array;
 }
 
+static AgateArray *agateArrayNewWithSize(AgateVM *vm, ptrdiff_t size, AgateValue value) {
+  AgateArray *array = agateAllocateEntity(vm, AgateArray, AGATE_ENTITY_ARRAY, vm->array_class);
+  agateValueArrayCreate(&array->elements);
+  agatePushRoot(vm, (AgateEntity *) array);
+  agateValueArrayResize(&array->elements, size, value, vm);
+  agatePopRoot(vm);
+  return array;
+}
+
 // Class
 
 static AgateClass *agateClassNewBare(AgateVM *vm, AgateUnit *unit, int field_count, AgateString *name) {
@@ -4050,6 +4059,15 @@ static bool agateCoreArrayNew(AgateVM *vm, int argc, AgateValue *args) {
   return true;
 }
 
+static bool agateCoreArrayNewWithSize(AgateVM *vm, int argc, AgateValue *args) {
+  if (!agateValidateInt(vm, args[1], "Size")) {
+    return false;
+  }
+
+  args[0] = agateEntityValue(agateArrayNewWithSize(vm, agateAsInt(args[1]), args[2]));
+  return true;
+}
+
 static bool agateCoreArrayAppend(AgateVM *vm, int argc, AgateValue *args) {
   agateValueArrayAppend(&agateAsArray(args[0])->elements, args[1], vm);
   args[0] = args[1];
@@ -5335,6 +5353,7 @@ static void agateLoadCoreUnit(AgateVM *vm) {
 
   vm->array_class = agateAsClass(agateUnitFindVariable(vm, core, "Array"));
   agateClassBindPrimitive(vm, vm->array_class->base.type, "new()", agateCoreArrayNew);
+  agateClassBindPrimitive(vm, vm->array_class->base.type, "new(_,_)", agateCoreArrayNewWithSize);
   agateClassBindPrimitive(vm, vm->array_class, "__put(_)", agateCoreArrayPut);
   agateClassBindPrimitive(vm, vm->array_class, "[_]", agateCoreArraySubscriptGetter);
   agateClassBindPrimitive(vm, vm->array_class, "[_]=(_)", agateCoreArraySubscriptSetter);
