@@ -1,0 +1,4 @@
+IO.println(Object.has_method(1, "to_f")) # expect: true
+IO.println(Object.has_method(1, "to_a")) # expect: false
+IO.println(Object.has_method(1, "to_x")) # expect: false
+IO.println(Object.has_method(Object, "has_method(_,_)")) # expect: true

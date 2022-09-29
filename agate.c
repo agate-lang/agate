@@ -3560,6 +3560,74 @@ static bool agateCoreObjectToS(AgateVM *vm, int argc, AgateValue *args) {
   return true;
 }
 
+static bool agateCoreObjectField2(AgateVM *vm, int argc, AgateValue *args) {
+  if (!agateIsInstance(args[1])) {
+    vm->error = AGATE_CONST_STRING(vm, "Object must be an instance of a native class.");
+    return false;
+  }
+
+  AgateInstance *instance = agateAsInstance(args[1]);
+
+  if (!agateValidateInt(vm, args[2], "Index")) {
+    return false;
+  }
+
+  ptrdiff_t index = agateAsInt(args[2]);
+
+  if (index < 0 || index >= instance->field_count) {
+    args[0] = agateNilValue();
+    return true;
+  }
+
+  args[0] = instance->fields[index];
+  return true;
+}
+
+static bool agateCoreObjectField3(AgateVM *vm, int argc, AgateValue *args) {
+  if (!agateIsInstance(args[1])) {
+    vm->error = AGATE_CONST_STRING(vm, "Object must be an instance of a native class.");
+    return false;
+  }
+
+  AgateInstance *instance = agateAsInstance(args[1]);
+
+  if (!agateValidateInt(vm, args[2], "Index")) {
+    return false;
+  }
+
+  ptrdiff_t index = agateAsInt(args[2]);
+
+  if (0 <= index && index < instance->field_count) {
+    instance->fields[index] = args[3];
+  }
+
+  args[0] = args[3];
+  return true;
+}
+
+static bool agateCoreObjectHasMethod(AgateVM *vm, int argc, AgateValue *args) {
+  if (!agateValidateString(vm, args[2], "Signature")) {
+    return false;
+  }
+
+  AgateString *signature = agateAsString(args[2]);
+  ptrdiff_t symbol = agateSymbolTableFind(&vm->method_names, signature->data, signature->size);
+
+  if (symbol == -1) {
+    args[0] = agateBoolValue(false);
+    return true;
+  }
+
+  AgateClass *klass = agateValueGetClass(args[1], vm);
+
+  if (symbol >= klass->methods.size) {
+    args[0] = agateBoolValue(false);
+    return true;
+  }
+
+  args[0] = agateBoolValue(klass->methods.data[symbol].kind != AGATE_METHOD_NONE);
+  return true;
+}
 
 // Class
 
@@ -5348,6 +5416,9 @@ static void agateLoadCoreUnit(AgateVM *vm) {
   agateClassBindPrimitive(vm, vm->class_class, "to_s", agateCoreClassToS);
 
   AgateClass *object_metaclass = agateClassNewBasic(vm, core, "Object metaclass");
+  agateClassBindPrimitive(vm, object_metaclass, "field(_,_)", agateCoreObjectField2);
+  agateClassBindPrimitive(vm, object_metaclass, "field(_,_,_)", agateCoreObjectField3);
+  agateClassBindPrimitive(vm, object_metaclass, "has_method(_,_)", agateCoreObjectHasMethod);
   agateClassBindPrimitive(vm, object_metaclass, "same(_,_)", agateCoreObjectSame);
 
   vm->object_class->base.type = object_metaclass;

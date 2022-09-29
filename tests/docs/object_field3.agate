@@ -1,0 +1,13 @@
+class Vec {
+  construct new() {
+    @x = 42.0
+    @y = 69.0
+  }
+  x { @x }
+  y { @y }
+}
+def v = Vec.new()
+Object.field(v, 0, 13.0)
+Object.field(v, 1, 21.0)
+IO.println(v.x) # expect: 13
+IO.println(v.y) # expect: 21

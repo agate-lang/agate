@@ -1,0 +1,10 @@
+class Vec {
+  construct new() {
+    @x = 42.0
+    @y = 69.0
+  }
+}
+def v = Vec.new()
+IO.println(Object.field(v, 0)) # expect: 42
+IO.println(Object.field(v, 1)) # expect: 69
+IO.println(Object.field(v, 2)) # expect: nil
