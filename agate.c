@@ -5811,19 +5811,29 @@ ptrdiff_t agateSlotCount(AgateVM *vm) {
 ptrdiff_t agateSlotAllocate(AgateVM *vm) {
   ptrdiff_t needed = (vm->stack_top - vm->stack) + 1;
   agateEnsureStack(vm, needed);
-  ptrdiff_t slot = vm->stack_top - vm->stack;
+  AgateCallFrame *frame = agateCurrentCallFrame(vm);
+  ptrdiff_t slot = vm->stack_top - frame->stack_start;
   ++vm->stack_top;
   return slot;
 }
 
 static inline bool agateIsSlotValid(AgateVM *vm, ptrdiff_t slot) {
   AgateCallFrame *frame = agateCurrentCallFrame(vm);
-  return (frame->stack_start - vm->stack) <= slot && slot < (vm->stack_top - vm->stack);
+  return 0 <= slot && slot < (vm->stack_top - frame->stack_start);
+}
+
+static inline AgateValue agateSlotGet(AgateVM *vm, ptrdiff_t slot) {
+  return agateCurrentCallFrame(vm)->stack_start[slot];
+}
+
+static inline void agateSlotSet(AgateVM *vm, ptrdiff_t slot, AgateValue value) {
+  agateCurrentCallFrame(vm)->stack_start[slot] = value;
 }
 
 AgateType agateSlotType(AgateVM *vm, ptrdiff_t slot) {
   assert(agateIsSlotValid(vm, slot));
-  switch (vm->stack[slot].kind) {
+  AgateValue value = agateSlotGet(vm, slot);
+  switch (value.kind) {
     case AGATE_VALUE_NIL:
       return AGATE_TYPE_NIL;
     case AGATE_VALUE_BOOL:
@@ -5835,7 +5845,7 @@ AgateType agateSlotType(AgateVM *vm, ptrdiff_t slot) {
     case AGATE_VALUE_FLOAT:
       return AGATE_TYPE_FLOAT;
     case AGATE_VALUE_ENTITY:
-      switch (agateEntityKind(vm->stack[slot])) {
+      switch (agateEntityKind(value)) {
         case AGATE_ENTITY_ARRAY:
           return AGATE_TYPE_ARRAY;
         case AGATE_ENTITY_FOREIGN:
@@ -5854,62 +5864,59 @@ AgateType agateSlotType(AgateVM *vm, ptrdiff_t slot) {
   return AGATE_TYPE_UNKNOWN;
 }
 
-ptrdiff_t agateSlotForArg(AgateVM *vm, ptrdiff_t i) {
-  AgateCallFrame *frame = agateCurrentCallFrame(vm);
-  assert(0 <= i && i < (vm->stack_top - frame->stack_start));
-  return (frame->stack_start - vm->stack) + i;
-}
-
-ptrdiff_t agateSlotForReturn(AgateVM *vm) {
-  return agateSlotForArg(vm, 0);
-}
-
 void agateSlotCopy(AgateVM *vm, ptrdiff_t dest, ptrdiff_t orig) {
   assert(agateIsSlotValid(vm, dest));
   assert(agateIsSlotValid(vm, orig));
-  vm->stack[dest] = vm->stack[orig];
+  agateSlotSet(vm, dest, agateSlotGet(vm, orig));
 }
 
 bool agateSlotGetBool(AgateVM *vm, ptrdiff_t slot) {
   assert(agateIsSlotValid(vm, slot));
-  assert(agateIsBool(vm->stack[slot]));
-  return agateAsBool(vm->stack[slot]);
+  AgateValue value = agateSlotGet(vm, slot);
+  assert(agateIsBool(value));
+  return agateAsBool(value);
 }
 
 uint32_t agateSlotGetChar(AgateVM *vm, ptrdiff_t slot) {
   assert(agateIsSlotValid(vm, slot));
-  assert(agateIsChar(vm->stack[slot]));
-  return agateAsChar(vm->stack[slot]);
+  AgateValue value = agateSlotGet(vm, slot);
+  assert(agateIsChar(value));
+  return agateAsChar(value);
 }
 
 int64_t agateSlotGetInt(AgateVM *vm, ptrdiff_t slot) {
   assert(agateIsSlotValid(vm, slot));
-  assert(agateIsInt(vm->stack[slot]));
-  return agateAsInt(vm->stack[slot]);
+  AgateValue value = agateSlotGet(vm, slot);
+  assert(agateIsInt(value));
+  return agateAsInt(value);
 }
 
 double agateSlotGetFloat(AgateVM *vm, ptrdiff_t slot) {
   assert(agateIsSlotValid(vm, slot));
-  assert(agateIsFloat(vm->stack[slot]));
-  return agateAsFloat(vm->stack[slot]);
+  AgateValue value = agateSlotGet(vm, slot);
+  assert(agateIsFloat(value));
+  return agateAsFloat(value);
 }
 
 void *agateSlotGetForeign(AgateVM *vm, ptrdiff_t slot) {
   assert(agateIsSlotValid(vm, slot));
-  assert(agateIsForeign(vm->stack[slot]));
-  return agateAsForeign(vm->stack[slot])->data;
+  AgateValue value = agateSlotGet(vm, slot);
+  assert(agateIsForeign(value));
+  return agateAsForeign(value)->data;
 }
 
 const char *agateSlotGetString(AgateVM *vm, ptrdiff_t slot) {
   assert(agateIsSlotValid(vm, slot));
-  assert(agateIsString(vm->stack[slot]));
-  return agateAsCString(vm->stack[slot]);
+  AgateValue value = agateSlotGet(vm, slot);
+  assert(agateIsString(value));
+  return agateAsCString(value);
 }
 
 const char *agateSlotGetStringSize(AgateVM *vm, ptrdiff_t slot, ptrdiff_t *size) {
   assert(agateIsSlotValid(vm, slot));
-  assert(agateIsString(vm->stack[slot]));
-  AgateString *string = agateAsString(vm->stack[slot]);
+  AgateValue value = agateSlotGet(vm, slot);
+  assert(agateIsString(value));
+  AgateString *string = agateAsString(value);
 
   if (size != NULL) {
     *size = string->size;
@@ -5920,147 +5927,167 @@ const char *agateSlotGetStringSize(AgateVM *vm, ptrdiff_t slot, ptrdiff_t *size)
 
 AgateHandle *agateSlotGetHandle(AgateVM *vm, ptrdiff_t slot) {
   assert(agateIsSlotValid(vm, slot));
-  return agateHandleNew(vm, vm->stack[slot]);
+  return agateHandleNew(vm, agateSlotGet(vm, slot));
 }
 
 void agateReleaseHandle(AgateVM *vm, AgateHandle *handle) {
   agateHandleDelete(vm, handle);
 }
 
-static inline void agateSlotSetValue(AgateVM *vm, ptrdiff_t slot, AgateValue value) {
-  assert(agateIsSlotValid(vm, slot));
-  vm->stack[slot] = value;
-}
-
 void agateSlotSetNil(AgateVM *vm, ptrdiff_t slot) {
-  agateSlotSetValue(vm, slot, agateNilValue());
+  assert(agateIsSlotValid(vm, slot));
+  agateSlotSet(vm, slot, agateNilValue());
 }
 
 void agateSlotSetBool(AgateVM *vm, ptrdiff_t slot, bool value) {
-  agateSlotSetValue(vm, slot, agateBoolValue(value));
+  assert(agateIsSlotValid(vm, slot));
+  agateSlotSet(vm, slot, agateBoolValue(value));
 }
 
 void agateSlotSetChar(AgateVM *vm, ptrdiff_t slot, uint32_t value) {
-  agateSlotSetValue(vm, slot, agateCharValue(value));
+  assert(agateIsSlotValid(vm, slot));
+  agateSlotSet(vm, slot, agateCharValue(value));
 }
 
 void agateSlotSetInt(AgateVM *vm, ptrdiff_t slot, int64_t value) {
-  agateSlotSetValue(vm, slot, agateIntValue(value));
+  assert(agateIsSlotValid(vm, slot));
+  agateSlotSet(vm, slot, agateIntValue(value));
 }
 
 void agateSlotSetFloat(AgateVM *vm, ptrdiff_t slot, double value) {
-  agateSlotSetValue(vm, slot, agateFloatValue(value));
+  assert(agateIsSlotValid(vm, slot));
+  agateSlotSet(vm, slot, agateFloatValue(value));
 }
 
 void *agateSlotSetForeign(AgateVM *vm, ptrdiff_t slot, ptrdiff_t class_slot) {
   assert(agateIsSlotValid(vm, slot));
   assert(agateIsSlotValid(vm, class_slot));
-  assert(agateIsClass(vm->stack[class_slot]));
 
-  AgateClass *klass = agateAsClass(vm->stack[class_slot]);
+  AgateValue class_value = agateSlotGet(vm, class_slot);
+  assert(agateIsClass(class_value));
+
+  AgateClass *klass = agateAsClass(class_value);
   assert(klass->field_count == -1);
 
   AgateForeign *foreign = agateForeignNew(vm, klass);
-  vm->stack[slot] = agateEntityValue(foreign);
+  agateSlotSet(vm, slot, agateEntityValue(foreign));
   return foreign->data;
 }
 
 void agateSlotSetString(AgateVM *vm, ptrdiff_t slot, const char *text) {
-  agateSlotSetValue(vm, slot, agateEntityValue(agateStringNew(vm, text, strlen(text))));
+  assert(agateIsSlotValid(vm, slot));
+  agateSlotSet(vm, slot, agateEntityValue(agateStringNew(vm, text, strlen(text))));
 }
 
 void agateSlotSetStringSize(AgateVM *vm, ptrdiff_t slot, const char *text, ptrdiff_t size) {
-  agateSlotSetValue(vm, slot, agateEntityValue(agateStringNew(vm, text, size)));
+  assert(agateIsSlotValid(vm, slot));
+  agateSlotSet(vm, slot, agateEntityValue(agateStringNew(vm, text, size)));
 }
 
 void agateSlotSetHandle(AgateVM *vm, ptrdiff_t slot, AgateHandle *handle) {
+  assert(agateIsSlotValid(vm, slot));
   assert(handle != NULL);
-  agateSlotSetValue(vm, slot, handle->value);
+  agateSlotSet(vm, slot, handle->value);
 }
 
 void agateSlotArrayNew(AgateVM *vm, ptrdiff_t slot) {
-  agateSlotSetValue(vm, slot, agateEntityValue(agateArrayNew(vm)));
+  assert(agateIsSlotValid(vm, slot));
+  agateSlotSet(vm, slot, agateEntityValue(agateArrayNew(vm)));
 }
 
 ptrdiff_t agateSlotArraySize(AgateVM *vm, ptrdiff_t slot) {
   assert(agateIsSlotValid(vm, slot));
-  agateIsArray(vm->stack[slot]);
-  AgateArray *array = agateAsArray(vm->stack[slot]);
+  AgateValue value = agateSlotGet(vm, slot);
+  assert(agateIsArray(value));
+  AgateArray *array = agateAsArray(value);
   return array->elements.size;
 }
 
 void agateSlotArrayGet(AgateVM *vm, ptrdiff_t array_slot, ptrdiff_t index, ptrdiff_t element_slot) {
   assert(agateIsSlotValid(vm, array_slot));
   assert(agateIsSlotValid(vm, element_slot));
-  agateIsArray(vm->stack[array_slot]);
-  AgateArray *array = agateAsArray(vm->stack[array_slot]);
+
+  AgateValue array_value = agateSlotGet(vm, array_slot);
+  assert(agateIsArray(array_value));
+  AgateArray *array = agateAsArray(array_value);
 
   index = agateValidateIndexValue(vm, index, array->elements.size, "Index");
   assert(index != AGATE_INDEX_ERROR);
 
-  vm->stack[element_slot] = array->elements.data[index];
+  agateSlotSet(vm, element_slot, array->elements.data[index]);
 }
 
 void agateSlotArraySet(AgateVM *vm, ptrdiff_t array_slot, ptrdiff_t index, ptrdiff_t element_slot) {
   assert(agateIsSlotValid(vm, array_slot));
   assert(agateIsSlotValid(vm, element_slot));
-  agateIsArray(vm->stack[array_slot]);
-  AgateArray *array = agateAsArray(vm->stack[array_slot]);
+
+  AgateValue array_value = agateSlotGet(vm, array_slot);
+  assert(agateIsArray(array_value));
+  AgateArray *array = agateAsArray(array_value);
 
   index = agateValidateIndexValue(vm, index, array->elements.size, "Index");
   assert(index != AGATE_INDEX_ERROR);
 
-  array->elements.data[index] = vm->stack[element_slot];
+  array->elements.data[index] = agateSlotGet(vm, element_slot);
 }
 
 void agateSlotArrayInsert(AgateVM *vm, ptrdiff_t array_slot, ptrdiff_t index, ptrdiff_t element_slot) {
   assert(agateIsSlotValid(vm, array_slot));
   assert(agateIsSlotValid(vm, element_slot));
-  agateIsArray(vm->stack[array_slot]);
-  AgateArray *array = agateAsArray(vm->stack[array_slot]);
+
+  AgateValue array_value = agateSlotGet(vm, array_slot);
+  assert(agateIsArray(array_value));
+  AgateArray *array = agateAsArray(array_value);
 
   index = agateValidateIndexValue(vm, index, array->elements.size + 1, "Index");
   assert(index != AGATE_INDEX_ERROR);
 
-  agateValueArrayInsert(&array->elements, index, vm->stack[element_slot], vm);
+  agateValueArrayInsert(&array->elements, index, agateSlotGet(vm, element_slot), vm);
 }
 
 void agateSlotArrayErase(AgateVM *vm, ptrdiff_t array_slot, ptrdiff_t index, ptrdiff_t element_slot) {
   assert(agateIsSlotValid(vm, array_slot));
   assert(agateIsSlotValid(vm, element_slot));
-  agateIsArray(vm->stack[array_slot]);
-  AgateArray *array = agateAsArray(vm->stack[array_slot]);
+
+  AgateValue array_value = agateSlotGet(vm, array_slot);
+  assert(agateIsArray(array_value));
+  AgateArray *array = agateAsArray(array_value);
 
   index = agateValidateIndexValue(vm, index, array->elements.size, "Index");
   assert(index != AGATE_INDEX_ERROR);
 
   AgateValue erased = agateValueArrayErase(&array->elements, index);
-  vm->stack[element_slot] = erased;
+  agateSlotSet(vm, element_slot, erased);
 }
 
 void agateSlotMapNew(AgateVM *vm, ptrdiff_t slot) {
-  agateSlotSetValue(vm, slot, agateEntityValue(agateMapNew(vm)));
+  agateSlotSet(vm, slot, agateEntityValue(agateMapNew(vm)));
 }
 
 ptrdiff_t agateSlotMapSize(AgateVM *vm, ptrdiff_t slot) {
   assert(agateIsSlotValid(vm, slot));
-  assert(agateIsMap(vm->stack[slot]));
-  AgateMap *map = agateAsMap(vm->stack[slot]);
+  AgateValue value = agateSlotGet(vm, slot);
+  assert(agateIsMap(value));
+  AgateMap *map = agateAsMap(value);
   return map->members.size;
 }
 
 bool agateSlotMapContains(AgateVM *vm, ptrdiff_t map_slot, ptrdiff_t key_slot) {
   assert(agateIsSlotValid(vm, map_slot));
   assert(agateIsSlotValid(vm, key_slot));
-  assert(agateIsMap(vm->stack[map_slot]));
-  AgateMap *map = agateAsMap(vm->stack[map_slot]);
 
-  if (!agateHasNativeHash(vm->stack[key_slot])) {
+  AgateValue map_value = agateSlotGet(vm, map_slot);
+  assert(agateIsMap(map_value));
+  AgateMap *map = agateAsMap(map_value);
+
+  AgateValue key = agateSlotGet(vm, key_slot);
+
+  if (!agateHasNativeHash(key)) {
     vm->error = AGATE_CONST_STRING(vm, "Key must be a value type.");
     return false;
   }
 
-  AgateValue value = agateTableFind(&map->members, vm->stack[key_slot], agateValueHash(vm->stack[key_slot]));
+  AgateValue value = agateTableFind(&map->members, key, agateValueHash(key));
   return !agateIsUndefined(value);
 }
 
@@ -6068,9 +6095,12 @@ void agateSlotMapGet(AgateVM *vm, ptrdiff_t map_slot, ptrdiff_t key_slot, ptrdif
   assert(agateIsSlotValid(vm, map_slot));
   assert(agateIsSlotValid(vm, key_slot));
   assert(agateIsSlotValid(vm, value_slot));
-  assert(agateIsMap(vm->stack[map_slot]));
-  AgateMap *map = agateAsMap(vm->stack[map_slot]);
-  AgateValue key = vm->stack[key_slot];
+
+  AgateValue map_value = agateSlotGet(vm, map_slot);
+  assert(agateIsMap(map_value));
+  AgateMap *map = agateAsMap(map_value);
+
+  AgateValue key = agateSlotGet(vm, key_slot);
 
   if (!agateHasNativeHash(key)) {
     vm->error = AGATE_CONST_STRING(vm, "Key must be a value type.");
@@ -6083,23 +6113,26 @@ void agateSlotMapGet(AgateVM *vm, ptrdiff_t map_slot, ptrdiff_t key_slot, ptrdif
     value = agateNilValue();
   }
 
-  vm->stack[value_slot] = value;
+  agateSlotSet(vm, value_slot, value);
 }
 
 void agateSlotMapSet(AgateVM *vm, ptrdiff_t map_slot, ptrdiff_t key_slot, ptrdiff_t value_slot) {
   assert(agateIsSlotValid(vm, map_slot));
   assert(agateIsSlotValid(vm, key_slot));
   assert(agateIsSlotValid(vm, value_slot));
-  assert(agateIsMap(vm->stack[map_slot]));
-  AgateMap *map = agateAsMap(vm->stack[map_slot]);
-  AgateValue key = vm->stack[key_slot];
+
+  AgateValue map_value = agateSlotGet(vm, map_slot);
+  assert(agateIsMap(map_value));
+  AgateMap *map = agateAsMap(map_value);
+
+  AgateValue key = agateSlotGet(vm, key_slot);
 
   if (!agateHasNativeHash(key)) {
     vm->error = AGATE_CONST_STRING(vm, "Key must be a value type.");
     return;
   }
 
-  AgateValue value = vm->stack[value_slot];
+  AgateValue value = agateSlotGet(vm, value_slot);
   agateTableHashInsert(&map->members, key, value, vm);
 }
 
@@ -6107,9 +6140,12 @@ void agateSlotMapErase(AgateVM *vm, ptrdiff_t map_slot, ptrdiff_t key_slot, ptrd
   assert(agateIsSlotValid(vm, map_slot));
   assert(agateIsSlotValid(vm, key_slot));
   assert(agateIsSlotValid(vm, value_slot));
-  assert(agateIsMap(vm->stack[map_slot]));
-  AgateMap *map = agateAsMap(vm->stack[map_slot]);
-  AgateValue key = vm->stack[key_slot];
+
+  AgateValue map_value = agateSlotGet(vm, map_slot);
+  assert(agateIsMap(map_value));
+  AgateMap *map = agateAsMap(map_value);
+
+  AgateValue key = agateSlotGet(vm, key_slot);
 
   if (!agateHasNativeHash(key)) {
     vm->error = AGATE_CONST_STRING(vm, "Key must be a value type.");
@@ -6117,7 +6153,7 @@ void agateSlotMapErase(AgateVM *vm, ptrdiff_t map_slot, ptrdiff_t key_slot, ptrd
   }
 
   AgateValue erased = agateTableHashErase(&map->members, key);
-  vm->stack[value_slot] = erased;
+  agateSlotSet(vm, value_slot, erased);
 }
 
 bool agateHasUnit(AgateVM *vm, const char *unit_name) {
@@ -6163,12 +6199,12 @@ void agateGetVariable(AgateVM *vm, const char *unit_name, const char *variable_n
   ptrdiff_t symbol = agateSymbolTableFind(&unit->object_names, variable_name, strlen(variable_name));
   assert(symbol != -1);
 
-  agateSlotSetValue(vm, slot, unit->object_values.data[symbol]);
+  agateSlotSet(vm, slot, unit->object_values.data[symbol]);
 }
 
 void agateAbort(AgateVM *vm, ptrdiff_t slot) {
   assert(agateIsSlotValid(vm, slot));
-  vm->error = vm->stack[slot];
+  vm->error = agateSlotGet(vm, slot);
 }
 
 void *agateGetUserData(AgateVM *vm) {

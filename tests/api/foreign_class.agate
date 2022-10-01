@@ -53,7 +53,7 @@ p.inherited() # expect: inherited method
 
 # Class with a finalizer.
 foreign class Resource {
-  construct new() {}
+  foreign construct new()
 }
 
 def resources = [

@@ -48,17 +48,17 @@ static ptrdiff_t mapsPopulate(AgateVM *vm) {
 }
 
 static void mapsNewMap(AgateVM *vm) {
-  agateSlotMapNew(vm, agateSlotForReturn(vm));
+  agateSlotMapNew(vm, AGATE_RETURN_SLOT);
 }
 
 static void mapsInsert(AgateVM *vm) {
   ptrdiff_t map_slot = mapsPopulate(vm);
-  agateSlotCopy(vm, agateSlotForReturn(vm), map_slot);
+  agateSlotCopy(vm, AGATE_RETURN_SLOT, map_slot);
 }
 
 static void mapsContains2(AgateVM *vm) {
-  bool result = agateSlotMapContains(vm, agateSlotForArg(vm, 1), agateSlotForArg(vm, 2));
-  agateSlotSetBool(vm, agateSlotForReturn(vm), result);
+  bool result = agateSlotMapContains(vm, 1, 2);
+  agateSlotSetBool(vm, AGATE_RETURN_SLOT, result);
 }
 
 static void mapsContains(AgateVM *vm) {
@@ -68,7 +68,7 @@ static void mapsContains(AgateVM *vm) {
   agateSlotSetString(vm, key_slot, "England");
 
   bool result = agateSlotMapContains(vm, map_slot, key_slot);
-  agateSlotSetBool(vm, agateSlotForReturn(vm), result);
+  agateSlotSetBool(vm, AGATE_RETURN_SLOT, result);
 }
 
 static void mapsContainsFalse(AgateVM *vm) {
@@ -78,22 +78,22 @@ static void mapsContainsFalse(AgateVM *vm) {
   agateSlotSetString(vm, key_slot, "UnknownKey");
 
   bool result = agateSlotMapContains(vm, map_slot, key_slot);
-  agateSlotSetBool(vm, agateSlotForReturn(vm), result);
+  agateSlotSetBool(vm, AGATE_RETURN_SLOT, result);
 }
 
 static void mapsSize(AgateVM *vm) {
   ptrdiff_t map_slot = mapsPopulate(vm);
-  agateSlotSetInt(vm, agateSlotForReturn(vm), agateSlotMapSize(vm, map_slot));
+  agateSlotSetInt(vm, AGATE_RETURN_SLOT, agateSlotMapSize(vm, map_slot));
 }
 
 static void mapsSize1(AgateVM *vm) {
-  agateSlotSetInt(vm, agateSlotForReturn(vm), agateSlotMapSize(vm, agateSlotForArg(vm, 1)));
+  agateSlotSetInt(vm, AGATE_RETURN_SLOT, agateSlotMapSize(vm, 1));
 }
 
 static void mapsErase(AgateVM *vm) {
   ptrdiff_t key_slot = agateSlotAllocate(vm);
   agateSlotSetString(vm, key_slot, "key");
-  agateSlotMapErase(vm, agateSlotForArg(vm, 1), key_slot, agateSlotForReturn(vm));
+  agateSlotMapErase(vm, 1, key_slot, AGATE_RETURN_SLOT);
 }
 
 AgateForeignMethodFunc agateTestMapsForeignMethodHandler(const char *class_name, AgateForeignMethodKind kind, const char *signature) {

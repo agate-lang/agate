@@ -5,9 +5,8 @@
 #include <string.h>
 
 static void reentrancyCallHandle(AgateVM *vm) {
-  ptrdiff_t param_slot = agateSlotForArg(vm, 1);
-  assert(agateSlotType(vm, param_slot) == AGATE_TYPE_STRING);
-  AgateHandle *param_handle = agateSlotGetHandle(vm, param_slot);
+  assert(agateSlotType(vm, 1) == AGATE_TYPE_STRING);
+  AgateHandle *param_handle = agateSlotGetHandle(vm, 1);
   AgateHandle *print_handle = agateMakeCallHandle(vm, "print(_)");
 
   agateStackStart(vm);

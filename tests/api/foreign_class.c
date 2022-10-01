@@ -12,8 +12,7 @@
 static int g_finalized = 0;
 
 static void foreignClassFinalized(AgateVM *vm) {
-  ptrdiff_t return_slot = agateSlotForReturn(vm);
-  agateSlotSetInt(vm, return_slot, g_finalized);
+  agateSlotSetInt(vm, AGATE_RETURN_SLOT, g_finalized);
 }
 
 /*
@@ -24,29 +23,20 @@ static ptrdiff_t agateTestCounterForeignAllocate(AgateVM *vm, const char *unit_n
   return sizeof(double);
 }
 
-static void counterInitNew(AgateVM *vm) {
-  ptrdiff_t counter_slot = agateSlotForArg(vm, 0);
-  double *value = agateSlotGetForeign(vm, counter_slot);
-
+static void counterNew(AgateVM *vm) {
+  double *value = agateSlotGetForeign(vm, 0);
   *value = 0.0;
 }
 
 static void counterIncrement(AgateVM *vm) {
-  ptrdiff_t counter_slot = agateSlotForArg(vm, 0);
-  double *value = agateSlotGetForeign(vm, counter_slot);
-
-  ptrdiff_t increment_slot = agateSlotForArg(vm, 1);
-  double increment = agateSlotGetFloat(vm, increment_slot);
-
+  double *value = agateSlotGetForeign(vm, 0);
+  double increment = agateSlotGetFloat(vm, 1);
   *value += increment;
 }
 
 static void counterValue(AgateVM *vm) {
-  ptrdiff_t counter_slot = agateSlotForArg(vm, 0);
-  double *value = agateSlotGetForeign(vm, counter_slot);
-
-  ptrdiff_t return_slot = agateSlotForReturn(vm);
-  agateSlotSetFloat(vm, return_slot, *value);
+  double *value = agateSlotGetForeign(vm, 0);
+  agateSlotSetFloat(vm, AGATE_RETURN_SLOT, *value);
 }
 
 /*
@@ -64,33 +54,29 @@ static ptrdiff_t agateTestPointForeignAllocate(AgateVM *vm, const char *unit_nam
 }
 
 static void pointConstruct(AgateVM *vm) {
-  ptrdiff_t point_slot = agateSlotForArg(vm, 0);
-  struct Point *point = agateSlotGetForeign(vm, point_slot);
+  struct Point *point = agateSlotGetForeign(vm, 0);
 
-  point->x = agateSlotGetFloat(vm, agateSlotForArg(vm, 1));
-  point->y = agateSlotGetFloat(vm, agateSlotForArg(vm, 2));
-  point->z = agateSlotGetFloat(vm, agateSlotForArg(vm, 3));
+  point->x = agateSlotGetFloat(vm, 1);
+  point->y = agateSlotGetFloat(vm, 2);
+  point->z = agateSlotGetFloat(vm, 3);
 }
 
 static void pointTranslate(AgateVM *vm) {
-  ptrdiff_t point_slot = agateSlotForArg(vm, 0);
-  struct Point *point = agateSlotGetForeign(vm, point_slot);
+  struct Point *point = agateSlotGetForeign(vm, 0);
 
-  point->x += agateSlotGetFloat(vm, agateSlotForArg(vm, 1));
-  point->y += agateSlotGetFloat(vm, agateSlotForArg(vm, 2));
-  point->z += agateSlotGetFloat(vm, agateSlotForArg(vm, 3));
+  point->x += agateSlotGetFloat(vm, 1);
+  point->y += agateSlotGetFloat(vm, 2);
+  point->z += agateSlotGetFloat(vm, 3);
 }
 
 static void pointToS(AgateVM *vm) {
-  ptrdiff_t point_slot = agateSlotForArg(vm, 0);
-  struct Point *point = agateSlotGetForeign(vm, point_slot);
+  struct Point *point = agateSlotGetForeign(vm, 0);
 
 #define AGATE_TEST_POINT_BUFFER_SIZE 128
   char buffer[AGATE_TEST_POINT_BUFFER_SIZE];
   snprintf(buffer, AGATE_TEST_POINT_BUFFER_SIZE, "(%g, %g, %g)", point->x, point->y, point->z);
 
-  ptrdiff_t return_slot = agateSlotForReturn(vm);
-  agateSlotSetString(vm, return_slot, buffer);
+  agateSlotSetString(vm, AGATE_RETURN_SLOT, buffer);
 }
 
 /*
@@ -105,10 +91,15 @@ void agateTestResourceForeignDestroy(AgateVM *vm, const char *unit_name, const c
   int *value = data;
 
   if (*value != 123) {
-//     exit(EXIT_FAILURE);
+    exit(EXIT_FAILURE);
   }
 
   ++g_finalized;
+}
+
+static void resourceNew(AgateVM *vm) {
+  int *value = agateSlotGetForeign(vm, 0);
+  *value = 123;
 }
 
 /*
@@ -149,7 +140,7 @@ AgateForeignMethodFunc agateTestForeignClassForeignMethodHandler(const char *cla
     assert(kind == AGATE_FOREIGN_METHOD_INSTANCE);
 
     if (strcmp(signature, "init new()") == 0) {
-      return counterInitNew;
+      return counterNew;
     }
 
     if (strcmp(signature, "increment(_)") == 0) {
@@ -174,6 +165,14 @@ AgateForeignMethodFunc agateTestForeignClassForeignMethodHandler(const char *cla
 
     if (strcmp(signature, "to_s") == 0) {
       return pointToS;
+    }
+  }
+
+  if (strcmp(class_name, "Resource") == 0) {
+    assert(kind == AGATE_FOREIGN_METHOD_INSTANCE);
+
+    if (strcmp(signature, "init new()") == 0) {
+      return resourceNew;
     }
   }
 

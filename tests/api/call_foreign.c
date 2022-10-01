@@ -5,7 +5,7 @@
 #include <string.h>
 
 static void callForeignApi(AgateVM *vm) {
-  ptrdiff_t array_slot = agateSlotForReturn(vm);
+  ptrdiff_t array_slot = AGATE_RETURN_SLOT;
   agateSlotArrayNew(vm, array_slot);
 
   for (int64_t i = 1; i < 10; ++i) {

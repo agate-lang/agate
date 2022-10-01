@@ -21,12 +21,12 @@ static void slotsNoSet(AgateVM *vm) {
 static void slotsGetSlots(AgateVM *vm) {
   bool result = true;
 
-  if (agateSlotGetBool(vm, agateSlotForArg(vm, 1)) != true) {
+  if (agateSlotGetBool(vm, 1) != true) {
     result = false;
   }
 
   ptrdiff_t size;
-  const char *string = agateSlotGetStringSize(vm, agateSlotForArg(vm, 2), &size);
+  const char *string = agateSlotGetStringSize(vm, 2, &size);
 
   if (size != 5) {
     result = false;
@@ -36,42 +36,42 @@ static void slotsGetSlots(AgateVM *vm) {
     result = false;
   }
 
-  if (agateSlotGetFloat(vm, agateSlotForArg(vm, 3)) != 1.5) {
+  if (agateSlotGetFloat(vm, 3) != 1.5) {
     result = false;
   }
 
-  if (strcmp(agateSlotGetString(vm, agateSlotForArg(vm, 4)), "str") != 0) {
+  if (strcmp(agateSlotGetString(vm, 4), "str") != 0) {
     result = false;
   }
 
-  AgateHandle *handle = agateSlotGetHandle(vm, agateSlotForArg(vm, 5));
+  AgateHandle *handle = agateSlotGetHandle(vm, 5);
 
   if (result) {
-    agateSlotSetHandle(vm, agateSlotForReturn(vm), handle);
+    agateSlotSetHandle(vm, AGATE_RETURN_SLOT, handle);
   } else {
-    agateSlotSetBool(vm, agateSlotForReturn(vm), false);
+    agateSlotSetBool(vm, AGATE_RETURN_SLOT, false);
   }
 
   agateReleaseHandle(vm, handle);
 }
 
 static void slotsSetSlots(AgateVM *vm) {
-  AgateHandle *handle = agateSlotGetHandle(vm, agateSlotForArg(vm, 1));
+  AgateHandle *handle = agateSlotGetHandle(vm, 1);
 
-  agateSlotSetBool(vm, agateSlotForArg(vm, 1), true);
-  agateSlotSetStringSize(vm, agateSlotForArg(vm, 2), "by\0te", 5);
-  agateSlotSetFloat(vm, agateSlotForArg(vm, 3), 1.5);
-  agateSlotSetString(vm, agateSlotForArg(vm, 4), "str");
-  agateSlotSetNil(vm, agateSlotForArg(vm, 5));
+  agateSlotSetBool(vm, 1, true);
+  agateSlotSetStringSize(vm, 2, "by\0te", 5);
+  agateSlotSetFloat(vm, 3, 1.5);
+  agateSlotSetString(vm, 4, "str");
+  agateSlotSetNil(vm, 5);
 
   bool result = true;
 
-  if (agateSlotGetBool(vm, agateSlotForArg(vm, 1)) != true) {
+  if (agateSlotGetBool(vm, 1) != true) {
     result = false;
   }
 
   ptrdiff_t size;
-  const char *string = agateSlotGetStringSize(vm, agateSlotForArg(vm, 2), &size);
+  const char *string = agateSlotGetStringSize(vm, 2, &size);
 
   if (size != 5) {
     result = false;
@@ -83,42 +83,42 @@ static void slotsSetSlots(AgateVM *vm) {
     printf("ERROR 2\n");
   }
 
-  if (agateSlotGetFloat(vm, agateSlotForArg(vm, 3)) != 1.5) {
+  if (agateSlotGetFloat(vm, 3) != 1.5) {
     result = false;
     printf("ERROR 3\n");
   }
 
-  if (strcmp(agateSlotGetString(vm, agateSlotForArg(vm, 4)), "str") != 0) {
+  if (strcmp(agateSlotGetString(vm, 4), "str") != 0) {
     result = false;
     printf("ERROR 4\n");
   }
 
-  if (agateSlotType(vm, agateSlotForArg(vm, 5)) != AGATE_TYPE_NIL) {
+  if (agateSlotType(vm, 5) != AGATE_TYPE_NIL) {
     result = false;
     printf("ERROR 5\n");
   }
 
 
   if (result) {
-    agateSlotSetHandle(vm, agateSlotForReturn(vm), handle);
+    agateSlotSetHandle(vm, AGATE_RETURN_SLOT, handle);
   } else {
-    agateSlotSetBool(vm, agateSlotForReturn(vm), false);
+    agateSlotSetBool(vm, AGATE_RETURN_SLOT, false);
   }
 
   agateReleaseHandle(vm, handle);
 }
 
 static void slotsSlotTypes(AgateVM *vm) {
-  bool result = agateSlotType(vm, agateSlotForArg(vm, 1)) == AGATE_TYPE_BOOL
-      && agateSlotType(vm, agateSlotForArg(vm, 2)) == AGATE_TYPE_FOREIGN
-      && agateSlotType(vm, agateSlotForArg(vm, 3)) == AGATE_TYPE_ARRAY
-      && agateSlotType(vm, agateSlotForArg(vm, 4)) == AGATE_TYPE_MAP
-      && agateSlotType(vm, agateSlotForArg(vm, 5)) == AGATE_TYPE_NIL
-      && agateSlotType(vm, agateSlotForArg(vm, 6)) == AGATE_TYPE_FLOAT
-      && agateSlotType(vm, agateSlotForArg(vm, 7)) == AGATE_TYPE_STRING
-      && agateSlotType(vm, agateSlotForArg(vm, 8)) == AGATE_TYPE_UNKNOWN;
+  bool result = agateSlotType(vm, 1) == AGATE_TYPE_BOOL
+      && agateSlotType(vm, 2) == AGATE_TYPE_FOREIGN
+      && agateSlotType(vm, 3) == AGATE_TYPE_ARRAY
+      && agateSlotType(vm, 4) == AGATE_TYPE_MAP
+      && agateSlotType(vm, 5) == AGATE_TYPE_NIL
+      && agateSlotType(vm, 6) == AGATE_TYPE_FLOAT
+      && agateSlotType(vm, 7) == AGATE_TYPE_STRING
+      && agateSlotType(vm, 8) == AGATE_TYPE_UNKNOWN;
 
-  agateSlotSetBool(vm, agateSlotForReturn(vm), result);
+  agateSlotSetBool(vm, AGATE_RETURN_SLOT, result);
 }
 
 #define SLOTS_COUNT 20
@@ -144,7 +144,7 @@ static void slotsEnsure(AgateVM *vm) {
 
   char result[128];
   snprintf(result, sizeof(result), "%td -> %td (%" PRIi64 ")", before, after, sum);
-  agateSlotSetString(vm, agateSlotForReturn(vm), result);
+  agateSlotSetString(vm, AGATE_RETURN_SLOT, result);
 }
 
 
@@ -179,24 +179,24 @@ static void slotsEnsureOutsideForeign(AgateVM *vm) {
 
   char result[128];
   snprintf(result, sizeof(result), "%td -> %td (%" PRIi64 ")", before, after, sum);
-  agateSlotSetString(vm, agateSlotForReturn(vm), result);
+  agateSlotSetString(vm, AGATE_RETURN_SLOT, result);
 }
 
 static void slotsGetArraySize(AgateVM *vm) {
-  agateSlotSetInt(vm, agateSlotForReturn(vm), agateSlotArraySize(vm, agateSlotForArg(vm, 1)));
+  agateSlotSetInt(vm, AGATE_RETURN_SLOT, agateSlotArraySize(vm, 1));
 }
 
 static void slotsGetArrayElement(AgateVM *vm) {
-  int64_t index = agateSlotGetInt(vm, agateSlotForArg(vm, 2));
-  agateSlotArrayGet(vm, agateSlotForArg(vm, 1), index, agateSlotForReturn(vm));
+  int64_t index = agateSlotGetInt(vm, 2);
+  agateSlotArrayGet(vm, 1, index, AGATE_RETURN_SLOT);
 }
 
 static void slotsGetMapSize(AgateVM *vm) {
-  agateSlotSetInt(vm, agateSlotForReturn(vm), agateSlotMapSize(vm, agateSlotForArg(vm, 1)));
+  agateSlotSetInt(vm, AGATE_RETURN_SLOT, agateSlotMapSize(vm, 1));
 }
 
 static void slotsGetMapValue(AgateVM *vm) {
-  agateSlotMapGet(vm, agateSlotForArg(vm, 1), agateSlotForArg(vm, 2), agateSlotForReturn(vm));
+  agateSlotMapGet(vm, 1, 2, AGATE_RETURN_SLOT);
 }
 
 AgateForeignMethodFunc agateTestSlotsForeignMethodHandler(const char *class_name, AgateForeignMethodKind kind, const char *signature) {

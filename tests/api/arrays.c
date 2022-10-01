@@ -4,7 +4,7 @@
 #include <string.h>
 
 static void arraysNewArray(AgateVM *vm) {
-  agateSlotArrayNew(vm, agateSlotForReturn(vm));
+  agateSlotArrayNew(vm, AGATE_RETURN_SLOT);
 }
 
 static inline void arraysHelperInsertFloat(AgateVM *vm, ptrdiff_t array_slot, ptrdiff_t index, ptrdiff_t value_slot, double value) {
@@ -18,7 +18,7 @@ static inline void arraysHelperAppendFloat(AgateVM *vm, ptrdiff_t array_slot, pt
 }
 
 static void arraysInsert(AgateVM *vm) {
-  ptrdiff_t array_slot = agateSlotForReturn(vm);
+  ptrdiff_t array_slot = AGATE_RETURN_SLOT;
   agateSlotArrayNew(vm, array_slot);
   ptrdiff_t value_slot = agateSlotAllocate(vm);
 
@@ -39,7 +39,7 @@ static void arraysInsert(AgateVM *vm) {
 }
 
 static void arraysSet(AgateVM *vm) {
-  ptrdiff_t array_slot = agateSlotForReturn(vm);
+  ptrdiff_t array_slot = AGATE_RETURN_SLOT;
   agateSlotArrayNew(vm, array_slot);
   ptrdiff_t value_slot = agateSlotAllocate(vm);
 
@@ -58,8 +58,8 @@ static void arraysSet(AgateVM *vm) {
 }
 
 static void arraysGet(AgateVM *vm) {
-  ptrdiff_t index = agateSlotGetInt(vm, agateSlotForArg(vm, 2));
-  agateSlotArrayGet(vm, agateSlotForArg(vm, 1), index, agateSlotForReturn(vm));
+  ptrdiff_t index = agateSlotGetInt(vm, 2);
+  agateSlotArrayGet(vm, 1, index, AGATE_RETURN_SLOT);
 }
 
 AgateForeignMethodFunc agateTestArraysForeignMethodHandler(const char *class_name, AgateForeignMethodKind kind, const char *signature) {

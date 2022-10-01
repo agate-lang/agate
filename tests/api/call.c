@@ -113,8 +113,7 @@ bool agateTestCallRunNative(AgateVM *vm) {
     agateSlotSetHandle(vm, arg0, call_class_handle);
     agateCallHandle(vm, get_value_handle);
     printf("slots after call: %td\n", agateSlotCount(vm));
-    ptrdiff_t ret = agateSlotForReturn(vm);
-    handle = agateSlotGetHandle(vm, ret);
+    handle = agateSlotGetHandle(vm, AGATE_RETURN_SLOT);
     agateStackFinish(vm);
   }
 

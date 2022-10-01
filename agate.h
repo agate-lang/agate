@@ -178,10 +178,10 @@ AgateType agateSlotType(AgateVM *vm, ptrdiff_t slot);
 void agateSlotCopy(AgateVM *vm, ptrdiff_t dest, ptrdiff_t orig);
 // end::slot_management[]
 
+#define AGATE_RETURN_SLOT 0
+
 // tag::slot_for_call[]
 ptrdiff_t agateSlotAllocate(AgateVM *vm);
-ptrdiff_t agateSlotForArg(AgateVM *vm, ptrdiff_t i);
-ptrdiff_t agateSlotForReturn(AgateVM *vm);
 // end::slot_for_call[]
 
 // tag::slot_get_primitive[]
