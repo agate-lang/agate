@@ -5808,16 +5808,23 @@ ptrdiff_t agateSlotCount(AgateVM *vm) {
   return vm->stack_top - frame->stack_start;
 }
 
-ptrdiff_t agateSlotAllocate(AgateVM *vm) {
-  ptrdiff_t needed = (vm->stack_top - vm->stack) + 1;
+ptrdiff_t agateSlotAllocateMany(AgateVM *vm, ptrdiff_t count) {
+  assert(vm->frames_count > 0);
+  ptrdiff_t needed = (vm->stack_top - vm->stack) + count;
   agateEnsureStack(vm, needed);
   AgateCallFrame *frame = agateCurrentCallFrame(vm);
   ptrdiff_t slot = vm->stack_top - frame->stack_start;
-  ++vm->stack_top;
+  vm->stack_top += count;
   return slot;
 }
 
+ptrdiff_t agateSlotAllocate(AgateVM *vm) {
+  return agateSlotAllocateMany(vm, 1);
+}
+
+
 static inline bool agateIsSlotValid(AgateVM *vm, ptrdiff_t slot) {
+  assert(vm->frames_count > 0);
   AgateCallFrame *frame = agateCurrentCallFrame(vm);
   return 0 <= slot && slot < (vm->stack_top - frame->stack_start);
 }

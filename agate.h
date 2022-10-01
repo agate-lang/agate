@@ -182,6 +182,7 @@ void agateSlotCopy(AgateVM *vm, ptrdiff_t dest, ptrdiff_t orig);
 
 // tag::slot_for_call[]
 ptrdiff_t agateSlotAllocate(AgateVM *vm);
+ptrdiff_t agateSlotAllocateMany(AgateVM *vm, ptrdiff_t count);
 // end::slot_for_call[]
 
 // tag::slot_get_primitive[]
