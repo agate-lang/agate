@@ -299,6 +299,7 @@ typedef enum {
   AGATE_METHOD_NATIVE,
   AGATE_METHOD_FOREIGN,
   AGATE_METHOD_FOREIGN_ALLOCATE,
+  AGATE_METHOD_FOREIGN_TAG,
   AGATE_METHOD_FOREIGN_DESTROY,
   AGATE_METHOD_CLOSURE,
 } AgateMethodKind;
@@ -309,6 +310,7 @@ typedef struct {
     AgateNativeFunc native;
     AgateForeignMethodFunc foreign;
     AgateForeignAllocateFunc foreign_allocate;
+    AgateForeignTagFunc foreign_tag;
     AgateForeignDestroyFunc foreign_destroy;
     AgateClosure *closure;
   } as;
@@ -333,6 +335,7 @@ typedef struct {
 
 typedef struct {
   AgateEntity base;
+  uint64_t tag;
   ptrdiff_t data_size;
   uint8_t data[];
 } AgateForeign;
@@ -1700,18 +1703,30 @@ static ptrdiff_t agateSymbolTableFind(AgateTable *self, const char *name, ptrdif
 static AgateForeign *agateForeignNew(AgateVM *vm, AgateClass *klass) {
   assert(klass->field_count == -1);
 
-  ptrdiff_t symbol = agateSymbolTableFind(&vm->method_names, "<allocate>", 10);
-  assert(symbol != -1);
+  ptrdiff_t allocate_symbol = agateSymbolTableFind(&vm->method_names, "<allocate>", 10);
+  assert(allocate_symbol != -1);
 
-  assert(symbol < klass->methods.size);
-  AgateMethod *method = &klass->methods.data[symbol];
-  assert(method->kind == AGATE_METHOD_FOREIGN_ALLOCATE);
+  assert(allocate_symbol < klass->methods.size);
+  AgateMethod *allocate_method = &klass->methods.data[allocate_symbol];
+  assert(allocate_method->kind == AGATE_METHOD_FOREIGN_ALLOCATE);
 
-  ptrdiff_t data_size = method->as.foreign_allocate(vm, klass->unit->name->data, klass->name->data);
+  ptrdiff_t data_size = allocate_method->as.foreign_allocate(vm, klass->unit->name->data, klass->name->data);
 
   AgateForeign *foreign = agateAllocateFlexEntity(vm, AgateForeign, uint8_t, data_size, AGATE_ENTITY_FOREIGN, klass);
   foreign->data_size = data_size;
   memset(foreign->data, 0, data_size);
+
+  ptrdiff_t tag_symbol = agateSymbolTableFind(&vm->method_names, "<tag>", 5);
+  assert(tag_symbol != -1);
+
+  if (tag_symbol < klass->methods.size) {
+    AgateMethod *tag_method = &klass->methods.data[tag_symbol];
+
+    if (tag_method->kind == AGATE_METHOD_FOREIGN_TAG) {
+      foreign->tag = tag_method->as.foreign_tag(vm, klass->unit->name->data, klass->name->data);
+    }
+  }
+
   return foreign;
 }
 
@@ -2757,6 +2772,7 @@ static AgateValue agateValidateSuperclass(AgateVM *vm, AgateValue name, AgateVal
 static void agateBindForeignClass(AgateVM *vm, AgateClass *klass, AgateUnit *unit) {
   AgateForeignClassHandler handler;
   handler.allocate = NULL;
+  handler.tag = NULL;
   handler.destroy = NULL;
 
   if (vm->config.foreign_class_handler != NULL) {
@@ -2770,6 +2786,15 @@ static void agateBindForeignClass(AgateVM *vm, AgateClass *klass, AgateUnit *uni
     method.kind = AGATE_METHOD_FOREIGN_ALLOCATE;
     method.as.foreign_allocate = handler.allocate;
     agateClassBindMethod(vm, klass, allocate_symbol, method);
+  }
+
+  ptrdiff_t tag_symbol = agateSymbolTableEnsure(&vm->method_names, "<tag>", 5, vm);
+
+  if (handler.tag != NULL) {
+    AgateMethod method;
+    method.kind = AGATE_METHOD_FOREIGN_TAG;
+    method.as.foreign_tag = handler.tag;
+    agateClassBindMethod(vm, klass, tag_symbol, method);
   }
 
   ptrdiff_t destroy_symbol = agateSymbolTableEnsure(&vm->method_names, "<destroy>", 9, vm);
@@ -5910,6 +5935,13 @@ void *agateSlotGetForeign(AgateVM *vm, ptrdiff_t slot) {
   AgateValue value = agateSlotGet(vm, slot);
   assert(agateIsForeign(value));
   return agateAsForeign(value)->data;
+}
+
+uint64_t agateSlotGetForeignTag(AgateVM *vm, ptrdiff_t slot) {
+  assert(agateIsSlotValid(vm, slot));
+  AgateValue value = agateSlotGet(vm, slot);
+  assert(agateIsForeign(value));
+  return agateAsForeign(value)->tag;
 }
 
 const char *agateSlotGetString(AgateVM *vm, ptrdiff_t slot) {

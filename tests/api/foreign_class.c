@@ -108,21 +108,21 @@ static void resourceNew(AgateVM *vm) {
 
 AgateForeignClassHandler agateTestForeignClassForeignClassHandler(const char *class_name) {
   if (strcmp(class_name, "Counter") == 0) {
-    AgateForeignClassHandler handler = { agateTestCounterForeignAllocate, NULL };
+    AgateForeignClassHandler handler = { agateTestCounterForeignAllocate, NULL, NULL };
     return handler;
   }
 
   if (strcmp(class_name, "Point") == 0) {
-    AgateForeignClassHandler handler = { agateTestPointForeignAllocate, NULL };
+    AgateForeignClassHandler handler = { agateTestPointForeignAllocate, NULL, NULL };
     return handler;
   }
 
   if (strcmp(class_name, "Resource") == 0) {
-    AgateForeignClassHandler handler = { agateTestResourceForeignAllocate, agateTestResourceForeignDestroy };
+    AgateForeignClassHandler handler = { agateTestResourceForeignAllocate, NULL, agateTestResourceForeignDestroy };
     return handler;
   }
 
-  AgateForeignClassHandler handler = { NULL, NULL };
+  AgateForeignClassHandler handler = { NULL, NULL, NULL };
   return handler;
 }
 

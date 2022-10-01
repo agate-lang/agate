@@ -78,11 +78,13 @@ typedef AgateUnitHandler (*AgateUnitHandlerFunc)(AgateVM *vm, const char *name);
 
 // tag::foreign_class_handler[]
 typedef ptrdiff_t (*AgateForeignAllocateFunc)(AgateVM *vm, const char *unit_name, const char *class_name);
+typedef uint64_t (*AgateForeignTagFunc)(AgateVM *vm, const char *unit_name, const char *class_name);
 typedef void (*AgateForeignDestroyFunc)(AgateVM *vm, const char *unit_name, const char *class_name, void *data);
 
 
 typedef struct {
   AgateForeignAllocateFunc allocate;
+  AgateForeignTagFunc tag;
   AgateForeignDestroyFunc destroy;
 } AgateForeignClassHandler;
 
@@ -190,7 +192,9 @@ bool agateSlotGetBool(AgateVM *vm, ptrdiff_t slot);
 uint32_t agateSlotGetChar(AgateVM *vm, ptrdiff_t slot);
 int64_t agateSlotGetInt(AgateVM *vm, ptrdiff_t slot);
 double agateSlotGetFloat(AgateVM *vm, ptrdiff_t slot);
+
 void *agateSlotGetForeign(AgateVM *vm, ptrdiff_t slot);
+uint64_t agateSlotGetForeignTag(AgateVM *vm, ptrdiff_t slot);
 
 const char *agateSlotGetString(AgateVM *vm, ptrdiff_t slot);
 const char *agateSlotGetStringSize(AgateVM *vm, ptrdiff_t slot, ptrdiff_t *size);
