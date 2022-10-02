@@ -158,6 +158,8 @@ AgateVM *agateNewVM(const AgateConfig *config);
 void agateDeleteVM(AgateVM *vm);
 // end::vm_delete[]
 
+void agateSetArgs(AgateVM *vm, int argc, const char *argv[]);
+
 // tag::handle_call[]
 AgateHandle *agateMakeCallHandle(AgateVM *vm, const char *signature);
 // end::handle_call[]

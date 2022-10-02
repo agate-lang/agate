@@ -101,7 +101,8 @@ int main(int argc, const char *argv[]) {
 
   if (argc == 1) {
     repl(vm);
-  } else if (argc == 2) {
+  } else if (argc >= 2) {
+    agateSetArgs(vm, argc - 1, argv + 1);
     run(vm, argv[1]);
   } else {
     fprintf(stderr, "Usage: agate-cli [path]\n");

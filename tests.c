@@ -203,7 +203,7 @@ static bool agateTestExecFile(AgateTest *self, AgateTestFunc func, AgateOutcome 
   if (pid == 0) {
     // child
 
-    // redirect stdout in the pipre
+    // redirect stdout in the pipe
     ret = dup2(out[1], 1);
     assert(ret != -1);
 

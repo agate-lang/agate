@@ -489,6 +489,7 @@ struct AgateVM {
   AgateUpvalue *open_upvalues;
 
   AgateValue error;
+  AgateValue args;
 
   // parser
 
@@ -2193,6 +2194,9 @@ static void agateMarkRoots(AgateVM *vm) {
   for (AgateUpvalue *upvalue = vm->open_upvalues; upvalue != NULL; upvalue = upvalue->next) {
     agateMarkEntity(vm, (AgateEntity *) upvalue);
   }
+
+  agateMarkValue(vm, vm->error);
+  agateMarkValue(vm, vm->args);
 
   for (AgateHandle *handle = vm->handles; handle != NULL; handle = handle->next) {
     agateMarkValue(vm, handle->value);
@@ -5249,6 +5253,17 @@ static bool agateCoreSystemAbort(AgateVM *vm, int argc, AgateValue *args) {
   return agateIsNil(args[1]);
 }
 
+static bool agateCoreSystemArgs(AgateVM *vm, int argc, AgateValue *args) {
+  if (agateIsNil(vm->args)) {
+    args[0] = agateEntityValue(agateArrayNew(vm));
+  } else {
+    assert(agateIsArray(vm->args));
+    args[0] = vm->args;
+  }
+
+  return true;
+}
+
 static bool agateCoreSystemClock(AgateVM *vm, int argc, AgateValue *args) {
   args[0] = agateFloatValue((double) clock() / CLOCKS_PER_SEC);
   return true;
@@ -5656,6 +5671,7 @@ static void agateLoadCoreUnit(AgateVM *vm) {
 
   AgateClass *system_class = agateAsClass(agateUnitFindVariable(vm, core, "System"));
   agateClassBindPrimitive(vm, system_class->base.type, "abort(_)", agateCoreSystemAbort);
+  agateClassBindPrimitive(vm, system_class->base.type, "args", agateCoreSystemArgs);
   agateClassBindPrimitive(vm, system_class->base.type, "clock", agateCoreSystemClock);
   agateClassBindPrimitive(vm, system_class->base.type, "env(_)", agateCoreSystemEnv);
   agateClassBindPrimitive(vm, system_class->base.type, "gc()", agateCoreSystemGc);
@@ -6343,6 +6359,7 @@ AgateVM *agateNewVM(const AgateConfig *config) {
   vm->open_upvalues = NULL;
 
   vm->error = agateNilValue();
+  vm->args = agateNilValue();
 
   vm->compiler = NULL;
   vm->last_unit = NULL;
@@ -6381,6 +6398,15 @@ void agateDeleteVM(AgateVM *vm) {
   // delete the vm
 
   reallocate(vm, 0, user_data);
+}
+
+void agateSetArgs(AgateVM *vm, int argc, const char *argv[]) {
+  AgateArray *args = agateArrayNewWithSize(vm, argc, agateNilValue());
+  vm->args = agateEntityValue(args);
+
+  for (int i = 0; i < argc; ++i) {
+    args->elements.data[i] = agateEntityValue(agateStringNew(vm, argv[i], strlen(argv[i])));
+  }
 }
 
 /*

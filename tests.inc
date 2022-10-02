@@ -570,6 +570,7 @@ static const char *AgateTestFiles[] = {
   "tests/docs/string_to_s.agate",
   "tests/docs/string_trim.agate",
   "tests/docs/system_abort.agate",
+  "tests/docs/system_args.agate",
   "tests/docs/system_clock.agate",
   "tests/docs/system_env.agate",
   "tests/docs/system_gc.agate",
