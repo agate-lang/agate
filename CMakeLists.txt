@@ -54,11 +54,11 @@ target_include_directories(agate-support0
 
 # cli
 
-add_executable(agate-cli
-  agate-cli.c
+add_executable(agate-run
+  agate-run.c
 )
 
-target_link_libraries(agate-cli
+target_link_libraries(agate-run
   PRIVATE
     agate0
 )

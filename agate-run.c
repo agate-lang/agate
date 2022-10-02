@@ -105,7 +105,7 @@ int main(int argc, const char *argv[]) {
     agateSetArgs(vm, argc - 1, argv + 1);
     run(vm, argv[1]);
   } else {
-    fprintf(stderr, "Usage: agate-cli [path]\n");
+    fprintf(stderr, "Usage: agate-run [path]\n");
     return EXIT_FAILURE;
   }
 
