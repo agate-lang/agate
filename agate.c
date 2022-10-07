@@ -5197,6 +5197,44 @@ static bool agateCoreMathPow(AgateVM *vm, int argc, AgateValue *args) {
   return false;
 }
 
+static int64_t agateGcd(int64_t x, int64_t y) {
+  while (y != 0) {
+    int64_t tmp = y;
+    y = x % y;
+    x = tmp;
+  }
+  return x;
+}
+
+static bool agateCoreMathGcd(AgateVM *vm, int argc, AgateValue *args) {
+  if (agateIsInt(args[1]) && agateIsInt(args[2])) {
+    int64_t x = agateAsInt(args[1]);
+    int64_t y = agateAsInt(args[2]);
+    args[0] = agateIntValue(agateGcd(x, y));
+    return true;
+  }
+
+  vm->error = AGATE_CONST_STRING(vm, "Arguments must both be integers.");
+  return false;
+}
+
+static int64_t agateLcm(int64_t x, int64_t y) {
+  int64_t gcd = agateGcd(x, y);
+  return x / gcd * y;
+}
+
+static bool agateCoreMathLcm(AgateVM *vm, int argc, AgateValue *args) {
+  if (agateIsInt(args[1]) && agateIsInt(args[2])) {
+    int64_t x = agateAsInt(args[1]);
+    int64_t y = agateAsInt(args[2]);
+    args[0] = agateIntValue(agateLcm(x, y));
+    return true;
+  }
+
+  vm->error = AGATE_CONST_STRING(vm, "Arguments must both be integers.");
+  return false;
+}
+
 // IO
 
 static bool agateCoreIoPrint(AgateVM *vm, int argc, AgateValue *args) {
@@ -5611,7 +5649,9 @@ static void agateLoadCoreUnit(AgateVM *vm) {
   agateClassBindPrimitive(vm, math_class->base.type, "exp(_)", agateCoreMathExp);
   agateClassBindPrimitive(vm, math_class->base.type, "exp2(_)", agateCoreMathExp2);
   agateClassBindPrimitive(vm, math_class->base.type, "floor(_)", agateCoreMathFloor);
+  agateClassBindPrimitive(vm, math_class->base.type, "gcd(_,_)", agateCoreMathGcd);
   agateClassBindPrimitive(vm, math_class->base.type, "hypot(_,_)", agateCoreMathHypot);
+  agateClassBindPrimitive(vm, math_class->base.type, "lcm(_,_)", agateCoreMathLcm);
   agateClassBindPrimitive(vm, math_class->base.type, "log(_)", agateCoreMathLog);
   agateClassBindPrimitive(vm, math_class->base.type, "log10(_)", agateCoreMathLog10);
   agateClassBindPrimitive(vm, math_class->base.type, "log2(_)", agateCoreMathLog2);
