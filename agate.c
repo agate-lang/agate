@@ -5069,6 +5069,11 @@ static bool agateCoreMath ## name(AgateVM *vm, int argc, AgateValue *args) {  \
 AGATE_MATH_FLOAT_2(ATan2, atan2)
 AGATE_MATH_FLOAT_2(Hypot, hypot)
 
+
+static inline int64_t agateAbs(int64_t x) {
+  return x < 0 ? -x : x;
+}
+
 static bool agateCoreMathAbs(AgateVM *vm, int argc, AgateValue *args) {
   if (agateIsFloat(args[1])) {
     args[0] = agateFloatValue(fabs(agateAsFloat(args[1])));
@@ -5076,7 +5081,7 @@ static bool agateCoreMathAbs(AgateVM *vm, int argc, AgateValue *args) {
   }
 
   if (agateIsInt(args[1])) {
-    args[0] = agateIntValue(abs(agateAsInt(args[1])));
+    args[0] = agateIntValue(agateAbs(agateAsInt(args[1])));
     return true;
   }
 
@@ -5203,7 +5208,7 @@ static int64_t agateGcd(int64_t x, int64_t y) {
     y = x % y;
     x = tmp;
   }
-  return x;
+  return agateAbs(x);
 }
 
 static bool agateCoreMathGcd(AgateVM *vm, int argc, AgateValue *args) {
@@ -5220,7 +5225,7 @@ static bool agateCoreMathGcd(AgateVM *vm, int argc, AgateValue *args) {
 
 static int64_t agateLcm(int64_t x, int64_t y) {
   int64_t gcd = agateGcd(x, y);
-  return x / gcd * y;
+  return agateAbs(x / gcd * y);
 }
 
 static bool agateCoreMathLcm(AgateVM *vm, int argc, AgateValue *args) {
