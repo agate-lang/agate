@@ -246,6 +246,12 @@ AgateUnitHandler agateExUnitHandler(AgateVM *vm, const char *name) {
 }
 
 const char *agateExUnitLoad(AgateVM *vm, const char *unit_name) {
+  const char *point = strrchr(unit_name, '.');
+
+  if (point != NULL && strcmp(point, ".agate") == 0) {
+    return agateUnitLoadFile(unit_name, agateGetUserData(vm));
+  }
+
   return agateUnitLoad(unit_name, agateGetUserData(vm));
 }
 
