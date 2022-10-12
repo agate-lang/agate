@@ -77,17 +77,14 @@ class ColorRamp {
 class Array2D {
   construct new(size, value) {
     @size = size
-    @data = []
-    for (i in 0...(size * size)) {
-      @data.append(value)
-    }
+    @data = Array.new(size * size, value)
   }
   size { @size }
   [x,y] { @data[.__linearize(x, y)] }
   [x,y]=(val) { @data[.__linearize(x, y)] = val }
   __linearize(x, y) {
     assert(0 <= x && x < @size, "x out of bounds.")
-    assert(0 <= y && y < @size, "x out of bounds.")
+    assert(0 <= y && y < @size, "y out of bounds.")
     return x + y * @size
   }
 }
