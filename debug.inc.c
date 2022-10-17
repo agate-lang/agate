@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) 2013-2021 Robert Nystrom and Wren Contributors
-//Copyright (c) 2022 Julien Bernard
+// Copyright (c) 2022 Julien Bernard
 
 static void agateFunctionPrint(AgateFunction *function) {
   if (function->name == NULL) {

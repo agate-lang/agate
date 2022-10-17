@@ -3463,6 +3463,15 @@ static bool agateValidateString(AgateVM *vm, AgateValue value, const char *arg) 
   return false;
 }
 
+static bool agateValidateArray(AgateVM *vm, AgateValue value, const char *arg) {
+  if (agateIsArray(value)) {
+    return true;
+  }
+
+  vm->error = agateEntityValue(agateStringNewFormat(vm, "$ must be an array.", arg));
+  return false;
+}
+
 typedef struct {
   ptrdiff_t start;
   ptrdiff_t count;
@@ -5454,6 +5463,52 @@ static bool agateCoreRandomInt2(AgateVM *vm, int argc, AgateValue *args) {
   return true;
 }
 
+static bool agateCoreRandomSample(AgateVM *vm, int argc, AgateValue *args) {
+  AgateRandom *random = agateAsRandom(args[0]);
+
+  if (!agateValidateArray(vm, args[1], "Array")) {
+    return false;
+  }
+
+  AgateArray *array = agateAsArray(args[1]);
+
+  if (array->elements.size == 0) {
+    vm->error = AGATE_CONST_STRING(vm, "Not enough elements to sample.");
+    return false;
+  }
+
+  ptrdiff_t index = agateRandomRange(random, array->elements.size);
+  args[0] = array->elements.data[index];
+  return true;
+}
+
+static bool agateCoreRandomShuffle(AgateVM *vm, int argc, AgateValue *args) {
+  AgateRandom *random = agateAsRandom(args[0]);
+
+  if (!agateValidateArray(vm, args[1], "Array")) {
+    return false;
+  }
+
+  AgateArray *array = agateAsArray(args[1]);
+  ptrdiff_t size = array->elements.size;
+
+  if (size <= 1) {
+    args[0] = args[1];
+    return true;
+  }
+
+  for (ptrdiff_t i = 0; i < size - 1; ++i) {
+    ptrdiff_t j = agateRandomRange(random, size - i) + i;
+
+    AgateValue tmp = array->elements.data[i];
+    array->elements.data[i] = array->elements.data[j];
+    array->elements.data[j] = tmp;
+  }
+
+  args[0] = args[1];
+  return true;
+}
+
 // utils
 
 static AgateClass *agateClassNewBasic(AgateVM *vm, AgateUnit *unit, const char *name) {
@@ -5682,6 +5737,8 @@ static void agateLoadCoreUnit(AgateVM *vm) {
   agateClassBindPrimitive(vm, vm->random_class, "int()", agateCoreRandomInt0);
   agateClassBindPrimitive(vm, vm->random_class, "int(_)", agateCoreRandomInt1);
   agateClassBindPrimitive(vm, vm->random_class, "int(_,_)", agateCoreRandomInt2);
+  agateClassBindPrimitive(vm, vm->random_class, "sample(_)", agateCoreRandomSample);
+  agateClassBindPrimitive(vm, vm->random_class, "shuffle(_)", agateCoreRandomShuffle);
 
   vm->range_class = agateAsClass(agateUnitFindVariable(vm, core, "Range"));
   agateClassBindPrimitive(vm, vm->range_class, "contains(_)", agateCoreRangeContains);

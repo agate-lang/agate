@@ -400,22 +400,4 @@ class System { }
 class Random {
   float(end) { .float() * end }
   float(start, end) { .float() * (end - start) + start }
-
-  sample(array) {
-    if (array.size == 0) {
-      System.abort("Not enough elements to sample.")
-    }
-    return array[.int(array.size)]
-  }
-
-  shuffle(array) {
-    if (array.empty) {
-      return
-    }
-    for (i in 0...array.size - 1) {
-      def j = .int(i, array.size)
-      array.swap(i, j)
-    }
-    return array
-  }
 }
