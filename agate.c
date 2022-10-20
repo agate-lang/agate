@@ -1374,6 +1374,10 @@ static inline AgateValue agateTableHashErase(AgateTable *self, AgateValue key) {
   return agateTableErase(self, key, agateValueHash(key));
 }
 
+static ptrdiff_t agateSymbolTableFind(AgateTable *self, const char *name, ptrdiff_t size);
+static ptrdiff_t agateSymbolTableEnsure(AgateTable *self, const char *name, ptrdiff_t size, AgateVM *vm);
+
+
 /*
  * entities - new
  */
@@ -1682,6 +1686,23 @@ static AgateClass *agateClassNew(AgateVM *vm, AgateUnit *unit, AgateClass *super
   return klass;
 }
 
+// Function
+
+static AgateFunction *agateFunctionNew(AgateVM *vm, AgateUnit *unit, ptrdiff_t slot_count) {
+  AgateFunction *function = agateAllocateEntity(vm, AgateFunction, AGATE_ENTITY_FUNCTION, vm->fn_class);
+  agateBytecodeCreate(&function->bc);
+  function->unit = unit;
+  function->arity = 0;
+  function->slot_count = slot_count;
+  function->upvalue_count = 0;
+  function->name = NULL;
+  return function;
+}
+
+static void agateFunctionBindName(AgateVM *vm, AgateFunction *function, const char *name, ptrdiff_t size) {
+  function->name = agateStringNew(vm, name, size);
+}
+
 // Closure
 
 static AgateClosure *agateClosureNew(AgateVM *vm, AgateFunction *function) {
@@ -1697,9 +1718,52 @@ static AgateClosure *agateClosureNew(AgateVM *vm, AgateFunction *function) {
   return closure;
 }
 
-// Foreign
+static AgateClosure *agateClosureCallNew(AgateVM *vm, const char *signature) {
+  assert(signature != NULL);
 
-static ptrdiff_t agateSymbolTableFind(AgateTable *self, const char *name, ptrdiff_t size);
+  ptrdiff_t signature_size = strlen(signature);
+  assert(signature_size > 0);
+
+  int argc = 0;
+
+  if (signature[signature_size - 1] == ')') {
+    for (ptrdiff_t i = signature_size - 1; i > 0 && signature[i] != '('; --i) {
+      if (signature[i] == '_') {
+        ++argc;
+      }
+    }
+  }
+
+  if (signature[0] == '[') {
+    for (ptrdiff_t i = 0; i < signature_size && signature[i] != ']'; ++i) {
+      if (signature[i] == '_') {
+        ++argc;
+      }
+    }
+  }
+
+  ptrdiff_t symbol = agateSymbolTableEnsure(&vm->method_names, signature, signature_size, vm);
+
+  AgateFunction *function = agateFunctionNew(vm, NULL, argc + 1);
+  agatePushRoot(vm, (AgateEntity *) function);
+  AgateClosure *closure = agateClosureNew(vm, function);
+  agatePushRoot(vm, (AgateEntity *) closure);
+
+  agateBytecodeWrite(&function->bc, AGATE_OP_INVOKE,      0, vm);
+  agateBytecodeWrite(&function->bc, argc,                 0, vm);
+  agateBytecodeWrite(&function->bc, (symbol >> 8) & 0xFF, 0, vm);
+  agateBytecodeWrite(&function->bc,  symbol       & 0xFF, 0, vm);
+  agateBytecodeWrite(&function->bc, AGATE_OP_RETURN,      0, vm);
+  agateBytecodeWrite(&function->bc, AGATE_OP_END,         0, vm);
+
+  agateFunctionBindName(vm, function, signature, signature_size);
+
+  agatePopRoot(vm);
+  agatePopRoot(vm);
+  return closure;
+}
+
+// Foreign
 
 static AgateForeign *agateForeignNew(AgateVM *vm, AgateClass *klass) {
   assert(klass->field_count == -1);
@@ -1752,23 +1816,6 @@ static void agateForeignDestroy(AgateVM *vm, AgateForeign *foreign) {
 
   assert(method->kind == AGATE_METHOD_FOREIGN_DESTROY);
   method->as.foreign_destroy(vm, klass->unit->name->data, klass->name->data, foreign->data);
-}
-
-// Function
-
-static AgateFunction *agateFunctionNew(AgateVM *vm, AgateUnit *unit, ptrdiff_t slot_count) {
-  AgateFunction *function = agateAllocateEntity(vm, AgateFunction, AGATE_ENTITY_FUNCTION, vm->fn_class);
-  agateBytecodeCreate(&function->bc);
-  function->unit = unit;
-  function->arity = 0;
-  function->slot_count = slot_count;
-  function->upvalue_count = 0;
-  function->name = NULL;
-  return function;
-}
-
-static void agateFunctionBindName(AgateVM *vm, AgateFunction *function, const char *name, ptrdiff_t size) {
-  function->name = agateStringNew(vm, name, size);
 }
 
 // Instance
@@ -5836,44 +5883,8 @@ static void agateHandleDelete(AgateVM *vm, AgateHandle *handle) {
  */
 
 AgateHandle *agateMakeCallHandle(AgateVM *vm, const char *signature) {
-  assert(signature != NULL);
-
-  ptrdiff_t signature_size = strlen(signature);
-  assert(signature_size > 0);
-
-  int argc = 0;
-
-  if (signature[signature_size - 1] == ')') {
-    for (ptrdiff_t i = signature_size - 1; i > 0 && signature[i] != '('; --i) {
-      if (signature[i] == '_') {
-        ++argc;
-      }
-    }
-  }
-
-  if (signature[0] == '[') {
-    for (ptrdiff_t i = 0; i < signature_size && signature[i] != ']'; ++i) {
-      if (signature[i] == '_') {
-        ++argc;
-      }
-    }
-  }
-
-  ptrdiff_t symbol = agateSymbolTableEnsure(&vm->method_names, signature, signature_size, vm);
-
-  AgateFunction *function = agateFunctionNew(vm, NULL, argc + 1);
-  AgateHandle *handle = agateHandleNew(vm, agateEntityValue(function));
-  handle->value = agateEntityValue(agateClosureNew(vm, function));
-
-  agateBytecodeWrite(&function->bc, AGATE_OP_INVOKE,      0, vm);
-  agateBytecodeWrite(&function->bc, argc,                 0, vm);
-  agateBytecodeWrite(&function->bc, (symbol >> 8) & 0xFF, 0, vm);
-  agateBytecodeWrite(&function->bc,  symbol       & 0xFF, 0, vm);
-  agateBytecodeWrite(&function->bc, AGATE_OP_RETURN,      0, vm);
-  agateBytecodeWrite(&function->bc, AGATE_OP_END,         0, vm);
-
-  agateFunctionBindName(vm, function, signature, signature_size);
-
+  AgateClosure *closure = agateClosureCallNew(vm, signature);
+  AgateHandle *handle = agateHandleNew(vm, agateEntityValue(closure));
   return handle;
 }
 
