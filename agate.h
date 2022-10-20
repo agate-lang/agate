@@ -245,6 +245,11 @@ void agateSlotMapSet(AgateVM *vm, ptrdiff_t map_slot, ptrdiff_t key_slot, ptrdif
 void agateSlotMapErase(AgateVM *vm, ptrdiff_t map_slot, ptrdiff_t key_slot, ptrdiff_t value_slot);
 // end::slot_map[]
 
+// tag::slot_object[]
+void agateSlotGetField(AgateVM *vm, ptrdiff_t object_slot, ptrdiff_t index, ptrdiff_t result_slot);
+void agateSlotSetField(AgateVM *vm, ptrdiff_t object_slot, ptrdiff_t index, ptrdiff_t value_slot);
+// end::slot_object[]
+
 // tag::has_unit[]
 bool agateHasUnit(AgateVM *vm, const char *unit_name);
 // end::has_unit[]

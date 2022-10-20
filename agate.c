@@ -6313,6 +6313,36 @@ void agateSlotMapErase(AgateVM *vm, ptrdiff_t map_slot, ptrdiff_t key_slot, ptrd
   agateSlotSet(vm, value_slot, erased);
 }
 
+void agateSlotGetField(AgateVM *vm, ptrdiff_t object_slot, ptrdiff_t index, ptrdiff_t result_slot) {
+  assert(agateIsSlotValid(vm, object_slot));
+  assert(agateIsSlotValid(vm, result_slot));
+
+  AgateValue object_value = agateSlotGet(vm, object_slot);
+  assert(agateIsInstance(object_value));
+
+  AgateInstance *instance = agateAsInstance(object_value);
+
+  if (0 <= index && index < instance->field_count) {
+    agateSlotSet(vm, result_slot, instance->fields[index]);
+  } else {
+    agateSlotSetNil(vm, result_slot);
+  }
+}
+
+void agateSlotSetField(AgateVM *vm, ptrdiff_t object_slot, ptrdiff_t index, ptrdiff_t value_slot) {
+  assert(agateIsSlotValid(vm, object_slot));
+  assert(agateIsSlotValid(vm, value_slot));
+
+  AgateValue object_value = agateSlotGet(vm, object_slot);
+  assert(agateIsInstance(object_value));
+
+  AgateInstance *instance = agateAsInstance(object_value);
+
+  if (0 <= index && index < instance->field_count) {
+    instance->fields[index] = agateSlotGet(vm, value_slot);
+  }
+}
+
 bool agateHasUnit(AgateVM *vm, const char *unit_name) {
   assert(unit_name != NULL);
 
