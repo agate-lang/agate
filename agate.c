@@ -2132,7 +2132,7 @@ static ptrdiff_t agateUnitAddVariable(AgateVM *vm, AgateUnit *unit, const char *
 }
 
 static AgateValue agateUnitFindVariable(AgateVM *vm, AgateUnit *unit, const char *name) {
-  int64_t symbol = agateSymbolTableFind(&unit->object_names, name, strlen(name));
+  ptrdiff_t symbol = agateSymbolTableFind(&unit->object_names, name, strlen(name));
   assert(symbol < unit->object_values.size);
   return unit->object_values.data[symbol];
 }
@@ -2969,27 +2969,34 @@ static inline void agateClosureCall(AgateVM *vm, AgateClosure *closure, int argc
 }
 
 static inline bool agateMethodCall(AgateVM *vm, AgateClass *klass, ptrdiff_t symbol, int argc, AgateValue *args) {
-  if (symbol >= klass->methods.size) {
-    agateMethodNotFound(vm, klass, symbol);
-    return false;
+  if (symbol >= klass->methods.size || klass->methods.data[symbol].kind == AGATE_METHOD_NONE) {
+    ptrdiff_t original_symbol = symbol;
+    AgateString *method_name = agateSymbolTableReverseFind(&vm->method_names, original_symbol);
+
+    symbol = agateSymbolTableFind(&vm->method_names, "?(_,_)", 6);
+
+    if (symbol == -1 || symbol >= klass->methods.size || klass->methods.data[symbol].kind == AGATE_METHOD_NONE) {
+      agateMethodNotFound(vm, klass, original_symbol);
+      return false;
+    }
+
+    int array_length = argc - 1;
+    AgateArray *array = agateArrayNewWithSize(vm, argc - 1, agateNilValue());
+    agatePushRoot(vm, (AgateEntity *) array);
+
+    while (--array_length >= 0) {
+      array->elements.data[array_length] = agatePop(vm);
+    }
+
+    agatePush(vm, agateEntityValue(method_name));
+    agatePush(vm, agateEntityValue(array));
+    agatePopRoot(vm);
+
+    argc = 3;
+    assert(args == vm->stack_top - argc);
   }
 
   AgateMethod *method = &klass->methods.data[symbol];
-
-  if (method->kind == AGATE_METHOD_NONE) {
-    agateMethodNotFound(vm, klass, symbol);
-
-//     for (ptrdiff_t i = 0; i < klass->methods.size; ++i) {
-//       AgateMethod *method = &klass->methods.data[i];
-//
-//       if (method->kind != AGATE_METHOD_NONE) {
-//         AgateString *name = agateSymbolTableReverseFind(&vm->method_names, i);
-//         printf("- %s\n", name->data);
-//       }
-//     }
-
-    return false;
-  }
 
   switch (method->kind) {
     case AGATE_METHOD_NATIVE:
@@ -8250,6 +8257,14 @@ static void agateNameSignature(AgateCompiler *compiler, AgateSignature *signatur
   agateParameterList(compiler, signature);
 }
 
+static void agateMissingMethodSignature(AgateCompiler *compiler, AgateSignature *signature) {
+  agateParameterList(compiler, signature);
+
+  if (signature->arity != 2) {
+    agateError(compiler, "Missing method declaration '?(_,_)' must have two parameters. (%i).", signature->arity);
+  }
+}
+
 static void agateConstructorSignature(AgateCompiler *compiler, AgateSignature *signature) {
   agateCompilerConsume(compiler, AGATE_TOKEN_IDENTIFIER, "Expect constructor name after 'construct'.");
   *signature = agateSignatureFromToken(compiler, AGATE_SIG_CONSTRUCTOR);
@@ -9207,6 +9222,9 @@ static bool agateMethod(AgateCompiler *compiler, AgateVariable class_variable) {
       break;
     case AGATE_TOKEN_LEFT_PAREN:
       agateCallSignature(&method_compiler, &signature);
+      break;
+    case AGATE_TOKEN_QUESTION:
+      agateMissingMethodSignature(&method_compiler, &signature);
       break;
     default:
       agateError(compiler, "Expect method definition.");
