@@ -1718,12 +1718,7 @@ static AgateClosure *agateClosureNew(AgateVM *vm, AgateFunction *function) {
   return closure;
 }
 
-static AgateClosure *agateClosureCallNew(AgateVM *vm, const char *signature) {
-  assert(signature != NULL);
-
-  ptrdiff_t signature_size = strlen(signature);
-  assert(signature_size > 0);
-
+static inline int agateSignatureArgc(const char *signature, ptrdiff_t signature_size) {
   int argc = 0;
 
   if (signature[signature_size - 1] == ')') {
@@ -1742,6 +1737,14 @@ static AgateClosure *agateClosureCallNew(AgateVM *vm, const char *signature) {
     }
   }
 
+  return argc;
+}
+
+static AgateClosure *agateClosureCallNew(AgateVM *vm, const char *signature, ptrdiff_t signature_size) {
+  assert(signature != NULL);
+  assert(signature_size > 0);
+
+  int argc = agateSignatureArgc(signature, signature_size);
   ptrdiff_t symbol = agateSymbolTableEnsure(&vm->method_names, signature, signature_size, vm);
 
   AgateFunction *function = agateFunctionNew(vm, NULL, argc + 1);
@@ -3005,7 +3008,7 @@ static inline bool agateMethodCall(AgateVM *vm, AgateClass *klass, ptrdiff_t sym
         return true;
       }
 
-      return false;
+      return agateIsNil(vm->error);
 
     case AGATE_METHOD_FOREIGN:
       agateForeignCall(vm, method->as.foreign, argc);
@@ -3719,6 +3722,40 @@ static bool agateCoreObjectHasMethod(AgateVM *vm, int argc, AgateValue *args) {
 
   args[0] = agateBoolValue(klass->methods.data[symbol].kind != AGATE_METHOD_NONE);
   return true;
+}
+
+static bool agateIndirectCall(AgateVM *vm, AgateValue receiver, AgateClosure *closure, AgateArray *args, int argc, ptrdiff_t stack_size) {
+  if (args->elements.size != argc) {
+    printf("args size: %td vs argc: %d\n", args->elements.size, argc);
+
+    vm->error = AGATE_CONST_STRING(vm, "The number of arguments in array is not the same as expected by the call.");
+    return false;
+  }
+
+  vm->stack_top -= stack_size;
+  *vm->stack_top++ = receiver;
+
+  for (int i = 0; i < argc; ++i) {
+    *vm->stack_top++ = args->elements.data[i];
+  }
+
+  agateClosureCall(vm, closure, argc + 1, AGATE_CALL_FRAME_INTERNAL);
+  return false;
+}
+
+static bool agateCoreObjectIndirectCall(AgateVM *vm, int argc, AgateValue *args) {
+  if (!agateValidateString(vm, args[2], "Signature")) {
+    return false;
+  }
+
+  if (!agateValidateArray(vm, args[3], "Args")) {
+    return false;
+  }
+
+  AgateString *signature = agateAsString(args[2]);
+  AgateClosure *closure = agateClosureCallNew(vm, signature->data, signature->size);
+  AgateArray *args_array = agateAsArray(args[3]);
+  return agateIndirectCall(vm, args[1], closure, args_array, agateSignatureArgc(signature->data, signature->size), 4);
 }
 
 // Class
@@ -5611,6 +5648,7 @@ static void agateLoadCoreUnit(AgateVM *vm) {
   agateClassBindPrimitive(vm, object_metaclass, "field(_,_)", agateCoreObjectField2);
   agateClassBindPrimitive(vm, object_metaclass, "field(_,_,_)", agateCoreObjectField3);
   agateClassBindPrimitive(vm, object_metaclass, "has_method(_,_)", agateCoreObjectHasMethod);
+  agateClassBindPrimitive(vm, object_metaclass, "indirect_call(_,_,_)", agateCoreObjectIndirectCall);
   agateClassBindPrimitive(vm, object_metaclass, "same(_,_)", agateCoreObjectSame);
 
   vm->object_class->base.type = object_metaclass;
@@ -5890,7 +5928,7 @@ static void agateHandleDelete(AgateVM *vm, AgateHandle *handle) {
  */
 
 AgateHandle *agateMakeCallHandle(AgateVM *vm, const char *signature) {
-  AgateClosure *closure = agateClosureCallNew(vm, signature);
+  AgateClosure *closure = agateClosureCallNew(vm, signature, strlen(signature));
   AgateHandle *handle = agateHandleNew(vm, agateEntityValue(closure));
   return handle;
 }
