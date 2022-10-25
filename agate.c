@@ -3529,6 +3529,15 @@ static bool agateValidateArray(AgateVM *vm, AgateValue value, const char *arg) {
   return false;
 }
 
+static bool agateValidateFn(AgateVM *vm, AgateValue value, const char *arg) {
+  if (agateIsClosure(value)) {
+    return true;
+  }
+
+  vm->error = agateEntityValue(agateStringNewFormat(vm, "$ must be a function.", arg));
+  return false;
+}
+
 typedef struct {
   ptrdiff_t start;
   ptrdiff_t count;
@@ -4230,8 +4239,7 @@ static bool agateCoreCharHash(AgateVM *vm, int argc, AgateValue *args) {
 // Fn
 
 static bool agateCoreFnNew(AgateVM *vm, int argc, AgateValue *args) {
-  if (!agateIsClosure(args[1])) {
-    vm->error = AGATE_CONST_STRING(vm, "Argument must be a function.");
+  if (!agateValidateFn(vm, args[1], "Argument")) {
     return false;
   }
 
@@ -4247,6 +4255,20 @@ static bool agateCoreFnArity(AgateVM *vm, int argc, AgateValue *args) {
 static bool agateCoreFnToS(AgateVM *vm, int argc, AgateValue *args) {
   args[0] = AGATE_CONST_STRING(vm, "<fn>");
   return true;
+}
+
+static bool agateCoreFnIndirectCall(AgateVM *vm, int argc, AgateValue *args) {
+  if (!agateValidateFn(vm, args[1], "Fn")) {
+    return false;
+  }
+
+  if (!agateValidateArray(vm, args[2], "Args")) {
+    return false;
+  }
+
+  AgateClosure *closure = agateAsClosure(args[1]);
+  AgateArray *args_array = agateAsArray(args[2]);
+  return agateIndirectCall(vm, args[1], closure, args_array, closure->function->arity, 3);
 }
 
 // Array
@@ -5725,6 +5747,7 @@ static void agateLoadCoreUnit(AgateVM *vm) {
 
   vm->fn_class = agateAsClass(agateUnitFindVariable(vm, core, "Fn"));
   agateClassBindPrimitive(vm, vm->fn_class->base.type, "new(_)", agateCoreFnNew);
+  agateClassBindPrimitive(vm, vm->fn_class->base.type, "indirect_call(_,_)", agateCoreFnIndirectCall);
   agateClassBindPrimitive(vm, vm->fn_class, "arity", agateCoreFnArity);
   agateClassBindPrimitive(vm, vm->fn_class, "to_s", agateCoreFnToS);
 
