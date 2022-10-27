@@ -1,0 +1,1 @@
+IO.println(Object.indirect_call("the cake is a lie", "find(_)", ["cake"])) # expect: 4

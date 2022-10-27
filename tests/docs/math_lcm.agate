@@ -1,0 +1,3 @@
+IO.println(Math.lcm(21, 6))    # expect: 42
+IO.println(Math.lcm(9, 7))     # expect: 63
+IO.println(Math.lcm(-8, -10))  # expect: 40

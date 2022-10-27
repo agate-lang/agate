@@ -1,0 +1,4 @@
+def hello(name) {
+  return "Hello " + name
+}
+IO.println(Fn.indirect_call(hello, ["World"])) # expect: Hello World

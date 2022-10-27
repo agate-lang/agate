@@ -1,0 +1,3 @@
+IO.println(Math.gcd(54, 24))    # expect: 6
+IO.println(Math.gcd(9, 28))     # expect: 1
+IO.println(Math.gcd(-42, -56))  # expect: 14

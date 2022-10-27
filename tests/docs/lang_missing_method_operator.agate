@@ -1,0 +1,9 @@
+class Entity {
+  construct new() { }
+  ?(signature, args) {
+    IO.println("Method %(signature) missing: %(args)")
+  }
+}
+
+def e = Entity.new()
+e.unknown("hello") # expect: Method unknown(_) missing: [hello]

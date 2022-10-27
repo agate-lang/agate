@@ -169,6 +169,7 @@ method_signature:
   | '[' subscript_parameters ']'
   | '[' subscript_parameters ']' '=' '(' IDENTIFIER ')'
   | '(' parameters ')'
+  | '?' '(' IDENTIFIER ',' IDENTIFIER ')'
   ;
 
 decorator:
