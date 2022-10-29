@@ -3608,6 +3608,12 @@ static bool agateValidateRange(AgateVM *vm, const AgateRange *range, ptrdiff_t s
 
 #define AGATE_CONST_STRING(vm, text) agateEntityValue(agateStringNew((vm), (text), sizeof(text) - 1))
 
+// no-op
+
+static bool agateCoreNoOp(AgateVM *vm, int argc, AgateValue *args) {
+  return true;
+}
+
 // Object
 
 static bool agateCoreObjectNot(AgateVM *vm, int argc, AgateValue *args) {
@@ -5701,6 +5707,7 @@ static void agateLoadCoreUnit(AgateVM *vm) {
 
   vm->bool_class = agateAsClass(agateUnitFindVariable(vm, core, "Bool"));
   agateClassBindPrimitive(vm, vm->bool_class, "!", agateCoreBoolNot);
+  agateClassBindPrimitive(vm, vm->bool_class, "clone()", agateCoreNoOp);
   agateClassBindPrimitive(vm, vm->bool_class, "hash", agateCoreBoolHash);
   agateClassBindPrimitive(vm, vm->bool_class, "to_i", agateCoreBoolToI);
   agateClassBindPrimitive(vm, vm->bool_class, "to_s", agateCoreBoolToS);
@@ -5710,6 +5717,7 @@ static void agateLoadCoreUnit(AgateVM *vm) {
   agateClassBindPrimitive(vm, vm->char_class, "<=(_)", agateCoreCharLEq);
   agateClassBindPrimitive(vm, vm->char_class, ">(_)", agateCoreCharGt);
   agateClassBindPrimitive(vm, vm->char_class, ">=(_)", agateCoreCharGEq);
+  agateClassBindPrimitive(vm, vm->char_class, "clone()", agateCoreNoOp);
   agateClassBindPrimitive(vm, vm->char_class, "hash", agateCoreCharHash);
   agateClassBindPrimitive(vm, vm->char_class, "to_i", agateCoreCharToI);
   agateClassBindPrimitive(vm, vm->char_class, "to_s", agateCoreCharToS);
@@ -5737,6 +5745,7 @@ static void agateLoadCoreUnit(AgateVM *vm) {
   agateClassBindPrimitive(vm, vm->float_class, "<=(_)", agateCoreFloatLEq);
   agateClassBindPrimitive(vm, vm->float_class, ">(_)", agateCoreFloatGt);
   agateClassBindPrimitive(vm, vm->float_class, ">=(_)", agateCoreFloatGEq);
+  agateClassBindPrimitive(vm, vm->float_class, "clone()", agateCoreNoOp);
   agateClassBindPrimitive(vm, vm->float_class, "fractional", agateCoreFloatFractional);
   agateClassBindPrimitive(vm, vm->float_class, "hash", agateCoreFloatHash);
   agateClassBindPrimitive(vm, vm->float_class, "integral", agateCoreFloatIntegral);
@@ -5775,6 +5784,7 @@ static void agateLoadCoreUnit(AgateVM *vm) {
   agateClassBindPrimitive(vm, vm->int_class, ">=(_)", agateCoreIntGEq);
   agateClassBindPrimitive(vm, vm->int_class, "..(_)", agateCoreIntDotDot);
   agateClassBindPrimitive(vm, vm->int_class, "...(_)", agateCoreIntDotDotDot);
+  agateClassBindPrimitive(vm, vm->int_class, "clone()", agateCoreNoOp);
   agateClassBindPrimitive(vm, vm->int_class, "hash", agateCoreIntHash);
   agateClassBindPrimitive(vm, vm->int_class, "to_c", agateCoreIntToC);
   agateClassBindPrimitive(vm, vm->int_class, "to_f", agateCoreIntToF);
@@ -5842,6 +5852,7 @@ static void agateLoadCoreUnit(AgateVM *vm) {
 
   vm->nil_class = agateAsClass(agateUnitFindVariable(vm, core, "Nil"));
   agateClassBindPrimitive(vm, vm->nil_class, "!", agateCoreNilNot);
+  agateClassBindPrimitive(vm, vm->nil_class, "clone()", agateCoreNoOp);
   agateClassBindPrimitive(vm, vm->nil_class, "hash", agateCoreNilHash);
   agateClassBindPrimitive(vm, vm->nil_class, "to_s", agateCoreNilToS);
 

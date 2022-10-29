@@ -294,6 +294,14 @@ class Array is Sequence {
     return mid
   }
 
+  clone() {
+    def a = []
+    for (item in this) {
+      a.append(item.clone())
+    }
+    return a
+  }
+
   to_a { this[0..-1] }
 
   +(other) {
@@ -369,6 +377,14 @@ class Map is Sequence {
   [key]=(value) { .__subscript_setter(key, value, key.hash) }
 
   to_s { "{%(.join(", "))}" }
+
+  clone() {
+    def m = { }
+    for (kv in this) {
+      m.insert(kv.key.clone(), kv.value.clone())
+    }
+    return m
+  }
 
   __put(key, value) { .__put(key, value, key.hash) }
 }
