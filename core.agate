@@ -40,6 +40,11 @@ class Sequence {
     return counter
   }
 
+  first {
+    def iterator = .iterate(nil)
+    return iterator != nil ? .iterator_value(iterator) : nil
+  }
+
   count(predicate) {
     def counter = 0
     for (element in this) {
