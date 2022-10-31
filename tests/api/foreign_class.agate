@@ -1,12 +1,12 @@
 class ForeignClass {
-  foreign static finalized
+  static finalized foreign
 }
 
 # Class with a default constructor.
 foreign class Counter {
-  foreign construct new()
-  foreign increment(amount)
-  foreign value
+  construct new() foreign
+  increment(amount) foreign
+  value foreign
 }
 
 def counter = Counter.new()
@@ -35,10 +35,10 @@ foreign class Point is PointBase {
     IO.println("%(x), %(y), %(z)")
   }
 
-  foreign __construct(x, y, z)
+  __construct(x, y, z) foreign
 
-  foreign translate(x, y, z)
-  foreign to_s
+  translate(x, y, z) foreign
+  to_s foreign
 }
 
 def p = Point.new(1.0, 2.0, 3.0) # expect: 1, 2, 3
@@ -53,7 +53,7 @@ p.inherited() # expect: inherited method
 
 # Class with a finalizer.
 foreign class Resource {
-  foreign construct new()
+  construct new() foreign
 }
 
 def resources = [

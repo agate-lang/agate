@@ -1,8 +1,8 @@
 class Arrays {
-  foreign static new_array()
-  foreign static insert()
-  foreign static set()
-  foreign static get(array, index)
+  static new_array() foreign
+  static insert() foreign
+  static set() foreign
+  static get(array, index) foreign
 }
 
 def array = Arrays.new_array()

@@ -1,14 +1,14 @@
 class Slots {
-  foreign static no_set
-  foreign static get_slots(bool, float, string, bytes, value)
-  foreign static set_slots(a, b, c, d, e)
-  foreign static slot_types(bool, foreign_val, array, map, nil_val, float, string, unknown)
-  foreign static ensure()
-  foreign static ensure_outside_foreign()
-  foreign static get_array_size(array)
-  foreign static get_array_element(array, index)
-  foreign static get_map_size(map)
-  foreign static get_map_value(map, key)
+  static no_set foreign
+  static get_slots(bool, float, string, bytes, value) foreign
+  static set_slots(a, b, c, d, e) foreign
+  static slot_types(bool, foreign_val, array, map, nil_val, float, string, unknown) foreign
+  static ensure() foreign
+  static ensure_outside_foreign() foreign
+  static get_array_size(array) foreign
+  static get_array_element(array, index) foreign
+  static get_map_size(map) foreign
+  static get_map_value(map, key) foreign
 }
 
 foreign class ForeignType {

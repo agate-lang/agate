@@ -2,7 +2,7 @@
 # `agateCall()` to invoke `CallForeign.call(_)`. That in turn calls
 # `CallForeign.api()`, which goes back through the API.
 class CallForeign {
-  foreign static api()
+  static api() foreign
 
   # expect: slots before 2
   static call(param) {

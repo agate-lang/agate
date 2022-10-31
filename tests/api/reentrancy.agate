@@ -1,6 +1,6 @@
 class Reentrancy {
-  foreign static call_handle(a)
-  foreign static call_string()
+  static call_handle(a) foreign
+  static call_string() foreign
   static print(a) {
     IO.print(a)
   }

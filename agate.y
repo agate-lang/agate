@@ -154,10 +154,13 @@ methods:
   ;
 
 method:
-    KW_CONSTRUCT IDENTIFIER '(' parameters ')' block
-  | KW_FOREIGN KW_CONSTRUCT IDENTIFIER '(' parameters ')'
-  | decorator method_signature block
-  | KW_FOREIGN decorator method_signature
+    KW_CONSTRUCT IDENTIFIER '(' parameters ')' method_body
+  | decorator method_signature method_body
+  ;
+
+method_body:
+    block
+  | KW_FOREIGN
   ;
 
 method_signature:

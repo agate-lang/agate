@@ -3,14 +3,14 @@ class ForeignClass {
 }
 
 class Maps {
-  foreign static new_map()
-  foreign static insert()
-  foreign static contains(map, key)
-  foreign static contains()
-  foreign static contains_false()
-  foreign static size()
-  foreign static size(map)
-  foreign static erase(map)
+  static new_map() foreign
+  static insert() foreign
+  static contains(map, key) foreign
+  static contains() foreign
+  static contains_false() foreign
+  static size() foreign
+  static size(map) foreign
+  static erase(map) foreign
 }
 
 # map new + get/set API

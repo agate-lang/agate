@@ -9240,7 +9240,6 @@ static ptrdiff_t agateDeclareMethod(AgateCompiler *compiler, AgateSignature *sig
 }
 
 static bool agateMethod(AgateCompiler *compiler, AgateVariable class_variable) {
-  bool is_foreign = agateCompilerMatch(compiler, AGATE_TOKEN_FOREIGN);
   bool is_static = agateCompilerMatch(compiler, AGATE_TOKEN_STATIC);
 
   compiler->enclosing_class->is_method_static = is_static;
@@ -9315,7 +9314,7 @@ static bool agateMethod(AgateCompiler *compiler, AgateVariable class_variable) {
 
   ptrdiff_t method_symbol = agateDeclareMethod(compiler, &signature, builder.name, builder.size);
 
-  if (is_foreign) {
+  if (agateCompilerMatch(compiler, AGATE_TOKEN_FOREIGN)) {
     agateEmitConstant(compiler, agateEntityValue(agateStringNew(compiler->parser->vm, builder.name, builder.size)));
     method_compiler.parser->vm->compiler = method_compiler.parent;
   } else {
