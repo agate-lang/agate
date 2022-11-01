@@ -53,6 +53,11 @@ static void *agateReallocDefault(void *ptr, ptrdiff_t size, void *user_data) {
   return next;
 }
 
+static void *agateReallocForward(void *ptr, ptrdiff_t size, void *user_data) {
+  AgateSupport *support = user_data;
+  return support->reallocate(ptr, size, support->user_data);
+}
+
 // duplicate
 
 static char *agateDuplicate(const char *string, AgateSupport *support) {
@@ -330,6 +335,7 @@ AgateVM *agateExNewVM(const AgateConfig *config) {
 
   if (local_config.reallocate) {
     reallocate = local_config.reallocate;
+    local_config.reallocate = agateReallocForward;
   } else {
     reallocate = agateReallocDefault;
   }

@@ -160,6 +160,8 @@ void agateDeleteVM(AgateVM *vm);
 
 void agateSetArgs(AgateVM *vm, int argc, const char *argv[]);
 
+void *agateAllocate(AgateVM *vm, void *ptr, ptrdiff_t size);
+
 // tag::handle_call[]
 AgateHandle *agateMakeCallHandle(AgateVM *vm, const char *signature);
 // end::handle_call[]

@@ -28,6 +28,12 @@ target_compile_features(agate0
     c_std_99
 )
 
+if(MSVC)
+  target_compile_options(agate0 PRIVATE /W3)
+else()
+  target_compile_options(agate0 PRIVATE -Wall -Wpedantic)
+endif()
+
 set_target_properties(agate0
   PROPERTIES
     C_STANDARD 99
@@ -52,7 +58,13 @@ target_include_directories(agate-support0
     ${CMAKE_CURRENT_SOURCE_DIR}
 )
 
-# cli
+if(MSVC)
+  target_compile_options(agate-support0 PRIVATE /W3)
+else()
+  target_compile_options(agate-support0 PRIVATE -Wall -Wpedantic)
+endif()
+
+# run
 
 add_executable(agate-run
   agate-run.c
@@ -62,6 +74,12 @@ target_link_libraries(agate-run
   PRIVATE
     agate0
 )
+
+if(MSVC)
+  target_compile_options(agate-run PRIVATE /W3)
+else()
+  target_compile_options(agate-run PRIVATE -Wall -Wpedantic)
+endif()
 
 if(UNIX AND AGATE_DEV)
   find_package(BISON REQUIRED)
@@ -114,6 +132,12 @@ if(UNIX AND AGATE_DEV)
       PRIVATE
         _POSIX_C_SOURCE=200809L
     )
+
+    if(MSVC)
+      target_compile_options(agate-tests PRIVATE /W3)
+    else()
+      target_compile_options(agate-tests PRIVATE -Wall -Wpedantic)
+    endif()
 
     target_include_directories(agate-tests
       PRIVATE
