@@ -6631,7 +6631,7 @@ void agateSetArgs(AgateVM *vm, int argc, const char *argv[]) {
   }
 }
 
-void *agateAllocate(AgateVM *vm, void *ptr, ptrdiff_t size) {
+void *agateMemoryAllocate(AgateVM *vm, void *ptr, ptrdiff_t size) {
   return vm->config.reallocate(ptr, size, vm->config.user_data);
 }
 
