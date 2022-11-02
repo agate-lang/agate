@@ -351,11 +351,14 @@ AgateVM *agateExNewVM(const AgateConfig *config) {
 
 void agateExDeleteVM(AgateVM *vm) {
   AgateSupport *support = agateGetUserData(vm);
+  AgateReallocFunc reallocate = support->reallocate;
   void *user_data = support->user_data;
-  agateSupportDestroy(support);
-  support->reallocate(support, 0, support->user_data);
-  agateSetUserData(vm, user_data);
+
+  // delete vm before support in case of forward allocator
   agateDeleteVM(vm);
+
+  agateSupportDestroy(support);
+  reallocate(support, 0, user_data);
 }
 
 void *agateExGetUserData(AgateVM *vm) {
