@@ -6596,8 +6596,6 @@ AgateVM *agateNewVM(const AgateConfig *config) {
 void agateDeleteVM(AgateVM *vm) {
   agateFreeArray(vm, AgateCallFrame, vm->frames, vm->frames_capacity);
   agateFreeArray(vm, AgateValue, vm->stack, vm->stack_capacity);
-  agateTableDestroy(&vm->method_names, vm);
-  agateTableDestroy(&vm->units, vm);
 
   // destroy entities
 
@@ -6608,6 +6606,11 @@ void agateDeleteVM(AgateVM *vm) {
     agateEntityDelete(entity, vm);
     entity = next;
   }
+
+  // destroy method_names and units table
+
+  agateTableDestroy(&vm->method_names, vm);
+  agateTableDestroy(&vm->units, vm);
 
   assert(vm->handles == NULL);
   assert(vm->bytes_allocated == 0);
@@ -6632,9 +6635,7 @@ void agateSetArgs(AgateVM *vm, int argc, const char *argv[]) {
 }
 
 void *agateMemoryAllocate(AgateVM *vm, void *ptr, ptrdiff_t size) {
-  void *res = vm->config.reallocate(ptr, size, vm->config.user_data);
-  printf("Allocate: %p %td -> %p (%s)\n", ptr, size, res, (ptr == res) ? "same" : "different");
-  return res;
+  return vm->config.reallocate(ptr, size, vm->config.user_data);
 }
 
 /*
