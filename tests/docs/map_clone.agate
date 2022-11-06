@@ -1,0 +1,3 @@
+def m0 = { 1: 'a', true: 3.14, "good": nil }
+def m1 = m0.clone()
+IO.println(m1) # expect: {1: a, true: 3.14, good: nil}

@@ -1,0 +1,1 @@
+IO.println(42.0.clone()) # expect: 42

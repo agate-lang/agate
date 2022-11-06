@@ -1,0 +1,3 @@
+def r0 = Random.new(42)
+def r1 = r0.clone()
+IO.println(r0.int() == r1.int()) # expect: true
