@@ -15,7 +15,7 @@
 #include "tests.inc"
 
 #include "agate.h"
-#include "support.h"
+#include "agate-support.h"
 
 #include "tests/api/api_tests.h"
 

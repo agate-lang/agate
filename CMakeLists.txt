@@ -45,7 +45,7 @@ set_target_properties(agate0
 # support
 
 add_library(agate-support0
-  support.c
+  agate-support.c
 )
 
 target_link_libraries(agate-support0
