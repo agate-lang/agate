@@ -4814,6 +4814,12 @@ static bool agateCoreStringHash(AgateVM *vm, int argc, AgateValue *args) {
   return true;
 }
 
+static bool agateCoreStringClone(AgateVM *vm, int argc, AgateValue *args) {
+  AgateString *string = agateAsString(args[0]);
+  args[0] = agateEntityValue(agateStringNew(vm, string->data, string->size));
+  return true;
+}
+
 // Map
 
 static bool agateCoreMapNew(AgateVM *vm, int argc, AgateValue *args) {
@@ -5129,6 +5135,12 @@ static bool agateCoreRangeToS(AgateVM *vm, int argc, AgateValue *args) {
 
   args[0] = agateEntityValue(agateStringNew(vm, chars.data, chars.size));
   agateCharArrayDestroy(&chars, vm);
+  return true;
+}
+
+static bool agateCoreRangeClone(AgateVM *vm, int argc, AgateValue *args) {
+  AgateRange *range = agateAsRange(args[0]);
+  args[0] = agateEntityValue(agateRangeNew(vm, range->from, range->to, range->kind));
   return true;
 }
 
@@ -5628,6 +5640,12 @@ static bool agateCoreRandomShuffle(AgateVM *vm, int argc, AgateValue *args) {
   return true;
 }
 
+static bool agateCoreRandomClone(AgateVM *vm, int argc, AgateValue *args) {
+  AgateRandom *random = agateAsRandom(args[0]);
+  args[0] = agateEntityValue(agateRandomNew4(vm, random->state[0], random->state[1], random->state[2], random->state[3]));
+  return true;
+}
+
 // utils
 
 static AgateClass *agateClassNewBasic(AgateVM *vm, AgateUnit *unit, const char *name) {
@@ -5859,6 +5877,7 @@ static void agateLoadCoreUnit(AgateVM *vm) {
   vm->random_class = agateAsClass(agateUnitFindVariable(vm, core, "Random"));
   agateClassBindPrimitive(vm, vm->random_class->base.type, "new(_)", agateCoreRandomNew1);
   agateClassBindPrimitive(vm, vm->random_class->base.type, "new(_,_,_,_)", agateCoreRandomNew4);
+  agateClassBindPrimitive(vm, vm->random_class, "clone()", agateCoreRandomClone);
   agateClassBindPrimitive(vm, vm->random_class, "float()", agateCoreRandomFloat);
   agateClassBindPrimitive(vm, vm->random_class, "int()", agateCoreRandomInt0);
   agateClassBindPrimitive(vm, vm->random_class, "int(_)", agateCoreRandomInt1);
@@ -5867,6 +5886,7 @@ static void agateLoadCoreUnit(AgateVM *vm) {
   agateClassBindPrimitive(vm, vm->random_class, "shuffle(_)", agateCoreRandomShuffle);
 
   vm->range_class = agateAsClass(agateUnitFindVariable(vm, core, "Range"));
+  agateClassBindPrimitive(vm, vm->range_class, "clone()", agateCoreRangeClone);
   agateClassBindPrimitive(vm, vm->range_class, "contains(_)", agateCoreRangeContains);
   agateClassBindPrimitive(vm, vm->range_class, "from", agateCoreRangeFrom);
   agateClassBindPrimitive(vm, vm->range_class, "hash", agateCoreRangeHash);
@@ -5883,6 +5903,7 @@ static void agateLoadCoreUnit(AgateVM *vm) {
   agateClassBindPrimitive(vm, vm->string_class, "__trim(_,_,_)", agateCoreStringTrim);
   agateClassBindPrimitive(vm, vm->string_class, "+(_)", agateCoreStringPlus);
   agateClassBindPrimitive(vm, vm->string_class, "*(_)", agateCoreStringTimes);
+  agateClassBindPrimitive(vm, vm->string_class, "clone()", agateCoreStringClone);
   agateClassBindPrimitive(vm, vm->string_class, "contains(_)", agateCoreStringContains);
   agateClassBindPrimitive(vm, vm->string_class, "ends_with(_)", agateCoreStringEndsWith);
   agateClassBindPrimitive(vm, vm->string_class, "find(_)", agateCoreStringFind1);
