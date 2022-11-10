@@ -1,0 +1,17 @@
+class Foo {
+  static ?(signature, args) {
+    IO.println("'%(signature)' %(args)")
+  }
+}
+
+Foo.unknown_method0() # expect: 'unknown_method0()' []
+Foo.unknown_method1("bar") # expect: 'unknown_method1(_)' [bar]
+Foo.unknown_method2("bar", "baz") # expect: 'unknown_method2(_,_)' [bar, baz]
+Foo.unknown_getter # expect: 'unknown_getter' []
+Foo.unknown_setter = "bar" # expect: 'unknown_setter=(_)' [bar]
+Foo[42] # expect: '[_]' [42]
+Foo[42] = "bar" # expect: '[_]=(_)' [42, bar]
+Foo() # expect: '()' []
+Foo("bar") # expect: '(_)' [bar]
+~Foo # expect: '~' []
+Foo + "bar" # expect: '+(_)' [bar]

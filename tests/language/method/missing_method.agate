@@ -1,0 +1,20 @@
+class Foo {
+  construct new() { }
+
+  ?(signature, args) {
+    IO.println("'%(signature)' %(args)")
+  }
+}
+
+def foo = Foo.new()
+foo.unknown_method0() # expect: 'unknown_method0()' []
+foo.unknown_method1("bar") # expect: 'unknown_method1(_)' [bar]
+foo.unknown_method2("bar", "baz") # expect: 'unknown_method2(_,_)' [bar, baz]
+foo.unknown_getter # expect: 'unknown_getter' []
+foo.unknown_setter = "bar" # expect: 'unknown_setter=(_)' [bar]
+foo[42] # expect: '[_]' [42]
+foo[42] = "bar" # expect: '[_]=(_)' [42, bar]
+foo() # expect: '()' []
+foo("bar") # expect: '(_)' [bar]
+~foo # expect: '~' []
+foo + "bar" # expect: '+(_)' [bar]
