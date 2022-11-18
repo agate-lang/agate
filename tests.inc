@@ -261,6 +261,7 @@ static const char *AgateTestFiles[] = {
   "tests/core/sequence/skip_negative.agate",
   "tests/core/sequence/skip_not_int.agate",
   "tests/core/sequence/skip_not_num.agate",
+  "tests/core/sequence/sorted.agate",
   "tests/core/sequence/take.agate",
   "tests/core/sequence/take_negative.agate",
   "tests/core/sequence/take_not_int.agate",
