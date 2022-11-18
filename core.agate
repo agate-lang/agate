@@ -143,7 +143,7 @@ class Sequence {
     def prev = .iterator_value(iter)
     while (iter = .iterate(iter)) {
       def curr = .iterator_value(iter)
-      if (!comp(prev, curr)) {
+      if (comp(curr, prev)) {
         return false
       }
       prev = curr
