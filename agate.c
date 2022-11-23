@@ -1621,7 +1621,7 @@ static AgateArray *agateArrayNewWithSize(AgateVM *vm, ptrdiff_t size, AgateValue
 
 // Class
 
-static AgateClass *agateClassNewBare(AgateVM *vm, AgateUnit *unit, int field_count, AgateString *name) {
+static AgateClass *agateClassNewBare(AgateVM *vm, AgateUnit *unit, ptrdiff_t field_count, AgateString *name) {
   AgateClass *klass = agateAllocateEntity(vm, AgateClass, AGATE_ENTITY_CLASS, NULL);
   klass->unit = unit;
   klass->supertype = NULL;
@@ -1657,7 +1657,7 @@ static void agateClassBindSuperclass(AgateVM *vm, AgateClass *subclass, AgateCla
   }
 }
 
-static AgateClass *agateClassNew(AgateVM *vm, AgateUnit *unit, AgateClass *superclass, int field_count, AgateString *name) {
+static AgateClass *agateClassNew(AgateVM *vm, AgateUnit *unit, AgateClass *superclass, ptrdiff_t field_count, AgateString *name) {
   assert(superclass->base.kind == AGATE_ENTITY_CLASS);
 
   // metaclass creation
@@ -1893,7 +1893,7 @@ static uint64_t agateRandomRange(AgateRandom *random, uint64_t end) {
   do {
     x = agateRandomNext(random);
     r = x % end;
-  } while (x - r > (-end));
+  } while (x - r > (UINT64_MAX - end));
 
   return r;
 }
@@ -2653,7 +2653,7 @@ static void agatePatchMethodCode(AgateClass *klass, AgateFunction *function) { /
       case AGATE_OP_FIELD_STORE:
       case AGATE_OP_FIELD_LOAD_THIS:
       case AGATE_OP_FIELD_STORE_THIS:
-        function->bc.code.data[ip + 1] += klass->supertype->field_count;
+        function->bc.code.data[ip + 1] += (uint8_t) klass->supertype->field_count;
         break;
 
       case AGATE_OP_SUPER:
@@ -5409,7 +5409,7 @@ static bool agateCoreIoWrite(AgateVM *vm, int argc, AgateValue *args) {
   }
 
   if (vm->config.write != NULL) {
-    uint8_t byte = value;
+    uint8_t byte = (uint8_t) value;
     vm->config.write(vm, byte);
   }
 
@@ -7751,7 +7751,7 @@ static inline void agateEmitJumpBackward(AgateCompiler *compiler, ptrdiff_t star
 
 static inline void agateEmitConstant(AgateCompiler *compiler, AgateValue value) {
   ptrdiff_t symbol = agateCompilerAddConstant(compiler, value);
-  agateEmitShortArg(compiler, AGATE_OP_CONSTANT, symbol);
+  agateEmitShortArg(compiler, AGATE_OP_CONSTANT, (uint16_t) symbol);
 }
 
 static inline void agateEmitLiteral(AgateCompiler *compiler) {
@@ -7839,7 +7839,7 @@ static void agateCompilerDefineVariable(AgateCompiler *compiler, ptrdiff_t symbo
     return;
   }
 
-  agateEmitShortArg(compiler, AGATE_OP_GLOBAL_STORE, symbol);
+  agateEmitShortArg(compiler, AGATE_OP_GLOBAL_STORE, (uint16_t) symbol);
   agateEmitOpcode(compiler, AGATE_OP_POP);
 }
 
@@ -7966,11 +7966,11 @@ static AgateFunction *agateCompilerEnd(AgateCompiler *compiler, const char *name
 
   if (compiler->parent != NULL) {
     ptrdiff_t symbol = agateCompilerAddConstant(compiler->parent, agateEntityValue(function));
-    agateEmitShortArg(compiler->parent, AGATE_OP_CLOSURE, symbol);
+    agateEmitShortArg(compiler->parent, AGATE_OP_CLOSURE, (uint16_t) symbol);
 
     for (int i = 0; i < function->upvalue_count; ++i) {
       agateEmitByte(compiler->parent, compiler->upvalues[i].capture);
-      agateEmitByte(compiler->parent, compiler->upvalues[i].index);
+      agateEmitByte(compiler->parent, (uint8_t) compiler->upvalues[i].index);
     }
   }
 
@@ -8174,17 +8174,17 @@ static inline void agateFinishArgumentList(AgateCompiler *compiler, int *argc) {
 static void agateCompilerCallSignature(AgateCompiler *compiler, AgateOpCode instruction, AgateSignature *signature) {
   ptrdiff_t symbol = agateSignatureSymbol(compiler, signature);
   agateEmitByteArg(compiler, instruction, signature->arity);
-  agateEmitShort(compiler, symbol);
+  agateEmitShort(compiler, (uint16_t) symbol);
 
   if (instruction == AGATE_OP_SUPER) {
-    agateEmitShort(compiler, agateCompilerAddConstant(compiler, agateNilValue()));
+    agateEmitShort(compiler, (uint16_t) agateCompilerAddConstant(compiler, agateNilValue()));
   }
 }
 
 static void agateEmitInvoke(AgateCompiler *compiler, int argc, const char *name, ptrdiff_t size) {
   ptrdiff_t symbol = agateCompilerMethodSymbol(compiler, name, size);
   agateEmitByteArg(compiler, AGATE_OP_INVOKE, argc);
-  agateEmitShort(compiler, symbol);
+  agateEmitShort(compiler, (uint16_t) symbol);
 }
 
 static void agateCompilerMethodCall(AgateCompiler *compiler, AgateOpCode instruction, AgateSignature *signature) {
@@ -8251,13 +8251,13 @@ static void agateCompilerNamedCall(AgateCompiler *compiler, bool can_assign, Aga
 static void agateEmitLoadVariable(AgateCompiler *compiler, AgateVariable variable) {
   switch (variable.scope) {
     case AGATE_SCOPE_LOCAL:
-      agateEmitByteArg(compiler, AGATE_OP_LOCAL_LOAD, variable.index);
+      agateEmitByteArg(compiler, AGATE_OP_LOCAL_LOAD, (uint8_t) variable.index);
       break;
     case AGATE_SCOPE_UPVALUE:
-      agateEmitByteArg(compiler, AGATE_OP_UPVALUE_LOAD, variable.index);
+      agateEmitByteArg(compiler, AGATE_OP_UPVALUE_LOAD, (uint8_t) variable.index);
       break;
     case AGATE_SCOPE_GLOBAL:
-      agateEmitShortArg(compiler, AGATE_OP_GLOBAL_LOAD, variable.index);
+      agateEmitShortArg(compiler, AGATE_OP_GLOBAL_LOAD, (uint16_t) variable.index);
       break;
   }
 }
@@ -8393,7 +8393,7 @@ static void agateEmitLoadThis(AgateCompiler *compiler) {
 static void agateEmitLoadCoreVariable(AgateCompiler *compiler, const char *name) {
   ptrdiff_t symbol = agateSymbolTableFind(&compiler->parser->unit->object_names, name, strlen(name));
   assert(symbol != -1);
-  agateEmitShortArg(compiler, AGATE_OP_GLOBAL_LOAD, symbol);
+  agateEmitShortArg(compiler, AGATE_OP_GLOBAL_LOAD, (uint16_t) symbol);
 }
 
 
@@ -8525,10 +8525,10 @@ static void agateFieldExpression(AgateCompiler *compiler, bool can_assign) {
   }
 
   if (compiler->parent != NULL && compiler->parent->enclosing_class == enclosing_class) {
-    agateEmitByteArg(compiler, is_load ? AGATE_OP_FIELD_LOAD_THIS : AGATE_OP_FIELD_STORE_THIS, field);
+    agateEmitByteArg(compiler, is_load ? AGATE_OP_FIELD_LOAD_THIS : AGATE_OP_FIELD_STORE_THIS, (uint8_t) field);
   } else {
     agateEmitLoadThis(compiler);
-    agateEmitByteArg(compiler, is_load ? AGATE_OP_FIELD_LOAD : AGATE_OP_FIELD_STORE, field);
+    agateEmitByteArg(compiler, is_load ? AGATE_OP_FIELD_LOAD : AGATE_OP_FIELD_STORE, (uint8_t) field);
   }
 }
 
@@ -8538,13 +8538,13 @@ static void agateBareName(AgateCompiler *compiler, bool can_assign, AgateVariabl
 
     switch (variable.scope) {
       case AGATE_SCOPE_LOCAL:
-        agateEmitByteArg(compiler, AGATE_OP_LOCAL_STORE, variable.index);
+        agateEmitByteArg(compiler, AGATE_OP_LOCAL_STORE, (uint8_t) variable.index);
         break;
       case AGATE_SCOPE_UPVALUE:
-        agateEmitByteArg(compiler, AGATE_OP_UPVALUE_STORE, variable.index);
+        agateEmitByteArg(compiler, AGATE_OP_UPVALUE_STORE, (uint8_t) variable.index);
         break;
       case AGATE_SCOPE_GLOBAL:
-        agateEmitShortArg(compiler, AGATE_OP_GLOBAL_STORE, variable.index);
+        agateEmitShortArg(compiler, AGATE_OP_GLOBAL_STORE, (uint16_t) variable.index);
         break;
     }
   } else {
@@ -9099,14 +9099,14 @@ static void agateForStatement(AgateCompiler *compiler) {
   AgateLoopContext loop;
   agateLoopStart(compiler, &loop);
 
-  agateEmitByteArg(compiler, AGATE_OP_LOCAL_LOAD, sequence_symbol);
-  agateEmitByteArg(compiler, AGATE_OP_LOCAL_LOAD, iterator_symbol);
+  agateEmitByteArg(compiler, AGATE_OP_LOCAL_LOAD, (uint8_t) sequence_symbol);
+  agateEmitByteArg(compiler, AGATE_OP_LOCAL_LOAD, (uint8_t) iterator_symbol);
   agateEmitInvoke(compiler, 1, "iterate(_)", 10);
-  agateEmitByteArg(compiler, AGATE_OP_LOCAL_STORE, iterator_symbol);
+  agateEmitByteArg(compiler, AGATE_OP_LOCAL_STORE, (uint8_t) iterator_symbol);
   agateEmitLoopJump(compiler);
 
-  agateEmitByteArg(compiler, AGATE_OP_LOCAL_LOAD, sequence_symbol);
-  agateEmitByteArg(compiler, AGATE_OP_LOCAL_LOAD, iterator_symbol);
+  agateEmitByteArg(compiler, AGATE_OP_LOCAL_LOAD, (uint8_t) sequence_symbol);
+  agateEmitByteArg(compiler, AGATE_OP_LOCAL_LOAD, (uint8_t) iterator_symbol);
   agateEmitInvoke(compiler, 1, "iterator_value(_)", 17);
 
   agateCompilerPushScope(compiler);
@@ -9233,7 +9233,7 @@ static void agateCreateConstructor(AgateCompiler *compiler, AgateSignature *sign
   agateEmitOpcode(&method_compiler, compiler->enclosing_class->is_foreign ? AGATE_OP_CONSTRUCT_FOREIGN : AGATE_OP_CONSTRUCT);
 
   agateEmitByteArg(&method_compiler, AGATE_OP_INVOKE, signature->arity);
-  agateEmitShort(&method_compiler, constructor_symbol);
+  agateEmitShort(&method_compiler, (uint16_t) constructor_symbol);
 
   agateEmitOpcode(&method_compiler, AGATE_OP_RETURN);
   agateCompilerEnd(&method_compiler, "", 0);
@@ -9242,7 +9242,7 @@ static void agateCreateConstructor(AgateCompiler *compiler, AgateSignature *sign
 static void agateDefineMethod(AgateCompiler *compiler, AgateVariable class_variable, bool is_static, ptrdiff_t method_symbol) {
   agateEmitLoadVariable(compiler, class_variable);
   AgateOpCode instruction = is_static ? AGATE_OP_METHOD_CLASS : AGATE_OP_METHOD_INSTANCE;
-  agateEmitShortArg(compiler, instruction, method_symbol);
+  agateEmitShortArg(compiler, instruction, (uint16_t) method_symbol);
 }
 
 static ptrdiff_t agateDeclareMethod(AgateCompiler *compiler, AgateSignature *signature, const char *name, ptrdiff_t size) {
@@ -9465,7 +9465,7 @@ static void agateImport(AgateCompiler *compiler) {
   agateCompilerConsume(compiler, AGATE_TOKEN_STRING, "Expect a string after 'import'.");
   ptrdiff_t unit_constant = agateCompilerAddConstant(compiler, compiler->parser->previous.value);
 
-  agateEmitShortArg(compiler, AGATE_OP_IMPORT_UNIT, unit_constant);
+  agateEmitShortArg(compiler, AGATE_OP_IMPORT_UNIT, (uint16_t) unit_constant);
   agateEmitOpcode(compiler, AGATE_OP_POP);
 
   if (!agateCompilerMatch(compiler, AGATE_TOKEN_FOR)) {
@@ -9486,7 +9486,7 @@ static void agateImport(AgateCompiler *compiler) {
       symbol = agateCompilerDeclareVariable(compiler, &source);
     }
 
-    agateEmitShortArg(compiler, AGATE_OP_IMPORT_OBJECT, source_constant);
+    agateEmitShortArg(compiler, AGATE_OP_IMPORT_OBJECT, (uint16_t) source_constant);
     agateCompilerDefineVariable(compiler, symbol);
   } while (agateCompilerMatch(compiler, AGATE_TOKEN_COMMA));
 }
@@ -9582,7 +9582,7 @@ static AgateFunction *agateRawCompile(AgateVM *vm, AgateUnit *unit, const char *
       parser.previous.kind = AGATE_TOKEN_IDENTIFIER;
       parser.previous.start = name->data;
       parser.previous.size = name->size;
-      parser.previous.line = agateAsInt(unit->object_values.data[i]);
+      parser.previous.line = (int) agateAsInt(unit->object_values.data[i]);
       agateError(&compiler, "Variable '%s' is used but not defined.", name->data);
     }
   }
