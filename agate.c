@@ -1887,13 +1887,19 @@ static uint64_t agateRandomNext(AgateRandom *random) {
 }
 
 static uint64_t agateRandomRange(AgateRandom *random, uint64_t end) {
+  assert(end > 0);
+
+  // using "Debiased Modulo (Once) — Java's Method" from
+  // https://www.pcg-random.org/posts/bounded-rands.html
+
   uint64_t x;
   uint64_t r;
+  uint64_t threshold = UINT64_MAX - end + 1;
 
   do {
     x = agateRandomNext(random);
     r = x % end;
-  } while (x - r > (UINT64_MAX - end));
+  } while (x - r > threshold);
 
   return r;
 }
