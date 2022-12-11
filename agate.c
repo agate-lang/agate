@@ -835,6 +835,7 @@ static inline bool agateIsMap(AgateValue value) { return agateIsEntityKind(value
 static inline bool agateIsRandom(AgateValue value) { return agateIsEntityKind(value, AGATE_ENTITY_RANDOM); }
 static inline bool agateIsRange(AgateValue value) { return agateIsEntityKind(value, AGATE_ENTITY_RANGE); }
 static inline bool agateIsString(AgateValue value) { return agateIsEntityKind(value, AGATE_ENTITY_STRING); }
+static inline bool agateIsTuple(AgateValue value) { return agateIsEntityKind(value, AGATE_ENTITY_TUPLE); }
 static inline bool agateIsUnit(AgateValue value) { return agateIsEntityKind(value, AGATE_ENTITY_UNIT); }
 static inline bool agateIsUpvalue(AgateValue value) { return agateIsEntityKind(value, AGATE_ENTITY_UPVALUE); }
 
@@ -848,6 +849,7 @@ static inline AgateMap *agateAsMap(AgateValue value) { return (AgateMap *) agate
 static inline AgateRandom *agateAsRandom(AgateValue value) { return (AgateRandom *) agateAsEntity(value); }
 static inline AgateRange *agateAsRange(AgateValue value) { return (AgateRange *) agateAsEntity(value); }
 static inline AgateString *agateAsString(AgateValue value) { return (AgateString *) agateAsEntity(value); }
+static inline AgateTuple *agateAsTuple(AgateValue value) { return (AgateTuple *) agateAsEntity(value); }
 static inline AgateUnit *agateAsUnit(AgateValue value) { return (AgateUnit *) agateAsEntity(value); }
 static inline AgateUpvalue *agateAsUpvalue(AgateValue value) { return (AgateUpvalue *) agateAsEntity(value); }
 
@@ -5028,6 +5030,73 @@ static bool agateCoreMapValueFromIterator(AgateVM *vm, int argc, AgateValue *arg
   return true;
 }
 
+// Tuple
+
+static bool agateCoreTupleSize(AgateVM *vm, int argc, AgateValue *args) {
+  args[0] = agateIntValue(agateAsTuple(args[0])->component_count);
+  return true;
+}
+
+static bool agateCoreTupleSubscriptGetter(AgateVM *vm, int argc, AgateValue *args) {
+  AgateTuple *tuple = agateAsTuple(args[0]);
+  ptrdiff_t index = agateValidateIndex(vm, args[1], tuple->component_count, "Index");
+
+  if (index == AGATE_INDEX_ERROR) {
+    return false;
+  }
+
+  args[0] = tuple->components[index];
+  return true;
+}
+
+static bool agateCoreTupleIterate(AgateVM *vm, int argc, AgateValue *args) {
+  AgateTuple *tuple = agateAsTuple(args[0]);
+
+  if (agateIsNil(args[1])) {
+    args[0] = agateIntValue(0);
+    return true;
+  }
+
+  if (!agateValidateInt(vm, args[1], "Iterator")) {
+    return false;
+  }
+
+  int64_t index = agateAsInt(args[1]);
+
+  if (index < 0 || index >= tuple->component_count) {
+    args[0] = agateNilValue();
+  } else {
+    args[0] = agateIntValue(index + 1);
+  }
+
+  return true;
+}
+
+static bool agateCoreTupleIteratorValue(AgateVM *vm, int argc, AgateValue *args) {
+  AgateTuple *tuple = agateAsTuple(args[0]);
+
+  ptrdiff_t index = agateValidateIndex(vm, args[1], tuple->component_count, "Iterator");
+
+  if (index == AGATE_INDEX_ERROR) {
+    return false;
+  }
+
+  args[0] = tuple->components[index];
+  return true;
+}
+
+static bool agateCoreTupleAt(AgateVM *vm, int argc, AgateValue *args) {
+  AgateTuple *tuple = agateAsTuple(args[0]);
+  ptrdiff_t index = agateValidateIndex(vm, args[1], tuple->component_count, "Index");
+
+  if (index == AGATE_INDEX_ERROR) {
+    return false;
+  }
+
+  args[0] = tuple->components[index];
+  return true;
+}
+
 // Range
 
 static bool agateCoreRangeFrom(AgateVM *vm, int argc, AgateValue *args) {
@@ -5550,7 +5619,7 @@ static bool agateCoreSystemVersionString(AgateVM *vm, int argc, AgateValue *args
   return true;
 }
 
-// random
+// Random
 
 static bool agateCoreRandomNew1(AgateVM *vm, int argc, AgateValue *args) {
   if (!agateValidateInt(vm, args[1], "Seed")) {
@@ -5982,6 +6051,11 @@ static void agateLoadCoreUnit(AgateVM *vm) {
   agateClassBindPrimitive(vm, system_class->base.type, "version_string", agateCoreSystemVersionString);
 
   vm->tuple_class = agateAsClass(agateUnitFindVariable(vm, core, "Tuple"));
+  agateClassBindPrimitive(vm, vm->tuple_class, "[_]", agateCoreTupleSubscriptGetter);
+  agateClassBindPrimitive(vm, vm->tuple_class, "at(_)", agateCoreTupleAt);
+  agateClassBindPrimitive(vm, vm->tuple_class, "iterate(_)", agateCoreTupleIterate);
+  agateClassBindPrimitive(vm, vm->tuple_class, "iterator_value(_)", agateCoreTupleIteratorValue);
+  agateClassBindPrimitive(vm, vm->tuple_class, "size", agateCoreTupleSize);
 
   for (AgateEntity *entity = vm->entities; entity != NULL; entity = entity->next) {
     if (entity->kind == AGATE_ENTITY_STRING) {
