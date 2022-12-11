@@ -409,6 +409,7 @@ compound:
   | '{' maybe_eol '}'
   | '{' members maybe_eol '}'
   | '{' members ',' maybe_eol '}'
+  | '(' components ')'
   ;
 
 elements:
@@ -423,6 +424,11 @@ members:
 
 member:
     expr_unary ':' maybe_eol expr
+  ;
+
+components:
+    expr ',' expr
+  | components ',' expr
   ;
 
 eol:
