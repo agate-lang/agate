@@ -1,0 +1,2 @@
+def tuple = (1, nil, true, 3.0, 'a')
+IO.println(tuple.to_s) # expect: (1, nil, true, 3, a)

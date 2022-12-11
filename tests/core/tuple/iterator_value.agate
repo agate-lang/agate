@@ -1,0 +1,6 @@
+def tuple = (1, nil, true, 3.0, 'a')
+IO.println(tuple.iterator_value(0)) # expect: 1
+IO.println(tuple.iterator_value(1)) # expect: nil
+IO.println(tuple.iterator_value(2)) # expect: true
+IO.println(tuple.iterator_value(3)) # expect: 3
+IO.println(tuple.iterator_value(4)) # expect: a

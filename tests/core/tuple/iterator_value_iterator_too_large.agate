@@ -1,0 +1,3 @@
+# result: runtime error
+def tuple = (1, nil, true, 3.0, 'a')
+tuple.iterator_value(5) # expect: Iterator out of bounds.

@@ -5063,7 +5063,7 @@ static bool agateCoreTupleIterate(AgateVM *vm, int argc, AgateValue *args) {
 
   int64_t index = agateAsInt(args[1]);
 
-  if (index < 0 || index >= tuple->component_count) {
+  if (index < 0 || index >= tuple->component_count - 1) {
     args[0] = agateNilValue();
   } else {
     args[0] = agateIntValue(index + 1);
@@ -6053,6 +6053,7 @@ static void agateLoadCoreUnit(AgateVM *vm) {
   vm->tuple_class = agateAsClass(agateUnitFindVariable(vm, core, "Tuple"));
   agateClassBindPrimitive(vm, vm->tuple_class, "[_]", agateCoreTupleSubscriptGetter);
   agateClassBindPrimitive(vm, vm->tuple_class, "at(_)", agateCoreTupleAt);
+  agateClassBindPrimitive(vm, vm->tuple_class, "clone()", agateCoreNoOp);
   agateClassBindPrimitive(vm, vm->tuple_class, "iterate(_)", agateCoreTupleIterate);
   agateClassBindPrimitive(vm, vm->tuple_class, "iterator_value(_)", agateCoreTupleIteratorValue);
   agateClassBindPrimitive(vm, vm->tuple_class, "size", agateCoreTupleSize);

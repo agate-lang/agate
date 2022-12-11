@@ -1,0 +1,4 @@
+IO.println((1, nil).size) # expect: 2
+IO.println((1, nil, true).size) # expect: 3
+IO.println((1, nil, true, 3.0).size) # expect: 4
+IO.println((1, nil, true, 3.0, 'a').size) # expect: 5

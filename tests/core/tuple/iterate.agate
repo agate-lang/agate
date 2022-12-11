@@ -1,0 +1,11 @@
+def tuple = (1, nil, true, 3.0, 'a')
+IO.println(tuple.iterate(nil)) # expect: 0
+IO.println(tuple.iterate(0)) # expect: 1
+IO.println(tuple.iterate(1)) # expect: 2
+IO.println(tuple.iterate(2)) # expect: 3
+IO.println(tuple.iterate(3)) # expect: 4
+IO.println(tuple.iterate(4)) # expect: nil
+
+# Out of bounds.
+IO.println(tuple.iterate(123)) # expect: nil
+IO.println(tuple.iterate(-1)) # expect: nil
