@@ -410,6 +410,7 @@ typedef struct {
   X(CLOSE_UPVALUE,     -1,  0)  \
   X(POP,               -1,  0)  \
   X(RETURN,             0,  0)  \
+  X(TUPLE,             -2,  1)  \
   X(CLASS,             -1,  1)  \
   X(CLASS_FOREIGN,     -1,  0)  \
   X(CONSTRUCT,          0,  0)  \
@@ -3405,6 +3406,15 @@ static AgateStatus agateRun(AgateVM *vm) {
           AGATE_RUNTIME_ERROR();
         }
 
+        break;
+      }
+
+      case AGATE_OP_TUPLE:
+      {
+        ptrdiff_t component_count = agateReadByte(frame);
+        AgateTuple *tuple = agateTupleNew(vm, vm->stack_top - component_count, component_count);
+        vm->stack_top -= component_count;
+        agatePush(vm, agateEntityValue(tuple));
         break;
       }
 
