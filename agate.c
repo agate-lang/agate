@@ -215,6 +215,7 @@ typedef enum {
   AGATE_ENTITY_RANDOM,
   AGATE_ENTITY_RANGE,
   AGATE_ENTITY_STRING,
+  AGATE_ENTITY_TUPLE,
   AGATE_ENTITY_UNIT,
   AGATE_ENTITY_UPVALUE,
 } AgateEntityKind;
@@ -341,7 +342,7 @@ typedef struct {
 } AgateForeign;
 
 /*
- * types - entities - array, map, range and random
+ * types - entities - array, map, tuple, range and random
  */
 
 typedef struct {
@@ -353,6 +354,12 @@ typedef struct {
   AgateEntity base;
   AgateTable members;
 } AgateMap;
+
+typedef struct {
+  AgateEntity base;
+  ptrdiff_t component_count;
+  AgateValue components[];
+} AgateTuple;
 
 typedef enum {
   AGATE_RANGE_INCLUSIVE,
@@ -1000,6 +1007,7 @@ static uint64_t agateEntityHash(const AgateEntity *entity) {
     case AGATE_ENTITY_INSTANCE:
     case AGATE_ENTITY_MAP:
     case AGATE_ENTITY_RANDOM:
+    case AGATE_ENTITY_TUPLE:
     case AGATE_ENTITY_UNIT:
     case AGATE_ENTITY_UPVALUE:
       assert(false);
@@ -2012,6 +2020,12 @@ static void agateEntityDelete(AgateEntity *entity, AgateVM *vm) {
       break;
     }
 
+    case AGATE_ENTITY_TUPLE: {
+      AgateTuple *tuple = (AgateTuple *) entity;
+      agateFreeFlex(vm, AgateTuple, tuple, AgateValue, tuple->component_count);
+      break;
+    }
+
     case AGATE_ENTITY_UPVALUE: {
       agateFree(vm, AgateUpvalue, entity);
       break;
@@ -2351,6 +2365,15 @@ static void agateBlackenObject(AgateVM *vm, AgateEntity *entity) {
     }
 
     case AGATE_ENTITY_STRING: {
+      break;
+    }
+
+    case AGATE_ENTITY_TUPLE: {
+      AgateTuple *tuple = (AgateTuple *) entity;
+
+      for (ptrdiff_t i = 0; i < tuple->component_count; ++i) {
+        agateMarkValue(vm, tuple->components[i]);
+      }
       break;
     }
 
