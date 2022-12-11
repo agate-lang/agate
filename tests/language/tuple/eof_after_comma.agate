@@ -1,0 +1,2 @@
+# result: compile error
+def tuple = (1, # expect: test:2: Error at ',': Expected expression.
