@@ -1,0 +1,12 @@
+class Tuples {
+  static size(tuple) foreign
+  static get(tuple, index) foreign
+}
+
+def tuple = (1, nil, true, 3.0, 'a')
+IO.println(tuple is Tuple) # expect: true
+IO.println(tuple.size) # expect: 5
+
+IO.println(Tuples.size(tuple)) # expect: 5
+IO.println(Tuples.get(tuple, 2)) # expect: true
+IO.println(Tuples.get(tuple, -2)) # expect: 3

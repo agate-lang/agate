@@ -10,6 +10,7 @@
 #include "maps.h"
 #include "reentrancy.h"
 #include "slots.h"
+#include "tuples.h"
 
 bool agateTestUseForeign(const char *path) {
   return strncmp(path, "tests/api", 9) == 0;
@@ -60,6 +61,10 @@ AgateForeignMethodFunc agateTestForeignMethodHandler(AgateVM *vm, const char *un
 
   if (strcmp(unit_name, "tests/api/slots.agate") == 0) {
     return agateTestSlotsForeignMethodHandler(class_name, kind, signature);
+  }
+
+  if (strcmp(unit_name, "tests/api/tuples.agate") == 0) {
+    return agateTestTuplesForeignMethodHandler(class_name, kind, signature);
   }
 
   return NULL;

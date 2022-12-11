@@ -126,6 +126,7 @@ if(UNIX AND AGATE_DEV)
       tests/api/maps.c
       tests/api/reentrancy.c
       tests/api/slots.c
+      tests/api/tuples.c
     )
 
     target_compile_definitions(agate-tests

@@ -8,6 +8,7 @@ static const char *AgateTestFiles[] = {
   "tests/api/maps.agate",
   "tests/api/reentrancy.agate",
   "tests/api/slots.agate",
+  "tests/api/tuples.agate",
   "tests/core/array/accumulate.agate",
   "tests/core/array/accumulate_empty.agate",
   "tests/core/array/accumulate_wrong_arity.agate",
