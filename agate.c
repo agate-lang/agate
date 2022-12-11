@@ -8532,6 +8532,23 @@ static void agateMapExpression(AgateCompiler *compiler) {
   agateCompilerConsume(compiler, AGATE_TOKEN_RIGHT_BRACE, "Expect '}' after map members.");
 }
 
+static void agateParenthesizedExpression(AgateCompiler *compiler) {
+  agateExpression(compiler);
+  ptrdiff_t component_count = 1;
+
+  while (agateCompilerMatch(compiler, AGATE_TOKEN_COMMA)) {
+    agateExpression(compiler);
+    ++component_count;
+  }
+
+  if (component_count == 1) {
+    agateCompilerConsume(compiler, AGATE_TOKEN_RIGHT_PAREN, "Expect ')' after expression.");
+  } else {
+    agateCompilerConsume(compiler, AGATE_TOKEN_RIGHT_PAREN, "Expect ')' after tuple.");
+    agateEmitByteArg(compiler, AGATE_OP_TUPLE, (uint8_t) component_count);
+  }
+}
+
 static void agateInterpolationExpression(AgateCompiler *compiler) {
   agateEmitLoadCoreVariable(compiler, "Array");
   agateEmitInvoke(compiler, 0, "new()", 5);
@@ -8694,8 +8711,7 @@ static void agatePrimaryExpression(AgateCompiler *compiler, bool can_assign) {
   } else if (agateCompilerMatch(compiler, AGATE_TOKEN_IDENTIFIER)) {
     agateIdentifierExpression(compiler, can_assign);
   } else if (agateCompilerMatch(compiler, AGATE_TOKEN_LEFT_PAREN)) {
-    agateExpression(compiler);
-    agateCompilerConsume(compiler, AGATE_TOKEN_RIGHT_PAREN, "Expect ')' after expression.");
+    agateParenthesizedExpression(compiler);
   } else if (agateCompilerMatch(compiler, AGATE_TOKEN_LEFT_BRACE)) {
     agateMapExpression(compiler);
   } else if (agateCompilerMatch(compiler, AGATE_TOKEN_LEFT_BRACKET)) {
