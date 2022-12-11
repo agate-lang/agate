@@ -6245,6 +6245,8 @@ AgateType agateSlotType(AgateVM *vm, ptrdiff_t slot) {
           return AGATE_TYPE_MAP;
         case AGATE_ENTITY_STRING:
           return AGATE_TYPE_STRING;
+        case AGATE_ENTITY_TUPLE:
+          return AGATE_TYPE_TUPLE;
         default:
           return AGATE_TYPE_UNKNOWN;
       }
@@ -6553,6 +6555,28 @@ void agateSlotMapErase(AgateVM *vm, ptrdiff_t map_slot, ptrdiff_t key_slot, ptrd
   AgateValue erased = agateTableHashErase(&map->members, key);
   agateSlotSet(vm, value_slot, erased);
 }
+
+ptrdiff_t agateSlotTupleSize(AgateVM *vm, ptrdiff_t slot) {
+  AgateValue tuple_value = agateSlotGet(vm, slot);
+  assert(agateIsTuple(tuple_value));
+  AgateTuple *tuple = agateAsTuple(tuple_value);
+  return tuple->component_count;
+}
+
+void agateSlotTupleGet(AgateVM *vm, ptrdiff_t tuple_slot, ptrdiff_t index, ptrdiff_t component_slot) {
+  assert(agateIsSlotValid(vm, tuple_slot));
+  assert(agateIsSlotValid(vm, component_slot));
+
+  AgateValue tuple_value = agateSlotGet(vm, tuple_slot);
+  assert(agateIsTuple(tuple_value));
+  AgateTuple *tuple = agateAsTuple(tuple_value);
+
+  index = agateValidateIndexValue(vm, index, tuple->component_count, "Index");
+  assert(index != AGATE_INDEX_ERROR);
+
+  agateSlotSet(vm, component_slot, tuple->components[index]);
+}
+
 
 void agateSlotGetField(AgateVM *vm, ptrdiff_t object_slot, ptrdiff_t index, ptrdiff_t result_slot) {
   assert(agateIsSlotValid(vm, object_slot));

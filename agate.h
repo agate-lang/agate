@@ -144,6 +144,7 @@ typedef enum {
   AGATE_TYPE_MAP,
   AGATE_TYPE_NIL,
   AGATE_TYPE_STRING,
+  AGATE_TYPE_TUPLE,
 } AgateType;
 // end::type[]
 
@@ -246,6 +247,11 @@ void agateSlotMapGet(AgateVM *vm, ptrdiff_t map_slot, ptrdiff_t key_slot, ptrdif
 void agateSlotMapSet(AgateVM *vm, ptrdiff_t map_slot, ptrdiff_t key_slot, ptrdiff_t value_slot);
 void agateSlotMapErase(AgateVM *vm, ptrdiff_t map_slot, ptrdiff_t key_slot, ptrdiff_t value_slot);
 // end::slot_map[]
+
+// tag::slot_tuple[]
+ptrdiff_t agateSlotTupleSize(AgateVM *vm, ptrdiff_t slot);
+void agateSlotTupleGet(AgateVM *vm, ptrdiff_t tuple_slot, ptrdiff_t index, ptrdiff_t component_slot);
+// end::slot_tuple[]
 
 // tag::slot_object[]
 void agateSlotGetField(AgateVM *vm, ptrdiff_t object_slot, ptrdiff_t index, ptrdiff_t result_slot);
