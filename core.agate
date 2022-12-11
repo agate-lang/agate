@@ -394,6 +394,8 @@ class Map is Sequence {
   __put(key, value) { .__put(key, value, key.hash) }
 }
 
+class Tuple is Sequence { }
+
 class Range is Sequence { }
 
 class IO {

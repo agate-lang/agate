@@ -480,6 +480,7 @@ struct AgateVM {
   AgateClass *random_class;
   AgateClass *range_class;
   AgateClass *string_class;
+  AgateClass *tuple_class;
 
   AgateTable method_names;
 
@@ -1920,6 +1921,19 @@ static AgateRange *agateRangeNew(AgateVM *vm, int64_t from, int64_t to, AgateRan
   range->to = to;
   range->kind = kind;
   return range;
+}
+
+// Tuple
+
+static AgateTuple *agateTupleNew(AgateVM *vm, AgateValue *values, ptrdiff_t count) {
+  AgateTuple *tuple = agateAllocateFlexEntity(vm, AgateTuple, AgateValue, count, AGATE_ENTITY_TUPLE, vm->tuple_class);
+  tuple->component_count = count;
+
+  for (ptrdiff_t i = 0; i < count; ++i) {
+    tuple->components[i] = values[i];
+  }
+
+  return tuple;
 }
 
 // Unit
@@ -5956,6 +5970,8 @@ static void agateLoadCoreUnit(AgateVM *vm) {
   agateClassBindPrimitive(vm, system_class->base.type, "time", agateCoreSystemTime);
   agateClassBindPrimitive(vm, system_class->base.type, "version", agateCoreSystemVersion);
   agateClassBindPrimitive(vm, system_class->base.type, "version_string", agateCoreSystemVersionString);
+
+  vm->tuple_class = agateAsClass(agateUnitFindVariable(vm, core, "Tuple"));
 
   for (AgateEntity *entity = vm->entities; entity != NULL; entity = entity->next) {
     if (entity->kind == AGATE_ENTITY_STRING) {
