@@ -712,7 +712,6 @@ static inline ptrdiff_t agateUtf8EncodeSize(uint32_t c) {
   if (c < 0x800) { return 2; }
   if (c < 0x10000) { return 3; }
   if (c < 0x110000) { return 4; }
-  assert(false);
   return 0;
 }
 
@@ -743,7 +742,6 @@ static ptrdiff_t agateUtf8Encode(uint32_t c, char *text) {
     return 4;
   }
 
-  assert(false);
   return 0;
 }
 
