@@ -3924,14 +3924,44 @@ static bool agateCoreInt ## name(AgateVM *vm, int argc, AgateValue *args) { \
 AGATE_INT_INFIX(Plus,       +)
 AGATE_INT_INFIX(Minus,      -)
 AGATE_INT_INFIX(Multiply,   *)
-AGATE_INT_INFIX(Divide,     /)
-AGATE_INT_INFIX(Modulo,     %)
 
 AGATE_INT_INFIX(And,        &)
 AGATE_INT_INFIX(Or,         |)
 AGATE_INT_INFIX(Xor,        ^)
 
 #undef AGATE_INT_INFIX
+
+static bool agateCoreIntDivide(AgateVM *vm, int argc, AgateValue *args) {
+  if (!agateValidateInt(vm, args[1], "Right operand")) {
+    return false;
+  }
+
+  int64_t rhs = agateAsInt(args[1]);
+
+  if (rhs == 0) {
+    vm->error = AGATE_CONST_STRING(vm, "Division by zero.");
+    return false;
+  }
+
+  args[0] = agateIntValue(agateAsInt(args[0]) / rhs);
+  return true;
+}
+
+static bool agateCoreIntModulo(AgateVM *vm, int argc, AgateValue *args) {
+  if (!agateValidateInt(vm, args[1], "Right operand")) {
+    return false;
+  }
+
+  int64_t rhs = agateAsInt(args[1]);
+
+  if (rhs == 0) {
+    vm->error = AGATE_CONST_STRING(vm, "Modulo by zero.");
+    return false;
+  }
+
+  args[0] = agateIntValue(agateAsInt(args[0]) % rhs);
+  return true;
+}
 
 #define AGATE_INT_CMP(name, op)                                             \
 static bool agateCoreInt ## name(AgateVM *vm, int argc, AgateValue *args) { \
@@ -3987,6 +4017,7 @@ static bool agateCoreIntRightShift(AgateVM *vm, int argc, AgateValue *args) {
 
   if (shift < 0) {
     vm->error = AGATE_CONST_STRING(vm, "Can not shift from a negative value.");
+    return false;
   }
 
   args[0] = agateIntValue(agateAsInt(args[0]) >> (shift & 0x3F));
@@ -4002,6 +4033,7 @@ static bool agateCoreIntLogicalRightShift(AgateVM *vm, int argc, AgateValue *arg
 
   if (shift < 0) {
     vm->error = AGATE_CONST_STRING(vm, "Can not shift from a negative value.");
+    return false;
   }
 
   args[0] = agateIntValue(((uint64_t) agateAsInt(args[0])) >> (shift & 0x3F));
