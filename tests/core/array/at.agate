@@ -1,0 +1,12 @@
+# Returns elements.
+def list = ["a", "b", "c", "d"]
+IO.println(list.at(0)) # expect: a
+IO.println(list.at(1)) # expect: b
+IO.println(list.at(2)) # expect: c
+IO.println(list.at(3)) # expect: d
+
+# Allows indexing backwards from the end.
+IO.println(list.at(-4)) # expect: a
+IO.println(list.at(-3)) # expect: b
+IO.println(list.at(-2)) # expect: c
+IO.println(list.at(-1)) # expect: d

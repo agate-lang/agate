@@ -1,0 +1,3 @@
+# result: runtime error
+def map = { 1: true, 2: false }
+map.at(3) # expect: Could not find key.

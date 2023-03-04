@@ -1,3 +1,2 @@
-# result: runtime error
 def a = [1, 2, 3]
-a[4] # expect: Index out of bounds.
+IO.println(a[4]) # expect: nil

@@ -1,0 +1,3 @@
+# result: runtime error
+def tuple = (1, nil, true, 3.0, 'a')
+tuple.at(5) # expect: Index out of bounds.

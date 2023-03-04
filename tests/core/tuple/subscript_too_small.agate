@@ -1,3 +1,2 @@
-# result: runtime error
 def tuple = (1, nil, true, 3.0, 'a')
-tuple[-6] # expect: Index out of bounds.
+IO.println(tuple[-6]) # expect: nil

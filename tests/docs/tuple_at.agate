@@ -1,0 +1,3 @@
+def t = (1, 'a', 3.14, "good", true)
+IO.println(t.at(3)) # expect: good
+IO.println(t.at(-1)) # expect: true

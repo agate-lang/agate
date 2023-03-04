@@ -1,0 +1,13 @@
+def tuple = (1, nil, true, 3.0, 'a')
+
+IO.println(tuple.at(0)) # expect: 1
+IO.println(tuple.at(1)) # expect: nil
+IO.println(tuple.at(2)) # expect: true
+IO.println(tuple.at(3)) # expect: 3
+IO.println(tuple.at(4)) # expect: a
+
+IO.println(tuple.at(-5)) # expect: 1
+IO.println(tuple.at(-4)) # expect: nil
+IO.println(tuple.at(-3)) # expect: true
+IO.println(tuple.at(-2)) # expect: 3
+IO.println(tuple.at(-1)) # expect: a

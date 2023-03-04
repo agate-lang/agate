@@ -399,6 +399,8 @@ class Map is Sequence {
   [key] { .__subscript_getter(key, key.hash) }
   [key]=(value) { .__subscript_setter(key, value, key.hash) }
 
+  at(key) { .__at(key, key.hash) }
+
   to_s { "{%(.join(", "))}" }
 
   clone() {

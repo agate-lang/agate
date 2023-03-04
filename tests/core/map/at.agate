@@ -1,0 +1,2 @@
+def map = { 1: true, 2: false }
+IO.println(map.at(1)) # expect: true

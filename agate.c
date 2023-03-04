@@ -3543,13 +3543,23 @@ static bool agateValidateChar(AgateVM *vm, AgateValue value, const char *arg) {
   return false;
 }
 
-static ptrdiff_t agateValidateIndexValue(AgateVM *vm, ptrdiff_t value, ptrdiff_t size, const char *arg) {
+static ptrdiff_t agateCheckIndex(ptrdiff_t value, ptrdiff_t size) {
   if (value < 0) {
     value = size + value;
   }
 
   if (0 <= value && value < size) {
     return value;
+  }
+
+  return AGATE_INDEX_ERROR;
+}
+
+static ptrdiff_t agateValidateIndexValue(AgateVM *vm, ptrdiff_t value, ptrdiff_t size, const char *arg) {
+  ptrdiff_t index = agateCheckIndex(value, size);
+
+  if (index != AGATE_INDEX_ERROR) {
+    return index;
   }
 
   vm->error = agateEntityValue(agateStringNewFormat(vm, "$ out of bounds.", arg));
@@ -4530,7 +4540,7 @@ static bool agateCoreArraySwap(AgateVM *vm, int argc, AgateValue *args) {
   return true;
 }
 
-static bool agateCoreArraySubscriptGetter(AgateVM *vm, int argc, AgateValue *args) {
+static bool agateCoreArrayAt(AgateVM *vm, int argc, AgateValue *args) {
   AgateArray *array = agateAsArray(args[0]);
 
   if (agateIsInt(args[1])) {
@@ -4538,6 +4548,25 @@ static bool agateCoreArraySubscriptGetter(AgateVM *vm, int argc, AgateValue *arg
 
     if (index == AGATE_INDEX_ERROR) {
       return false;
+    }
+
+    args[0] = array->elements.data[index];
+    return true;
+  }
+
+  vm->error = AGATE_CONST_STRING(vm, "Index must be an integer.");
+  return false;
+}
+
+static bool agateCoreArraySubscriptGetter(AgateVM *vm, int argc, AgateValue *args) {
+  AgateArray *array = agateAsArray(args[0]);
+
+  if (agateIsInt(args[1])) {
+    ptrdiff_t index = agateCheckIndex(agateAsInt(args[1]), array->elements.size);
+
+    if (index == AGATE_INDEX_ERROR) {
+      args[0] = agateNilValue();
+      return true;
     }
 
     args[0] = array->elements.data[index];
@@ -4985,6 +5014,22 @@ static bool agateCoreMapPut(AgateVM *vm, int argc, AgateValue *args) {
   return true;
 }
 
+static bool agateCoreMapAt(AgateVM *vm, int argc, AgateValue *args) {
+  if (!agateValidateInt(vm, args[2], "Hash")) {
+    return false;
+  }
+
+  AgateValue value = agateTableFind(&agateAsMap(args[0])->members, args[1], agateAsInt(args[2]));
+
+  if (agateIsUndefined(value)) {
+    vm->error = AGATE_CONST_STRING(vm, "Could not find key.");
+    return false;
+  }
+
+  args[0] = value;
+  return true;
+}
+
 static bool agateCoreMapSubscriptGetter(AgateVM *vm, int argc, AgateValue *args) {
   if (!agateValidateInt(vm, args[2], "Hash")) {
     return false;
@@ -5094,10 +5139,16 @@ static bool agateCoreTupleSize(AgateVM *vm, int argc, AgateValue *args) {
 
 static bool agateCoreTupleSubscriptGetter(AgateVM *vm, int argc, AgateValue *args) {
   AgateTuple *tuple = agateAsTuple(args[0]);
-  ptrdiff_t index = agateValidateIndex(vm, args[1], tuple->component_count, "Index");
+
+  if (!agateValidateInt(vm, args[1], "Index")) {
+    return false;
+  }
+
+  ptrdiff_t index = agateCheckIndex(agateAsInt(args[1]), tuple->component_count);
 
   if (index == AGATE_INDEX_ERROR) {
-    return false;
+    args[0] = agateNilValue();
+    return true;
   }
 
   args[0] = tuple->components[index];
@@ -5889,6 +5940,7 @@ static void agateLoadCoreUnit(AgateVM *vm) {
   agateClassBindPrimitive(vm, vm->array_class, "[_]", agateCoreArraySubscriptGetter);
   agateClassBindPrimitive(vm, vm->array_class, "[_]=(_)", agateCoreArraySubscriptSetter);
   agateClassBindPrimitive(vm, vm->array_class, "append(_)", agateCoreArrayAppend);
+  agateClassBindPrimitive(vm, vm->array_class, "at(_)", agateCoreArrayAt);
   agateClassBindPrimitive(vm, vm->array_class, "clear()", agateCoreArrayClear);
   agateClassBindPrimitive(vm, vm->array_class, "size", agateCoreArraySize);
   agateClassBindPrimitive(vm, vm->array_class, "erase(_)", agateCoreArrayErase);
@@ -5992,6 +6044,7 @@ static void agateLoadCoreUnit(AgateVM *vm) {
 
   vm->map_class = agateAsClass(agateUnitFindVariable(vm, core, "Map"));
   agateClassBindPrimitive(vm, vm->map_class->base.type, "new()", agateCoreMapNew);
+  agateClassBindPrimitive(vm, vm->map_class, "__at(_,_)", agateCoreMapAt);
   agateClassBindPrimitive(vm, vm->map_class, "__contains(_,_)", agateCoreMapContains);
   agateClassBindPrimitive(vm, vm->map_class, "__erase(_,_)", agateCoreMapErase);
   agateClassBindPrimitive(vm, vm->map_class, "__insert(_,_,_)", agateCoreMapInsert);

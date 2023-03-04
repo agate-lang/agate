@@ -1,0 +1,2 @@
+def m = { 1: 'a', true: 3.14, "good": nil }
+IO.println(m.at(true)) # expect: 3.14
