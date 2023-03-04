@@ -1,6 +1,8 @@
 class Entity {
   # no superclass = superclass is Object
 }
+IO.println(Entity.supertype) # expect: Object
 class Hero is Entity {
   # superclass is Entity
 }
+IO.println(Hero.supertype) # expect: Entity

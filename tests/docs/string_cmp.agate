@@ -1,0 +1,2 @@
+IO.println("the cake".cmp("a lie") > 0) # expect: true
+IO.println("the cake".cmp("the cake") == 0) # expect: true

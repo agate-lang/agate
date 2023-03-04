@@ -4586,6 +4586,31 @@ static bool agateCoreArraySubscriptSetter(AgateVM *vm, int argc, AgateValue *arg
 
 // String
 
+static bool agateCoreStringCmp(AgateVM *vm, int argc, AgateValue *args) {
+  if (!agateValidateString(vm, args[1], "Argument")) {
+    return false;
+  }
+
+  AgateString *lhs = agateAsString(args[0]);
+  AgateString *rhs = agateAsString(args[1]);
+
+  ptrdiff_t min_size = lhs->size < rhs->size ? lhs->size : rhs->size;
+  int res = memcmp(lhs->data, rhs->data, min_size);
+
+  if (res != 0) {
+    args[0] = agateIntValue(res);
+    return true;
+  }
+
+  if (lhs->size == rhs->size) {
+    args[0] = agateIntValue(0);
+    return true;
+  }
+
+  args[0] = agateIntValue(lhs->size < rhs->size ? -1 : 1);
+  return true;
+}
+
 static bool agateCoreStringContains(AgateVM *vm, int argc, AgateValue *args) {
   AgateString *haystack = agateAsString(args[0]);
 
@@ -6056,6 +6081,7 @@ static void agateLoadCoreUnit(AgateVM *vm) {
   agateClassBindPrimitive(vm, vm->string_class, "+(_)", agateCoreStringPlus);
   agateClassBindPrimitive(vm, vm->string_class, "*(_)", agateCoreStringTimes);
   agateClassBindPrimitive(vm, vm->string_class, "clone()", agateCoreStringClone);
+  agateClassBindPrimitive(vm, vm->string_class, "cmp(_)", agateCoreStringCmp);
   agateClassBindPrimitive(vm, vm->string_class, "contains(_)", agateCoreStringContains);
   agateClassBindPrimitive(vm, vm->string_class, "ends_with(_)", agateCoreStringEndsWith);
   agateClassBindPrimitive(vm, vm->string_class, "find(_)", agateCoreStringFind1);

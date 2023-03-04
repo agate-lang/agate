@@ -1,0 +1,14 @@
+IO.println("".cmp("abc") < 0)     # expect: true
+IO.println("abc".cmp("def") < 0)  # expect: true
+IO.println("abc".cmp("defg") < 0) # expect: true
+IO.println("abc".cmp("de") < 0)   # expect: true
+IO.println("abc".cmp("abc") == 0) # expect: true
+IO.println("abc".cmp("abcd") < 0) # expect: true
+IO.println("abc".cmp("ab") > 0)   # expect: true
+
+IO.println("abc".cmp("") > 0)     # expect: true
+IO.println("def".cmp("abc") > 0)  # expect: true
+IO.println("defg".cmp("abc") > 0) # expect: true
+IO.println("de".cmp("abc") > 0)   # expect: true
+IO.println("abcd".cmp("abc") > 0) # expect: true
+IO.println("ab".cmp("abc") < 0)   # expect: true
