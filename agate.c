@@ -3924,6 +3924,28 @@ AGATE_INT_CONSTANT(Min, INT64_MIN)
 
 #define AGATE_INT_INFIX(name, op)                                           \
 static bool agateCoreInt ## name(AgateVM *vm, int argc, AgateValue *args) { \
+  if (agateIsInt(args[1])) {                                                \
+    int64_t lhs = agateAsInt(args[1]);                                      \
+    args[0] = agateIntValue(agateAsInt(args[0]) op lhs);                    \
+    return true;                                                            \
+  }                                                                         \
+  if (agateIsFloat(args[1])) {                                              \
+    double lhs = agateAsFloat(args[1]);                                     \
+    args[0] = agateFloatValue((double) agateAsInt(args[0]) op lhs);         \
+    return true;                                                            \
+  }                                                                         \
+  vm->error = AGATE_CONST_STRING(vm, "Right operand must be an integer or a float."); \
+  return false;                                                             \
+}
+
+AGATE_INT_INFIX(Plus,       +)
+AGATE_INT_INFIX(Minus,      -)
+AGATE_INT_INFIX(Multiply,   *)
+
+#undef AGATE_INT_INFIX
+
+#define AGATE_INT_INFIX_STRICT(name, op)                                    \
+static bool agateCoreInt ## name(AgateVM *vm, int argc, AgateValue *args) { \
   if (!agateValidateInt(vm, args[1], "Right operand")) {                    \
     return false;                                                           \
   }                                                                         \
@@ -3931,46 +3953,56 @@ static bool agateCoreInt ## name(AgateVM *vm, int argc, AgateValue *args) { \
   return true;                                                              \
 }
 
-AGATE_INT_INFIX(Plus,       +)
-AGATE_INT_INFIX(Minus,      -)
-AGATE_INT_INFIX(Multiply,   *)
+AGATE_INT_INFIX_STRICT(And, &)
+AGATE_INT_INFIX_STRICT(Or,  |)
+AGATE_INT_INFIX_STRICT(Xor, ^)
 
-AGATE_INT_INFIX(And,        &)
-AGATE_INT_INFIX(Or,         |)
-AGATE_INT_INFIX(Xor,        ^)
-
-#undef AGATE_INT_INFIX
+#undef AGATE_INT_INFIX_STRICT
 
 static bool agateCoreIntDivide(AgateVM *vm, int argc, AgateValue *args) {
-  if (!agateValidateInt(vm, args[1], "Right operand")) {
-    return false;
+  if (agateIsInt(args[1])) {
+    int64_t rhs = agateAsInt(args[1]);
+
+    if (rhs == 0) {
+      vm->error = AGATE_CONST_STRING(vm, "Division by zero.");
+      return false;
+    }
+
+    args[0] = agateIntValue(agateAsInt(args[0]) / rhs);
+    return true;
   }
 
-  int64_t rhs = agateAsInt(args[1]);
-
-  if (rhs == 0) {
-    vm->error = AGATE_CONST_STRING(vm, "Division by zero.");
-    return false;
+  if (agateIsFloat(args[1])) {
+    double rhs = agateAsFloat(args[1]);
+    args[0] = agateFloatValue((double) agateAsInt(args[0]) / rhs);
+    return true;
   }
 
-  args[0] = agateIntValue(agateAsInt(args[0]) / rhs);
-  return true;
+  vm->error = AGATE_CONST_STRING(vm, "Right operand must be an integer or a float.");
+  return false;
 }
 
 static bool agateCoreIntModulo(AgateVM *vm, int argc, AgateValue *args) {
-  if (!agateValidateInt(vm, args[1], "Right operand")) {
-    return false;
+  if (agateIsInt(args[1])) {
+    int64_t rhs = agateAsInt(args[1]);
+
+    if (rhs == 0) {
+      vm->error = AGATE_CONST_STRING(vm, "Modulo by zero.");
+      return false;
+    }
+
+    args[0] = agateIntValue(agateAsInt(args[0]) % rhs);
+    return true;
   }
 
-  int64_t rhs = agateAsInt(args[1]);
-
-  if (rhs == 0) {
-    vm->error = AGATE_CONST_STRING(vm, "Modulo by zero.");
-    return false;
+  if (agateIsFloat(args[1])) {
+    double rhs = agateAsFloat(args[1]);
+    args[0] = agateFloatValue(fmod((double) agateAsInt(args[0]), rhs));
+    return true;
   }
 
-  args[0] = agateIntValue(agateAsInt(args[0]) % rhs);
-  return true;
+  vm->error = AGATE_CONST_STRING(vm, "Right operand must be an integer or a float.");
+  return false;
 }
 
 #define AGATE_INT_CMP(name, op)                                             \
@@ -4118,11 +4150,18 @@ AGATE_FLOAT_CONSTANT(TrueMin, 0x1P-1074)
 
 #define AGATE_FLOAT_INFIX(name, op)                                           \
 static bool agateCoreFloat ## name(AgateVM *vm, int argc, AgateValue *args) { \
-  if (!agateValidateFloat(vm, args[1], "Right operand")) {                    \
-    return false;                                                             \
+  if (agateIsFloat(args[1])) {                                                \
+    const double rhs = agateAsFloat(args[1]);                                 \
+    args[0] = agateFloatValue(agateAsFloat(args[0]) op rhs);                  \
+    return true;                                                              \
   }                                                                           \
-  args[0] = agateFloatValue(agateAsFloat(args[0]) op agateAsFloat(args[1]));  \
-  return true;                                                                \
+  if (agateIsInt(args[1])) {                                                  \
+    const double rhs = (double) agateAsInt(args[1]);                          \
+    args[0] = agateFloatValue(agateAsFloat(args[0]) op rhs);                  \
+    return true;                                                              \
+  }                                                                           \
+  vm->error = AGATE_CONST_STRING(vm, "Right operand must be a float or an integer."); \
+  return false;                                                               \
 }
 
 AGATE_FLOAT_INFIX(Plus,     +)

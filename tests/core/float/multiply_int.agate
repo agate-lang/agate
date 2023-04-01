@@ -1,0 +1,1 @@
+IO.println(1.0 * 2) # expect: 2

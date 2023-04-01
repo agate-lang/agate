@@ -1,2 +1,2 @@
 # result: runtime error
-1.0 * false # expect: Right operand must be a float.
+1.0 * false # expect: Right operand must be a float or an integer.
