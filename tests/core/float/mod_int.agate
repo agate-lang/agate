@@ -1,0 +1,2 @@
+IO.println(6.9 % 2) # expect: 1.9
+IO.println(6.9 % 0) # expect: nan

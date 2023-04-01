@@ -4172,11 +4172,16 @@ AGATE_FLOAT_INFIX(Divide,   /)
 #undef AGATE_FLOAT_INFIX
 
 static bool agateCoreFloatModulo(AgateVM *vm, int argc, AgateValue *args) {
-  if (!agateValidateFloat(vm, args[1], "Right operand")) {
-    return false;
+  if (agateIsFloat(args[1])) {
+    args[0] = agateFloatValue(fmod(agateAsFloat(args[0]), agateAsFloat(args[1])));
+    return true;
   }
-  args[0] = agateFloatValue(fmod(agateAsFloat(args[0]), agateAsFloat(args[1])));
-  return true;
+  if (agateIsInt(args[1])) {
+    args[0] = agateFloatValue(fmod(agateAsFloat(args[0]), (double) agateAsInt(args[1])));
+    return true;
+  }
+  vm->error = AGATE_CONST_STRING(vm, "Right operand must be a float or an integer.");
+  return false;
 }
 
 #define AGATE_FLOAT_CMP(name, op)                                             \
