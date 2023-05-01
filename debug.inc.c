@@ -43,6 +43,9 @@ static void agateEntityPrint(AgateValue value) {
     case AGATE_ENTITY_STRING:
       printf("\"%s\"", agateAsCString(value));
       break;
+    case AGATE_ENTITY_TUPLE:
+      printf("tuple");
+      break;
     case AGATE_ENTITY_UNIT:
       printf("unit");
       break;
@@ -220,10 +223,14 @@ static ptrdiff_t agateDisassembleInstruction(AgateVM *vm, AgateFunction *functio
       return agateDisassembleSimpleInstruction("POP", offset);
     case AGATE_OP_RETURN:
       return agateDisassembleSimpleInstruction("RETURN", offset);
+    case AGATE_OP_TUPLE:
+      return agateDisassembleByteInstruction("TUPLE", bc, offset);
     case AGATE_OP_CLASS:
       return agateDisassembleByteInstruction("CLASS", bc, offset);
     case AGATE_OP_CLASS_FOREIGN:
       return agateDisassembleSimpleInstruction("CLASS_FOREIGN", offset);
+    case AGATE_OP_MIXIN:
+      return agateDisassembleSimpleInstruction("MIXIN", offset);
     case AGATE_OP_CONSTRUCT:
       return agateDisassembleSimpleInstruction("CONSTRUCT", offset);
     case AGATE_OP_CONSTRUCT_FOREIGN:

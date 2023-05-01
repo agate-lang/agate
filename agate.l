@@ -88,6 +88,7 @@ ESC   (\\([0'"\\abefnrtv%]|u[a-fA-F0-9]{4}|U[a-fA-F0-9]{8}))
 "in"          { return KW_IN; }
 "is"          { return KW_IS; }
 "loop"        { return KW_LOOP; }
+"mixin"       { return KW_MIXIN; }
 "nil"         { return KW_NIL; }
 "once"        { return KW_ONCE; }
 "return"      { return KW_RETURN; }

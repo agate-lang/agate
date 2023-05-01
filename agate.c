@@ -3432,6 +3432,15 @@ static AgateStatus agateRun(AgateVM *vm) {
         break;
       }
 
+      case AGATE_OP_TUPLE:
+      {
+        ptrdiff_t component_count = agateReadByte(frame);
+        AgateTuple *tuple = agateTupleNew(vm, vm->stack_top - component_count, component_count);
+        vm->stack_top -= component_count;
+        agatePush(vm, agateEntityValue(tuple));
+        break;
+      }
+
       case AGATE_OP_CLASS:
       {
         ptrdiff_t field_count = agateReadByte(frame);
@@ -3441,15 +3450,6 @@ static AgateStatus agateRun(AgateVM *vm) {
           AGATE_RUNTIME_ERROR();
         }
 
-        break;
-      }
-
-      case AGATE_OP_TUPLE:
-      {
-        ptrdiff_t component_count = agateReadByte(frame);
-        AgateTuple *tuple = agateTupleNew(vm, vm->stack_top - component_count, component_count);
-        vm->stack_top -= component_count;
-        agatePush(vm, agateEntityValue(tuple));
         break;
       }
 
@@ -9643,9 +9643,7 @@ static ptrdiff_t agateDeclareMethod(AgateCompiler *compiler, AgateSignature *sig
   return symbol;
 }
 
-static bool agateMethod(AgateCompiler *compiler, AgateVariable class_variable) {
-  bool is_static = agateCompilerMatch(compiler, AGATE_TOKEN_STATIC);
-
+static bool agateMethod(AgateCompiler *compiler, AgateVariable class_variable, bool is_static) {
   compiler->enclosing_class->is_method_static = is_static;
 
   AgateTokenKind method_token = compiler->parser->current.kind;
@@ -9781,8 +9779,19 @@ static void agateClassDeclaration(AgateCompiler *compiler, bool is_foreign) {
     agateCompilerConsumeNewline(compiler, "Expect newline after '{'.");
 
     while (!agateCompilerCheck(compiler, AGATE_TOKEN_RIGHT_BRACE) && !agateCompilerCheck(compiler, AGATE_TOKEN_EOF)) {
-      agateMethod(compiler, variable);
-      agateCompilerConsumeNewline(compiler, "Expect newline after method definition.");
+      bool is_static = agateCompilerMatch(compiler, AGATE_TOKEN_STATIC);
+
+      if (agateCompilerMatch(compiler, AGATE_TOKEN_MIXIN)) {
+        agateCompilerConsume(compiler, AGATE_TOKEN_IDENTIFIER, "Expect identifier after 'mixin'.");
+        AgateVariable mixin_variable = agateCompilerResolveName(compiler, compiler->parser->previous.start, compiler->parser->previous.size);
+        agateEmitLoadVariable(compiler, mixin_variable);
+        agateEmitLoadVariable(compiler, variable);
+        agateEmitOpcode(compiler, AGATE_OP_MIXIN);
+        agateCompilerConsumeNewline(compiler, "Expect newline after mixin declaration.");
+      } else {
+        agateMethod(compiler, variable, is_static);
+        agateCompilerConsumeNewline(compiler, "Expect newline after method definition.");
+      }
     }
 
     agateCompilerConsume(compiler, AGATE_TOKEN_RIGHT_BRACE, "Expect '}' after class body.");

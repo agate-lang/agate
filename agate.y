@@ -47,6 +47,7 @@ static int yyerror(const char *message) {
 %token          KW_IN             "in"
 %token          KW_IS             "is"
 %token          KW_LOOP           "loop"
+%token          KW_MIXIN          "mixin"
 %token          KW_NIL            "nil"
 %token          KW_ONCE           "once"
 %token          KW_RETURN         "return"
@@ -156,6 +157,7 @@ methods:
 method:
     KW_CONSTRUCT IDENTIFIER '(' parameters ')' method_body
   | decorator method_signature method_body
+  | decorator KW_MIXIN IDENTIFIER
   ;
 
 method_body:
