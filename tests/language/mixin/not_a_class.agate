@@ -1,0 +1,6 @@
+# result: runtime error
+def var
+
+class Foo {
+  mixin var # expect: Class 'Foo' cannot mix in a non-class object.
+}

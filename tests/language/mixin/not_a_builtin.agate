@@ -1,0 +1,5 @@
+# result: runtime error
+
+class Foo {
+  mixin Bool # expect: Class 'Foo' cannot mix in a built-in class 'Bool'.
+}

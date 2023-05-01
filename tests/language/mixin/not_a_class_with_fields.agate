@@ -1,0 +1,11 @@
+# result: runtime error
+
+class Mixin {
+  method() {
+    @x = true
+  }
+}
+
+class Foo {
+  mixin Mixin # expect: Class 'Foo' cannot mix in class with fields 'Mixin'.
+}

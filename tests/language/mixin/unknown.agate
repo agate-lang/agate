@@ -1,0 +1,5 @@
+# result: compile error
+
+class Foo {
+  mixin Unknown # expect: test:4: Error at 'Unknown': Unknown identifier after 'mixin'.
+}

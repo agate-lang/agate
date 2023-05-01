@@ -9790,6 +9790,11 @@ static void agateClassDeclaration(AgateCompiler *compiler, bool is_foreign) {
       if (agateCompilerMatch(compiler, AGATE_TOKEN_MIXIN)) {
         agateCompilerConsume(compiler, AGATE_TOKEN_IDENTIFIER, "Expect identifier after 'mixin'.");
         AgateVariable mixin_variable = agateCompilerResolveName(compiler, compiler->parser->previous.start, compiler->parser->previous.size);
+
+        if (mixin_variable.index == -1) {
+          agateError(compiler, "Unknown identifier after 'mixin'.");
+        }
+
         agateEmitLoadVariable(compiler, mixin_variable);
         agateEmitLoadVariable(compiler, variable);
         agateEmitOpcode(compiler, is_static ? AGATE_OP_MIXIN_CLASS : AGATE_OP_MIXIN_INSTANCE);

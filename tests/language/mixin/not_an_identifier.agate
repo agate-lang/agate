@@ -1,0 +1,5 @@
+# result: compile error
+
+class Foo {
+  mixin "String" # expect: test:4: Error at '"String"': Expect identifier after 'mixin'.
+}

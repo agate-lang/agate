@@ -1,0 +1,30 @@
+class Mixin {
+  method() {
+    IO.println("Mixin")
+  }
+}
+
+class Foo {
+  construct new() { }
+  static mixin Mixin
+}
+
+class Bar {
+  construct new() { }
+  static mixin Mixin
+  static method() {
+    IO.println("Bar")
+  }
+}
+
+class Baz {
+  construct new() { }
+  static method() {
+    IO.println("Baz")
+  }
+  static mixin Mixin
+}
+
+Foo.method() # expect: Mixin
+Bar.method() # expect: Bar
+Baz.method() # expect: Mixin
