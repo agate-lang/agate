@@ -3,12 +3,14 @@ import "implicitly_imports_core/unit"
 # expect: Bool
 # expect: Char
 # expect: Class
+# expect: Comparable
 # expect: Float
 # expect: Fn
 # expect: Int
+# expect: Iterable
 # expect: Map
 # expect: Nil
 # expect: Object
 # expect: Range
-# expect: Sequence
 # expect: String
+# expect: Tuple

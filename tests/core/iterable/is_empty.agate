@@ -1,11 +1,13 @@
 IO.println([].empty) # expect: true
 IO.println([1].empty) # expect: false
 
-class InfiniteSequence is Sequence {
+class InfiniteIterable {
+  mixin Iterable
+
   construct new() { }
   iterate(iterator) { true }
   iterator_value(iterator) { iterator }
 }
 
 # Should not try to iterate the whole sequence.
-IO.println(InfiniteSequence.new().empty) # expect: false
+IO.println(InfiniteIterable.new().empty) # expect: false

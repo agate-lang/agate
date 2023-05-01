@@ -1,4 +1,6 @@
-class TestSequence is Sequence {
+class TestIterable {
+  mixin Iterable
+
   construct new() {}
 
   iterate(iterator) {
@@ -14,10 +16,10 @@ class TestSequence is Sequence {
   iterator_value(iterator) { iterator }
 }
 
-def test = TestSequence.new().take(3)
+def test = TestIterable.new().take(3)
 
-IO.println(test is Sequence) # expect: true
-IO.println(test) # expect: instance of __TakeSequence
+IO.println(test is Iterable) # expect: false
+IO.println(test) # expect: instance of __TakeIterable
 
 # Taking 0 produces empty list.
 IO.println(test.take(0).empty) # expect: true

@@ -1,7 +1,7 @@
 def range = 2..5
 
 IO.println(range is Range)      # expect: true
-IO.println(range is Sequence)   # expect: true
+IO.println(range is Iterable)   # expect: false
 IO.println(range is Object)     # expect: true
 IO.println(range is String)     # expect: false
 IO.println(range.type == Range) # expect: true

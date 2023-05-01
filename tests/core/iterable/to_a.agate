@@ -1,4 +1,6 @@
-class TestSequence is Sequence {
+class TestIterable {
+  mixin Iterable
+
   construct new() {}
 
   iterate(iterator) {
@@ -14,4 +16,4 @@ class TestSequence is Sequence {
   iterator_value(iterator) { iterator }
 }
 
-IO.println(TestSequence.new().to_a) # expect: [1, 2, 3]
+IO.println(TestIterable.new().to_a) # expect: [1, 2, 3]

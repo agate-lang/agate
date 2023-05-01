@@ -1,4 +1,6 @@
-class TestSequence is Sequence {
+class TestIterable {
+  mixin Iterable
+
   construct new() {}
 
   iterate(iterator) {
@@ -14,10 +16,10 @@ class TestSequence is Sequence {
   iterator_value(iterator) { iterator }
 }
 
-def test = TestSequence.new().skip(0)
+def test = TestIterable.new().skip(0)
 
-IO.println(test is Sequence) # expect: true
-IO.println(test) # expect: instance of __SkipSequence
+IO.println(test is Iterable) # expect: false
+IO.println(test) # expect: instance of __SkipIterable
 
 # Skipping 0 changes nothing.
 IO.println(test.to_a) # expect: [1, 2, 3]

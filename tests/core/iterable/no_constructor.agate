@@ -1,0 +1,2 @@
+# result: runtime error
+Iterable.new() # expect: Iterable metaclass does not implement 'new()'.

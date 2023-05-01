@@ -5,7 +5,7 @@ class Float { }
 class Char { }
 class Fn { }
 
-class Sequence {
+class Iterable {
   all(predicate) {
     def value = true
     for (element in this) {
@@ -91,25 +91,25 @@ class Sequence {
     return res
   }
 
-  map(fn) { __MapSequence.new(this, fn) }
+  map(fn) { __MapIterable.new(this, fn) }
 
   skip(count) {
     if (!(count is Int) || count < 0) {
       System.abort("Count must be a non-negative integer.")
     }
-    return __SkipSequence.new(this, count)
+    return __SkipIterable.new(this, count)
   }
 
   take(count) {
     if (!(count is Int) || count < 0) {
       System.abort("Count must be a non-negative integer.")
     }
-    return __TakeSequence.new(this, count)
+    return __TakeIterable.new(this, count)
   }
 
-  uniq() { __UniqSequence.new(this) }
+  uniq() { __UniqIterable.new(this) }
 
-  where(predicate) { __WhereSequence.new(this, predicate) }
+  where(predicate) { __WhereIterable.new(this, predicate) }
 
   accumulate(val, op) {
     for (element in this) {
@@ -162,7 +162,18 @@ class Sequence {
   }
 }
 
-class __MapSequence is Sequence {
+class Comparable {
+  ==(other) { .cmp(other) == 0 }
+  !=(other) { .cmp(other) != 0 }
+  <(other) { .cmp(other) < 0 }
+  <=(other) { .cmp(other) <= 0 }
+  >(other) { .cmp(other) > 0 }
+  >=(other) { .cmp(other) >= 0 }
+}
+
+class __MapIterable {
+  mixin Iterable
+
   construct new(seq, fn) {
     @seq = seq
     @fn = fn
@@ -172,7 +183,9 @@ class __MapSequence is Sequence {
   iterator_value(iterator) { @fn(@seq.iterator_value(iterator)) }
 }
 
-class __SkipSequence is Sequence {
+class __SkipIterable {
+  mixin Iterable
+
   construct new(seq, count) {
     @seq = seq
     @count = count
@@ -194,7 +207,9 @@ class __SkipSequence is Sequence {
   iterator_value(iterator) { @seq.iterator_value(iterator) }
 }
 
-class __TakeSequence is Sequence {
+class __TakeIterable {
+  mixin Iterable
+
   construct new(seq, count) {
     @seq = seq
     @count = count
@@ -212,7 +227,9 @@ class __TakeSequence is Sequence {
   iterator_value(iterator) { @seq.iterator_value(iterator) }
 }
 
-class __UniqSequence is Sequence {
+class __UniqIterable {
+  mixin Iterable
+
   construct new(seq) {
     @seq = seq
   }
@@ -238,7 +255,9 @@ class __UniqSequence is Sequence {
   iterator_value(iterator) { @seq.iterator_value(iterator) }
 }
 
-class __WhereSequence is Sequence {
+class __WhereIterable {
+  mixin Iterable
+
   construct new(seq, fn) {
     @seq = seq
     @fn = fn
@@ -256,7 +275,9 @@ class __WhereSequence is Sequence {
   iterator_value(iterator) { @seq.iterator_value(iterator) }
 }
 
-class Array is Sequence {
+class Array {
+  mixin Iterable
+
   append_all(seq) {
     for (elem in seq) {
       .append(elem)
@@ -345,7 +366,9 @@ class Array is Sequence {
   }
 }
 
-class String is Sequence {
+class String {
+  mixin Iterable
+
   ltrim() { .__trim(" \n\t\r", true, false) }
   ltrim(chars) { .__trim(chars, true, false) }
 
@@ -368,7 +391,9 @@ class MapEntry {
   to_s { "%(@key): %(@value)" }
 }
 
-class __MapKeySequence is Sequence {
+class __MapKeyIterable {
+  mixin Iterable
+
   construct new(map) {
     @map = map
   }
@@ -377,7 +402,9 @@ class __MapKeySequence is Sequence {
   iterator_value(iterator) { @map.__key_from_iterator(iterator) }
 }
 
-class __MapValueSequence is Sequence {
+class __MapValueIterable {
+  mixin Iterable
+
   construct new(map) {
     @map = map
   }
@@ -386,9 +413,11 @@ class __MapValueSequence is Sequence {
   iterator_value(iterator) { @map.__value_from_iterator(iterator) }
 }
 
-class Map is Sequence {
-  keys { __MapKeySequence.new(this) }
-  values { __MapValueSequence.new(this) }
+class Map {
+  mixin Iterable
+
+  keys { __MapKeyIterable.new(this) }
+  values { __MapValueIterable.new(this) }
 
   iterator_value(iterator) { MapEntry.new(.__key_from_iterator(iterator), .__value_from_iterator(iterator)) }
 
@@ -414,11 +443,14 @@ class Map is Sequence {
   __put(key, value) { .__put(key, value, key.hash) }
 }
 
-class Tuple is Sequence {
+class Tuple {
+  mixin Iterable
   to_s { "(%(.join(", ")))" }
 }
 
-class Range is Sequence { }
+class Range {
+  mixin Iterable
+}
 
 class IO {
   static print(obj) { .__print(obj.to_s) }

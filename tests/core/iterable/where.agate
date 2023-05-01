@@ -1,4 +1,4 @@
-# Infinite iterator demonstrating that Sequence.where is not eager
+# Infinite iterator demonstrating that Iterable.where is not eager
 class FibIterator {
   construct new() {
     @current = 0
@@ -14,7 +14,9 @@ class FibIterator {
   value { @current }
 }
 
-class Fib is Sequence {
+class Fib {
+  mixin Iterable
+
   construct new() { }
 
   iterate(iterator) {
@@ -31,8 +33,8 @@ class Fib is Sequence {
 def large_fib = Fib.new().where {|fib| fib > 100 }
 def iterator = nil
 
-IO.println(large_fib is Sequence) # expect: true
-IO.println(large_fib) # expect: instance of __WhereSequence
+IO.println(large_fib is Iterable) # expect: false
+IO.println(large_fib) # expect: instance of __WhereIterable
 
 iterator = large_fib.iterate(iterator)
 IO.println(large_fib.iterator_value(iterator)) # expect: 144

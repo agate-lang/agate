@@ -1,5 +1,5 @@
 IO.println([] is Array)       # expect: true
-IO.println([] is Sequence)    # expect: true
+IO.println([] is Iterable)    # expect: false
 IO.println([] is Object)      # expect: true
 IO.println([] is Bool)        # expect: false
 IO.println([].type == Array)  # expect: true
