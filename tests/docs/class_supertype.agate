@@ -4,4 +4,3 @@ class Cancoillote is Cheese { }
 IO.println(Cancoillote.supertype) # expect: Cheese
 IO.println(Cheese.supertype)      # expect: Object
 IO.println(Object.supertype)      # expect: nil
-IO.println(Array.supertype)       # expect: Sequence

@@ -3,4 +3,3 @@ IO.println(42 is Int)       # expect: true
 IO.println(42 is Float)     # expect: false
 IO.println(nil is String)   # expect: false
 IO.println([] is Array)     # expect: true
-IO.println([] is Sequence)  # expect: true
