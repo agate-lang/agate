@@ -1,0 +1,12 @@
+class Representable {
+  string { .to_s }
+}
+
+class Entity {
+  mixin Representable
+  construct new() { }
+  to_s { "Entity" }
+}
+
+def e = Entity.new()
+IO.println(e.string) # expect: Entity
