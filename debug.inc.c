@@ -229,12 +229,14 @@ static ptrdiff_t agateDisassembleInstruction(AgateVM *vm, AgateFunction *functio
       return agateDisassembleByteInstruction("CLASS", bc, offset);
     case AGATE_OP_CLASS_FOREIGN:
       return agateDisassembleSimpleInstruction("CLASS_FOREIGN", offset);
-    case AGATE_OP_MIXIN:
-      return agateDisassembleSimpleInstruction("MIXIN", offset);
     case AGATE_OP_CONSTRUCT:
       return agateDisassembleSimpleInstruction("CONSTRUCT", offset);
     case AGATE_OP_CONSTRUCT_FOREIGN:
       return agateDisassembleSimpleInstruction("CONSTRUCT_FOREIGN", offset);
+    case AGATE_OP_MIXIN_INSTANCE:
+      return agateDisassembleSimpleInstruction("MIXIN_INSTANCE", offset);
+    case AGATE_OP_MIXIN_CLASS:
+      return agateDisassembleSimpleInstruction("MIXIN_CLASS", offset);
     case AGATE_OP_METHOD_INSTANCE:
       return agateDisassembleShortInstruction("METHOD_INSTANCE", bc, offset);
     case AGATE_OP_METHOD_CLASS:

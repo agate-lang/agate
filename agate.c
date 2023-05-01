@@ -413,9 +413,10 @@ typedef struct {
   X(TUPLE,             -2,  1)  \
   X(CLASS,             -1,  1)  \
   X(CLASS_FOREIGN,     -1,  0)  \
-  X(MIXIN,             -1,  0)  \
   X(CONSTRUCT,          0,  0)  \
   X(CONSTRUCT_FOREIGN,  0,  0)  \
+  X(MIXIN_INSTANCE,    -1,  0)  \
+  X(MIXIN_CLASS,       -1,  0)  \
   X(METHOD_INSTANCE,   -2,  2)  \
   X(METHOD_CLASS,      -2,  2)  \
   X(IMPORT_UNIT,        1,  2)  \
@@ -2949,7 +2950,11 @@ static void agateCreateClass(AgateVM *vm, ptrdiff_t field_count, AgateUnit *unit
   }
 }
 
-static void agateMixin(AgateVM *vm, AgateClass *klass, AgateValue mixin_value) {
+static void agateMixin(AgateVM *vm, AgateOpCode kind, AgateClass *klass, AgateValue mixin_value) {
+  if (kind == AGATE_OP_MIXIN_CLASS) {
+    klass = klass->base.type;
+  }
+
   vm->error = agateValidateMixin(vm, klass, mixin_value);
 
   if (!agateIsNil(vm->error)) {
@@ -3464,22 +3469,6 @@ static AgateStatus agateRun(AgateVM *vm) {
         break;
       }
 
-      case AGATE_OP_MIXIN:
-      {
-        assert(agateIsClass(agatePeek(vm, 0)));
-        AgateClass *klass = agateAsClass(agatePeek(vm, 0));
-        AgateValue mixin_value = agatePeek(vm, 1);
-
-        agateMixin(vm, klass, mixin_value);
-
-        if (!agateIsNil(vm->error)) {
-          AGATE_RUNTIME_ERROR();
-        }
-
-        vm->stack_top -= 2;
-        break;
-      }
-
       case AGATE_OP_CONSTRUCT:
       {
         assert(agateIsClass(frame->stack_start[0]));
@@ -3491,6 +3480,23 @@ static AgateStatus agateRun(AgateVM *vm) {
       {
         assert(agateIsClass(frame->stack_start[0]));
         frame->stack_start[0] = agateEntityValue(agateForeignNew(vm, agateAsClass(frame->stack_start[0])));
+        break;
+      }
+
+      case AGATE_OP_MIXIN_INSTANCE:
+      case AGATE_OP_MIXIN_CLASS:
+      {
+        assert(agateIsClass(agatePeek(vm, 0)));
+        AgateClass *klass = agateAsClass(agatePeek(vm, 0));
+        AgateValue mixin = agatePeek(vm, 1);
+
+        agateMixin(vm, instruction, klass, mixin);
+
+        if (!agateIsNil(vm->error)) {
+          AGATE_RUNTIME_ERROR();
+        }
+
+        vm->stack_top -= 2;
         break;
       }
 
@@ -9786,7 +9792,7 @@ static void agateClassDeclaration(AgateCompiler *compiler, bool is_foreign) {
         AgateVariable mixin_variable = agateCompilerResolveName(compiler, compiler->parser->previous.start, compiler->parser->previous.size);
         agateEmitLoadVariable(compiler, mixin_variable);
         agateEmitLoadVariable(compiler, variable);
-        agateEmitOpcode(compiler, AGATE_OP_MIXIN);
+        agateEmitOpcode(compiler, is_static ? AGATE_OP_MIXIN_CLASS : AGATE_OP_MIXIN_INSTANCE);
         agateCompilerConsumeNewline(compiler, "Expect newline after mixin declaration.");
       } else {
         agateMethod(compiler, variable, is_static);
