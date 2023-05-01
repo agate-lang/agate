@@ -2843,6 +2843,33 @@ static AgateClosure *agateCompile(AgateVM *vm, AgateValue name, const char *sour
   return closure;
 }
 
+static inline bool agateIsBuiltinClass(AgateVM *vm, AgateClass *klass) {
+  AgateClass *builtin_classes[] = {
+    vm->array_class,
+    vm->bool_class,
+    vm->char_class,
+    vm->class_class,
+    vm->float_class,
+    vm->fn_class,
+    vm->int_class,
+    vm->map_class,
+    vm->nil_class,
+    vm->range_class,
+    vm->string_class,
+    vm->tuple_class,
+  };
+
+  const size_t builtin_classes_count = AGATE_ARRAY_SIZE(builtin_classes);
+
+  for (size_t i = 0; i < builtin_classes_count; ++i) {
+    if (klass == builtin_classes[i]) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
 static AgateValue agateValidateSuperclass(AgateVM *vm, AgateValue name, AgateValue superclass_value, ptrdiff_t field_count) {
   assert(agateIsString(name));
 
@@ -2852,7 +2879,7 @@ static AgateValue agateValidateSuperclass(AgateVM *vm, AgateValue name, AgateVal
 
   AgateClass *superclass = agateAsClass(superclass_value);
 
-  if (superclass == vm->array_class || superclass == vm->bool_class || superclass == vm->char_class || superclass == vm->class_class || superclass == vm->float_class || superclass == vm->fn_class || superclass == vm->int_class || superclass == vm->map_class || superclass == vm->nil_class || superclass == vm->range_class || superclass == vm->string_class) {
+  if (agateIsBuiltinClass(vm, superclass)) {
     return agateEntityValue(agateStringNewFormat(vm, "Class '@' cannot inherit from built-in class '@'.", agateAsString(name), superclass->name));
   }
 
@@ -2878,7 +2905,7 @@ static AgateValue agateValidateMixin(AgateVM *vm, AgateClass *klass, AgateValue 
 
   AgateClass *mixin = agateAsClass(mixin_value);
 
-  if (mixin == vm->array_class || mixin == vm->bool_class || mixin == vm->char_class || mixin == vm->class_class || mixin == vm->float_class || mixin == vm->fn_class || mixin == vm->int_class || mixin == vm->map_class || mixin == vm->nil_class || mixin == vm->range_class || mixin == vm->string_class) {
+  if (agateIsBuiltinClass(vm, mixin)) {
     return agateEntityValue(agateStringNewFormat(vm, "Class '@' cannot mix in a built-in class '@'.", klass->name, mixin->name));
   }
 

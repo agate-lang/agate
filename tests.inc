@@ -782,6 +782,7 @@ static const char *AgateTestFiles[] = {
   "tests/language/inheritance/inherit_from_nonclass.agate",
   "tests/language/inheritance/inherit_from_range.agate",
   "tests/language/inheritance/inherit_from_string.agate",
+  "tests/language/inheritance/inherit_from_tuple.agate",
   "tests/language/inheritance/inherit_methods.agate",
   "tests/language/inheritance/is.agate",
   "tests/language/interpolation/empty.agate",
