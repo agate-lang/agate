@@ -413,6 +413,7 @@ typedef struct {
   X(TUPLE,             -2,  1)  \
   X(CLASS,             -1,  1)  \
   X(CLASS_FOREIGN,     -1,  0)  \
+  X(MIXIN,             -1,  0)  \
   X(CONSTRUCT,          0,  0)  \
   X(CONSTRUCT_FOREIGN,  0,  0)  \
   X(METHOD_INSTANCE,   -2,  2)  \
@@ -1652,19 +1653,21 @@ static void agateClassBindMethod(AgateVM *vm, AgateClass *klass, ptrdiff_t symbo
   klass->methods.data[symbol] = method;
 }
 
+static void agateClassBindParentMethods(AgateVM *vm, AgateClass *subclass, AgateClass *superclass) {
+  for (ptrdiff_t i = 0; i < superclass->methods.size; ++i) {
+    agateClassBindMethod(vm, subclass, i, superclass->methods.data[i]);
+  }
+}
+
 static void agateClassBindSuperclass(AgateVM *vm, AgateClass *subclass, AgateClass *superclass) {
   assert(superclass);
   subclass->supertype = superclass;
 
   if (subclass->field_count != -1) {
     subclass->field_count += superclass->field_count;
-  } else {
-    assert(superclass->field_count == 0);
   }
 
-  for (ptrdiff_t i = 0; i < superclass->methods.size; ++i) {
-    agateClassBindMethod(vm, subclass, i, superclass->methods.data[i]);
-  }
+  agateClassBindParentMethods(vm, subclass, superclass);
 }
 
 static AgateClass *agateClassNew(AgateVM *vm, AgateUnit *unit, AgateClass *superclass, ptrdiff_t field_count, AgateString *name) {
@@ -2867,6 +2870,28 @@ static AgateValue agateValidateSuperclass(AgateVM *vm, AgateValue name, AgateVal
   return agateNilValue();
 }
 
+static AgateValue agateValidateMixin(AgateVM *vm, AgateClass *klass, AgateValue mixin_value) {
+  if (!agateIsClass(mixin_value)) {
+    return agateEntityValue(agateStringNewFormat(vm, "Class '@' cannot mix in a non-class object.", klass->name));
+  }
+
+  AgateClass *mixin = agateAsClass(mixin_value);
+
+  if (mixin == vm->array_class || mixin == vm->bool_class || mixin == vm->char_class || mixin == vm->class_class || mixin == vm->float_class || mixin == vm->fn_class || mixin == vm->int_class || mixin == vm->map_class || mixin == vm->nil_class || mixin == vm->range_class || mixin == vm->string_class) {
+    return agateEntityValue(agateStringNewFormat(vm, "Class '@' cannot mix in a built-in class '@'.", klass->name, mixin->name));
+  }
+
+  if (mixin->field_count == -1) {
+    return agateEntityValue(agateStringNewFormat(vm, "Class '@' cannot mix in foreign class '@'.", klass->name, mixin->name));
+  }
+
+  if (mixin->field_count > 0) {
+    return agateEntityValue(agateStringNewFormat(vm, "Class '@' cannot mix in class with fields '@'.", klass->name, mixin->name));
+  }
+
+  return agateNilValue();
+}
+
 static void agateBindForeignClass(AgateVM *vm, AgateClass *klass, AgateUnit *unit) {
   AgateForeignClassHandler handler;
   handler.allocate = NULL;
@@ -2922,6 +2947,16 @@ static void agateCreateClass(AgateVM *vm, ptrdiff_t field_count, AgateUnit *unit
   if (field_count == -1) {
     agateBindForeignClass(vm, klass, unit);
   }
+}
+
+static void agateMixin(AgateVM *vm, AgateClass *klass, AgateValue mixin_value) {
+  vm->error = agateValidateMixin(vm, klass, mixin_value);
+
+  if (!agateIsNil(vm->error)) {
+    return;
+  }
+
+  agateClassBindParentMethods(vm, klass, agateAsClass(mixin_value));
 }
 
 static AgateValue agateImportUnit(AgateVM *vm, AgateValue name) {
@@ -3426,6 +3461,22 @@ static AgateStatus agateRun(AgateVM *vm) {
           AGATE_RUNTIME_ERROR();
         }
 
+        break;
+      }
+
+      case AGATE_OP_MIXIN:
+      {
+        assert(agateIsClass(agatePeek(vm, 0)));
+        AgateClass *klass = agateAsClass(agatePeek(vm, 0));
+        AgateValue mixin_value = agatePeek(vm, 1);
+
+        agateMixin(vm, klass, mixin_value);
+
+        if (!agateIsNil(vm->error)) {
+          AGATE_RUNTIME_ERROR();
+        }
+
+        vm->stack_top -= 2;
         break;
       }
 
