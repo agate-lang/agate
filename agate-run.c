@@ -85,8 +85,8 @@ static void error(AgateVM *vm, AgateErrorKind kind, const char *unit_name, int l
   }
 }
 
-static void input(AgateVM *vm, char *buffer, size_t size) {
-  fgets(buffer, size, stdin);
+static bool input(AgateVM *vm, char *buffer, size_t size) {
+  return fgets(buffer, size, stdin) != NULL;
 }
 
 int main(int argc, const char *argv[]) {

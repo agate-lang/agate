@@ -5778,7 +5778,10 @@ static bool agateCoreIoInput(AgateVM *vm, int argc, AgateValue *args) {
   char buffer[AGATE_INPUT_SIZE] = { '\0' };
 
   if (vm->config.input != NULL) {
-    vm->config.input(vm, buffer, AGATE_INPUT_SIZE);
+    if (!vm->config.input(vm, buffer, AGATE_INPUT_SIZE)) {
+      args[0] = agateNilValue();
+      return true;
+    }
   }
 
   args[0] = agateEntityValue(agateStringNew(vm, buffer, strlen(buffer)));

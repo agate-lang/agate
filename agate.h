@@ -60,7 +60,7 @@ typedef void (*AgateErrorFunc)(AgateVM *vm, AgateErrorKind kind, const char *uni
 // end::error[]
 
 // tag::input[]
-typedef void (*AgateInputFunc)(AgateVM *vm, char *buffer, size_t size);
+typedef bool (*AgateInputFunc)(AgateVM *vm, char *buffer, size_t size);
 // end::input[]
 
 // tag::unit_handler[]
